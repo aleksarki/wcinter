@@ -1,0 +1,8 @@
+# git, ide directories
+.git/
+.idea/
+.vscode/
+
+# build directories
+bin/
+build/
