@@ -3,6 +3,7 @@
 #define CINTER_INCLUDE_CONSOLE_HPP
 
 #include <memory>
+#include <string>
 
 namespace cinter {
 
@@ -21,6 +22,11 @@ namespace cinter {
 
         Console(Console&&) = default;
         Console& operator=(Console&&) = default;
+
+        void write(const char* string);
+        void write(const std::string& string);
+        void write(const wchar_t* wstring);
+        void write(const std::wstring& wstring);
     };
 
 }
