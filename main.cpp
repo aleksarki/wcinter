@@ -1,7 +1,8 @@
-#include <iostream>
+#include "source/include/console.hpp"
 
 int main()
 {
-    std::cout << "Hello there!" << std::endl;
+    cinter::Console console;
+
     return 0;
 }
