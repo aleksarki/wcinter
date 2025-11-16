@@ -53,6 +53,11 @@ namespace cinter {
 
         ScreenBufferInfo screenBufferInfo();
 
+        CursorInfo cursorInfo();
+        void cursorInfo(const CursorInfo& info);
+
+        void cursorPosition(const Coord& position);
+
     };
 }
 

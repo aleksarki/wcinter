@@ -28,6 +28,12 @@ namespace cinter {
         Word attributes;
     };
 
+    struct CursorInfo
+    {
+        Dword size;
+        bool visible;
+    };
+
     struct ScreenBufferInfo
     {
         Coord size;

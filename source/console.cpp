@@ -77,12 +77,53 @@ public:
         CONSOLE_SCREEN_BUFFER_INFO info;
         GetConsoleScreenBufferInfo(hStdOut, &info);
         return ci::ScreenBufferInfo{
-            ci::Coord{ info.dwSize.X, info.dwSize.Y },
-            ci::Coord{ info.dwCursorPosition.X, info.dwCursorPosition.Y },
-            info.wAttributes,
-            ci::SmallRect{ info.srWindow.Left, info.srWindow.Top, info.srWindow.Right, info.srWindow.Bottom },
-            ci::Coord{ info.dwMaximumWindowSize.X, info.dwMaximumWindowSize.Y }
+            ci::Coord{
+                static_cast<ci::Short>(info.dwSize.X),
+                static_cast<ci::Short>( info.dwSize.Y)
+            },
+            ci::Coord{
+                static_cast<ci::Short>(info.dwCursorPosition.X),
+                static_cast<ci::Short>(info.dwCursorPosition.Y)
+            },
+            static_cast<ci::Word>(info.wAttributes),
+            ci::SmallRect{
+                static_cast<ci::Short>(info.srWindow.Left),
+                static_cast<ci::Short>(info.srWindow.Top),
+                static_cast<ci::Short>(info.srWindow.Right),
+                static_cast<ci::Short>(info.srWindow.Bottom)
+            },
+            ci::Coord{
+                static_cast<ci::Short>(info.dwMaximumWindowSize.X),
+                static_cast<ci::Short>(info.dwMaximumWindowSize.Y)
+            }
         };
+    }
+    
+    ci::CursorInfo getCursorInfo()
+    {
+        CONSOLE_CURSOR_INFO info;
+        GetConsoleCursorInfo(hStdOut, &info);
+        return ci::CursorInfo{
+            static_cast<ci::Dword>(info.dwSize),
+            static_cast<bool>(info.bVisible)
+        };
+    }
+    void setCursorInfo(const ci::CursorInfo& info)
+    {
+        CONSOLE_CURSOR_INFO winInfo{
+            static_cast<DWORD>(info.size),
+            static_cast<int>(info.visible)
+        };
+        SetConsoleCursorInfo(hStdOut, &winInfo);
+    }
+
+    void setCursorPosition(const ci::Coord& position)
+    {
+        COORD winCoord{
+            static_cast<SHORT>(position.x),
+            static_cast<SHORT>(position.y)
+        };
+        SetConsoleCursorPosition(hStdOut, winCoord);
     }
 };
 
@@ -118,4 +159,18 @@ void ci::Console::title(const std::wstring& newTitle)
 ci::ScreenBufferInfo ci::Console::screenBufferInfo()
 {
     return pImpl->getScreenBufferInfo();
+}
+
+ci::CursorInfo ci::Console::cursorInfo()
+{
+    return pImpl->getCursorInfo();
+}
+void ci::Console::cursorInfo(const ci::CursorInfo& info)
+{
+    pImpl->setCursorInfo(info);
+}
+
+void ci::Console::cursorPosition(const ci::Coord& position)
+{
+    pImpl->setCursorPosition(position);
 }

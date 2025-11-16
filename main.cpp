@@ -12,9 +12,12 @@ int main()
     console.write(L"tête\n");
     console.write(L"τεςτ\n");
 
-    cinter::ScreenBufferInfo info = console.screenBufferInfo();
-    std::cout << info.cursorPosition.y;
-
+    while (true)
+    {
+        cinter::Dword size;
+        std::cin >> size;
+        console.cursorInfo({ size, true });
+    }
 
     return 0;
 }
