@@ -4,7 +4,7 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include "include/structs.hpp"
+#include "include/definitions.hpp"
 #include "include/console.hpp"
 
 namespace ci = cinter;
@@ -125,6 +125,17 @@ public:
         };
         SetConsoleCursorPosition(hStdOut, winCoord);
     }
+
+    ci::Handle getActiveScreenBuffer()
+    {
+        return hStdOut;
+    }
+    void setActiveScreenBuffer(ci::Handle handle)
+    {
+        SetConsoleActiveScreenBuffer(static_cast<HANDLE>(handle));
+        hStdOut = handle;
+        hStdErr = handle;
+    }
 };
 
 ci::Console::Console() : pImpl(std::make_unique<Impl>()) {}
@@ -173,4 +184,13 @@ void ci::Console::cursorInfo(const ci::CursorInfo& info)
 void ci::Console::cursorPosition(const ci::Coord& position)
 {
     pImpl->setCursorPosition(position);
+}
+
+ci::Handle ci::Console::activeScreenBuffer()
+{
+    return pImpl->getActiveScreenBuffer();
+}
+void ci::Console::activeScreenBuffer(ci::Handle handle)
+{
+    pImpl->setActiveScreenBuffer(handle);
 }

@@ -4,7 +4,7 @@
 
 #include <memory>
 #include <string>
-#include "structs.hpp"
+#include "definitions.hpp"
 
 namespace cinter {
 
@@ -58,6 +58,8 @@ namespace cinter {
 
         void cursorPosition(const Coord& position);
 
+        Handle activeScreenBuffer();
+        void activeScreenBuffer(Handle handle);
     };
 }
 

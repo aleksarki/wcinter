@@ -1,23 +1,15 @@
+#include "source/include/definitions.hpp"
 #include "source/include/console.hpp"
-#include "source/include/structs.hpp"
+#include "source/include/window.hpp"
 
 #include <iostream>
 
 int main()
 {
-    cinter::Console console;
-    
-    console.write(L"test\n");
-    console.write(L"тест\n");
-    console.write(L"tête\n");
-    console.write(L"τεςτ\n");
+    cinter::Window window;
 
-    while (true)
-    {
-        cinter::Dword size;
-        std::cin >> size;
-        console.cursorInfo({ size, true });
-    }
+    int a;
+    std::cin >> a;
 
     return 0;
 }
