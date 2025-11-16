@@ -1,8 +1,8 @@
 #define UNICODE
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-#include <vector>
 #include "include/definitions.hpp"
+#include "include/console.hpp"
 #include "include/window.hpp"
 
 namespace ci = cinter;
@@ -10,31 +10,15 @@ namespace ci = cinter;
 class ci::Window::Impl
 {
 private:
-    ci::Console console;
+    ci::Console con;
     ci::Coord size;
-    std::vector<ci::CharInfo> matrix;
-    HANDLE oldScreenBuffer;
-
-    ci::CharInfo& charAt(ci::Short x, ci::Short y) noexcept
-    {
-        return matrix[y * size.x + x];
-    }
-    const ci::CharInfo& charAt(ci::Short x, ci::Short y) const noexcept
-    {
-        return matrix[y * size.x + x];
-    }
-    void charAt(ci::Short x, ci::Short y, ci::CharInfo charInfo)
-    {
-        matrix[y * size.x + x] = charInfo;
-    }
+    ci::Handle oldScreenBuffer;
+    ci::CharMatrix mat;
 
 public:
-    Impl() : console(), matrix()
+    Impl() : con(), mat(con.screenBufferInfo().size)
     {
-        auto screenBufferInfo = console.screenBufferInfo();
-        size = screenBufferInfo.size;
-        matrix.resize(size.x * size.y);
-        oldScreenBuffer = console.activeScreenBuffer();
+        oldScreenBuffer = con.activeScreenBuffer();
         HANDLE handle = CreateConsoleScreenBuffer(
             static_cast<DWORD>(GenericRights::Read) | static_cast<DWORD>(GenericRights::Write),
             static_cast<DWORD>(FileAccessRights::ShareRead) | static_cast<DWORD>(FileAccessRights::ShareWrite),
@@ -42,14 +26,60 @@ public:
             CONSOLE_TEXTMODE_BUFFER,
             NULL
         );
-        console.activeScreenBuffer(static_cast<ci::Handle>(handle));
+        con.activeScreenBuffer(static_cast<ci::Handle>(handle));
     }
 
     ~Impl()
     {
-        console.activeScreenBuffer(oldScreenBuffer);
+        con.activeScreenBuffer(oldScreenBuffer);
+    }
+
+    ci::Console& console() noexcept
+    {
+        return con;
+    }
+    const ci::Console& console() const noexcept
+    {
+        return con;
+    }
+
+    ci::CharMatrix& matrix() noexcept
+    {
+        return mat;
+    }
+    const ci::CharMatrix& matrix() const noexcept
+    {
+        return mat;
+    }
+
+    void render()
+    {
+        con.writeMatrix(mat);
     }
 };
 
 ci::Window::Window() : pImpl(std::make_unique<Impl>()) {}
 ci::Window::~Window() = default;
+
+ci::Console& ci::Window::console() noexcept
+{
+    return pImpl->console();
+}
+const ci::Console& ci::Window::console() const noexcept
+{
+    return pImpl->console();
+}
+
+ci::CharMatrix& ci::Window::matrix() noexcept
+{
+    return pImpl->matrix();
+}
+const ci::CharMatrix& ci::Window::matrix() const noexcept
+{
+    return pImpl->matrix();
+}
+
+void ci::Window::render()
+{
+    pImpl->render();
+}

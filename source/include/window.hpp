@@ -3,6 +3,7 @@
 #define CINTER_INCLUDE_WINDOW_HPP
 
 #include <memory>
+#include "definitions.hpp"
 #include "console.hpp"
 
 namespace cinter {
@@ -22,6 +23,14 @@ namespace cinter {
 
         Window(Window&&) = default;
         Window& operator=(Window&&) = default;
+
+        Console& console() noexcept;
+        const Console& console() const noexcept;
+
+        CharMatrix& matrix() noexcept;
+        const CharMatrix& matrix() const noexcept;
+
+        void render();
     };
 }
 

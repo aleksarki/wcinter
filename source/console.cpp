@@ -79,7 +79,7 @@ public:
         return ci::ScreenBufferInfo{
             ci::Coord{
                 static_cast<ci::Short>(info.dwSize.X),
-                static_cast<ci::Short>( info.dwSize.Y)
+                static_cast<ci::Short>(info.dwSize.Y)
             },
             ci::Coord{
                 static_cast<ci::Short>(info.dwCursorPosition.X),
@@ -135,6 +135,26 @@ public:
         SetConsoleActiveScreenBuffer(static_cast<HANDLE>(handle));
         hStdOut = handle;
         hStdErr = handle;
+    }
+
+    void writeMatrix(const ci::CharMatrix& matrix)
+    {
+        auto info = getScreenBufferInfo();
+        SMALL_RECT rect{
+            0, 0,
+            static_cast<SHORT>(info.size.x),
+            static_cast<SHORT>(info.size.y)
+        };
+        WriteConsoleOutputW(
+            hStdOut,
+            reinterpret_cast<CONST CHAR_INFO*>(matrix.data()),
+            COORD{
+                static_cast<SHORT>(matrix.size().x),
+                static_cast<SHORT>(matrix.size().y)
+            },
+            COORD{ 0, 0 },
+            &rect
+        );
     }
 };
 
@@ -193,4 +213,9 @@ ci::Handle ci::Console::activeScreenBuffer()
 void ci::Console::activeScreenBuffer(ci::Handle handle)
 {
     pImpl->setActiveScreenBuffer(handle);
+}
+
+void ci::Console::writeMatrix(const CharMatrix& matrix)
+{
+    pImpl->writeMatrix(matrix);
 }
