@@ -11,7 +11,7 @@ namespace cinter {
     using Dword = unsigned long;
     using Handle = void*;
 
-    enum class Attribute
+    enum class Attribute : Word
     {
         ForegroundBlue =      0x0001,  // Text color contains blue.
         ForegroundGreen =     0x0002,  // Text color contains green.
@@ -163,6 +163,10 @@ namespace cinter {
         void put(const Coord& position, CharInfo charInfo)
         {
             mat[position.y * siz.x + position.x] = charInfo;
+        }
+        void put(const Coord& position, wchar_t character, Word attributes)
+        {
+            mat[position.y * siz.x + position.x] = CharInfo{ character, attributes };
         }
     
         CharInfo* data() noexcept

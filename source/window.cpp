@@ -56,6 +56,43 @@ public:
     {
         con.writeMatrix(mat);
     }
+
+    void printChar(wchar_t character)
+    {
+        auto info = con.screenBufferInfo();
+        auto position = info.cursorPosition;
+        if (character != L'\n')
+            mat.put(position, character, info.attributes);
+        if (position.x >= info.size.x || character == L'\n')  // go to next line
+        {
+            position.x = 0;
+            ++position.y;
+        }
+        else
+            ++position.x;
+        con.cursorPosition(position);
+    }
+    void printString(const wchar_t* string)
+    {
+        auto info = con.screenBufferInfo();
+        auto position = info.cursorPosition;
+        unsigned length = 0;
+        while (string[length])
+        {
+            if (string[length] != L'\n')
+                mat.put(position, string[length], info.attributes);
+            if (position.x >= info.size.x || string[length] == L'\n')  // go to next line
+            {
+                position.x = 0;
+                ++position.y;
+            }
+            else
+                ++position.x;
+            ++length;
+        }
+
+        con.cursorPosition(position);
+    }
 };
 
 ci::Window::Window() : pImpl(std::make_unique<Impl>()) {}
@@ -82,4 +119,13 @@ const ci::CharMatrix& ci::Window::matrix() const noexcept
 void ci::Window::render()
 {
     pImpl->render();
+}
+
+void ci::Window::printChar(wchar_t character)
+{
+    pImpl->printChar(character);
+}
+void ci::Window::printString(const wchar_t* string)
+{
+    pImpl->printString(string);
 }

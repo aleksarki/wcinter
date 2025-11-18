@@ -137,6 +137,11 @@ public:
         hStdErr = handle;
     }
 
+    void setTextAttribute(ci::Word attributes)
+    {
+        SetConsoleTextAttribute(hStdOut, static_cast<WORD>(attributes));
+    }
+
     void writeMatrix(const ci::CharMatrix& matrix)
     {
         auto info = getScreenBufferInfo();
@@ -213,6 +218,11 @@ ci::Handle ci::Console::activeScreenBuffer()
 void ci::Console::activeScreenBuffer(ci::Handle handle)
 {
     pImpl->setActiveScreenBuffer(handle);
+}
+
+void ci::Console::textAttribute(Word attributes)
+{
+    pImpl->setTextAttribute(attributes);
 }
 
 void ci::Console::writeMatrix(const CharMatrix& matrix)

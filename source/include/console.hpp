@@ -61,6 +61,8 @@ namespace cinter {
         Handle activeScreenBuffer();
         void activeScreenBuffer(Handle handle);
 
+        void textAttribute(Word attributes);
+
         void writeMatrix(const CharMatrix& matrix);
     };
 }
