@@ -35,11 +35,14 @@ namespace cinter {
         void printChar(wchar_t character);
         void printString(const wchar_t* string);
 
-        void putChar(Short x, Short y, CharInfo charInfo);
+        void putChar(Short x, Short y, wchar_t character);
         void putChar(Short x, Short y, wchar_t character, Word attributes);
         void putChar(const Coord& position, CharInfo charInfo);
+        
+        void putString(Short x, Short y, const wchar_t* string);
         void putString(Short x, Short y, const wchar_t* string, Word attributes);
-        void putString(const Coord& position, const wchar_t* string, Word attributes);
+        void putString(const Coord& position, const CharInfo* charInfos, size_t length);
+
         void putMatrix(Short x, Short y, const CharMatrix& matrix);
         void putMatrix(const Coord& position, const CharMatrix& matrix);
     };

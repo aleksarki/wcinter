@@ -90,8 +90,41 @@ public:
                 ++position.x;
             ++length;
         }
-
         con.cursorPosition(position);
+    }
+
+    void putChar(ci::Short x, ci::Short y, wchar_t character)
+    {
+        mat.put(x, y, character, con.screenBufferInfo().attributes);
+    }
+    void putChar(ci::Short x, ci::Short y, wchar_t character, ci::Word attributes)
+    {
+        mat.put(x, y, character, attributes);
+    }
+
+    void putString(ci::Short x, ci::Short y, const wchar_t* string)
+    {
+        auto attributes = con.screenBufferInfo().attributes;
+        unsigned length = 0;
+        while (string[length])
+        {
+            mat.put(x + length, y, string[length], attributes);
+            ++length;
+        }
+    }
+    void putString(ci::Short x, ci::Short y, const wchar_t* string, ci::Word attributes)
+    {
+        unsigned length = 0;
+        while (string[length])
+        {
+            mat.put(x + length, y, string[length], attributes);
+            ++length;
+        }
+    }
+    void putString(ci::Short x, ci::Short y, const ci::CharInfo* charInfos, size_t length)
+    {
+        for (size_t i = 0; i < length; ++i)
+            mat.put(x + static_cast<ci::Short>(i), y, charInfos[i]);
     }
 };
 
@@ -128,4 +161,30 @@ void ci::Window::printChar(wchar_t character)
 void ci::Window::printString(const wchar_t* string)
 {
     pImpl->printString(string);
+}
+
+void ci::Window::putChar(ci::Short x, ci::Short y, wchar_t character)
+{
+    pImpl->putChar(x, y, character);
+}
+void ci::Window::putChar(ci::Short x, ci::Short y, wchar_t character, ci::Word attributes)
+{
+    pImpl->putChar(x, y, character, attributes);
+}
+void ci::Window::putChar(const ci::Coord& position, ci::CharInfo charInfo)
+{
+    pImpl->putChar(position.x, position.y, charInfo.character, charInfo.attributes);
+}
+
+void ci::Window::putString(ci::Short x, ci::Short y, const wchar_t* string)
+{
+    pImpl->putString(x, y, string);
+}
+void ci::Window::putString(ci::Short x, ci::Short y, const wchar_t* string, ci::Word attributes)
+{
+    pImpl->putString(x, y, string, attributes);
+}
+void ci::Window::putString(const Coord& position, const CharInfo* charInfos, size_t length)
+{
+    pImpl->putString(position.x, position.y, charInfos, length);
 }
