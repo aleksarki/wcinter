@@ -5,11 +5,11 @@
 #include <functional>
 #include <memory>
 #include "include/console.hpp"
-#include "include/application.hpp"
+#include "include/eventloop.hpp"
 
 namespace ci = cinter;
 
-class ci::Application::Impl
+class ci::EventLoop::Impl
 {
 private:
     ci::Console& console;
@@ -65,23 +65,23 @@ public:
     }
 };
 
-ci::Application::Application(ci::Console& console) : pImpl(std::make_unique<Impl>(console)) {}
-ci::Application::~Application() = default;
+ci::EventLoop::EventLoop(ci::Console& console) : pImpl(std::make_unique<Impl>(console)) {}
+ci::EventLoop::~EventLoop() = default;
 
-void ci::Application::bindKeyEvent(std::function<void(KeyEventRecord)> callback)
+void ci::EventLoop::bindKeyEvent(std::function<void(KeyEventRecord)> callback)
 {
     pImpl->bindKeyEvent(std::move(callback));
 }
-void ci::Application::bindMouseEvent(std::function<void(MouseEventRecord)> callback)
+void ci::EventLoop::bindMouseEvent(std::function<void(MouseEventRecord)> callback)
 {
     pImpl->bindMouseEvent(std::move(callback));
 }
-void ci::Application::bindWindowBufferSizeEvent(std::function<void(WindowBufferSizeRecord)> callback)
+void ci::EventLoop::bindWindowBufferSizeEvent(std::function<void(WindowBufferSizeRecord)> callback)
 {
     pImpl->bindWindowBufferSizeEvent(std::move(callback));
 }
 
-void ci::Application::execute()
+void ci::EventLoop::execute()
 {
     pImpl->execute();
 }

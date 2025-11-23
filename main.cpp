@@ -1,4 +1,4 @@
-#include "source/include/application.hpp"
+#include "source/include/eventloop.hpp"
 #include "source/include/definitions.hpp"
 #include "source/include/console.hpp"
 #include "source/include/window.hpp"
@@ -6,18 +6,15 @@
 int main()
 {
     cinter::Window window;
-    cinter::Application application(window.console());
+    cinter::EventLoop EventLoop(window.console());
 
-    window.console().textAttribute(static_cast<cinter::Word>(cinter::Attribute::FgColorCyanBright));
-
-    application.bindKeyEvent([&window](cinter::KeyEventRecord keyEvent)
+    EventLoop.bindKeyEvent([&window](cinter::KeyEventRecord keyEvent)
     {
-        if (keyEvent.keyDown)
-            window.printChar(keyEvent.virtualScanCode);
+        window.putChar(0, 0, keyEvent.character, static_cast<cinter::Word>(cinter::Attribute::FgColorCyan));
         window.render();
     });
 
-    application.execute();
+    EventLoop.execute();
 
     return 0;
 }

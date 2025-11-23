@@ -1,6 +1,6 @@
 #pragma once
-#ifndef CINTER_INCLUDE_APPLICATION_HPP
-#define CINTER_INCLUDE_APPLICATION_HPP
+#ifndef CINTER_INCLUDE_EventLoop_HPP
+#define CINTER_INCLUDE_EventLoop_HPP
 
 #include <functional>
 #include <memory>
@@ -9,11 +9,11 @@
 
 namespace cinter {
 
-    class Application
+    class EventLoop
     {
     public:
-        Application(Console& console);
-        ~Application();
+        EventLoop(Console& console);
+        ~EventLoop();
 
         void bindKeyEvent(std::function<void(KeyEventRecord)> callback);
         void bindMouseEvent(std::function<void(MouseEventRecord)> callback);
@@ -28,4 +28,4 @@ namespace cinter {
 
 }
 
-#endif  // CINTER_INCLUDE_APPLICATION_HPP
+#endif  // CINTER_INCLUDE_EventLoop_HPP
