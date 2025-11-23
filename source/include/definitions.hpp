@@ -84,6 +84,53 @@ namespace cinter {
         ShareDelete = 0x00000004
     };
 
+    enum class ControlKeyState : Dword
+    {
+        RightAltPressed =  0x00000001,  // the right alt key is pressed.
+        LeftAltPressed =   0x00000002,  // the left alt key is pressed.
+        RightCtrlPressed = 0x00000004,  // the right ctrl key is pressed.
+        LeftCtrlPressed =  0x00000008,  // the left ctrl key is pressed.
+        ShiftPressed =     0x00000010,  // the shift key is pressed.
+        NumLockOn =        0x00000020,  // the numlock light is on.
+        ScrollLockOn =     0x00000040,  // the scrolllock light is on.
+        CapsLockOn =       0x00000080,  // the capslock light is on.
+        EnhancedKey =      0x00000100,  // the key is enhanced.
+        NlsDbcsChar =      0x00010000,  // DBCS for JPN: SBCS/DBCS mode.
+        NlsAlphaNumeric =  0x00000000,  // DBCS for JPN: Alphanumeric mode.
+        NlsKatakana =      0x00020000,  // DBCS for JPN: Katakana mode.
+        NlsHiragana =      0x00040000,  // DBCS for JPN: Hiragana mode.
+        NlsRoman =         0x00400000,  // DBCS for JPN: Roman/Noroman mode.
+        NlsImeConversion = 0x00800000,  // DBCS for JPN: IME conversion.
+        AltNumpadBit =     0x04000000,  // AltNumpad OEM char (copied from ntuser\inc\kbd.h) ;internal_NT
+        NlsImeDisable =    0x20000000   // DBCS for JPN: IME enable/disable.
+    };
+
+    enum class ButtonState : Dword
+    {
+        FromLeft1stButtonPressed = 0x0001,
+        RightmostButtonPressed   = 0x0002,
+        FromLeft2ndButtonPressed = 0x0004,
+        FromLeft3rdButtonPressed = 0x0008,
+        FromLeft4thButtonPressed = 0x0010
+    };
+
+    enum class EventFlag : Dword
+    {
+        MouseMoved =    0x0001,
+        DoubleClick =   0x0002,
+        MouseWheeled =  0x0004,
+        MouseHWheeled = 0x0008
+    };
+
+    enum class EventType : Word
+    {
+        KeyEvent =              0x0001,  // Event contains key event record
+        MouseEvent =            0x0002,  // Event contains mouse event record
+        WindowBufferSizeEvent = 0x0004,  // Event contains window change event record
+        MenuEvent =             0x0008,  // Event contains menu event record
+        FocusEvent =            0x0010   // Event contains focus change
+    };
+
     struct Coord
     {
         Short x;
@@ -117,6 +164,51 @@ namespace cinter {
         Word attributes;
         SmallRect window;
         Coord maxWindowSize;
+    };
+
+    struct KeyEventRecord
+    {
+        bool keyDown;
+        Word repeatCount;
+        Word virtualKeyCode;
+        Word virtualScanCode;
+        wchar_t character;
+        Dword controlKeyState;
+    };
+
+    struct MouseEventRecord
+    {
+        Coord mousePosition;
+        Dword buttonState;
+        Dword controlKeyState;
+        Dword eventFlags;
+    };
+
+    struct WindowBufferSizeRecord
+    {
+        Coord size;
+    };
+
+    struct MenuEventRecord
+    {
+        unsigned int commandId;
+    };
+
+    struct FocusEventRecord
+    {
+        bool setFocus;
+    };
+
+    struct InputRecord
+    {
+        Word eventType;
+        union {
+            KeyEventRecord keyEvent;
+            MouseEventRecord mouseEvent;
+            WindowBufferSizeRecord windowBufferSizeEvent;
+            MenuEventRecord menuEvent;
+            FocusEventRecord focusEvent;
+        } event;
     };
 
     class CharMatrix

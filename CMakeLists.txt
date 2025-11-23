@@ -13,6 +13,7 @@ add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 
 add_executable(main
     main.cpp
+    source/application.cpp
     source/console.cpp
     source/window.cpp
 )

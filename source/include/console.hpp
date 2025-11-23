@@ -10,10 +10,6 @@ namespace cinter {
 
     class Console
     {
-    private:
-        class Impl;
-        std::unique_ptr<Impl> pImpl;
-
     public:
         Console();
         ~Console();
@@ -64,6 +60,12 @@ namespace cinter {
         void textAttribute(Word attributes);
 
         void writeMatrix(const CharMatrix& matrix);
+
+        void readInput(InputRecord* inputBuffer, Dword inputBufferLength, Dword* eventsRead);
+
+    private:
+        class Impl;
+        std::unique_ptr<Impl> pImpl;
     };
 }
 

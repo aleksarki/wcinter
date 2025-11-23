@@ -112,7 +112,7 @@ public:
     {
         CONSOLE_CURSOR_INFO winInfo{
             static_cast<DWORD>(info.size),
-            static_cast<int>(info.visible)
+            static_cast<BOOL>(info.visible)
         };
         SetConsoleCursorInfo(hStdOut, &winInfo);
     }
@@ -159,6 +159,16 @@ public:
             },
             COORD{ 0, 0 },
             &rect
+        );
+    }
+
+    void readInput(ci::InputRecord* inputBuffer, ci::Dword inputBufferLength, ci::Dword* eventsRead)
+    {
+        ReadConsoleInputW(
+            hStdIn,
+            reinterpret_cast<PINPUT_RECORD>(inputBuffer),  /* this is definitely not good */
+            static_cast<DWORD>(inputBufferLength),
+            reinterpret_cast<LPDWORD>(eventsRead)
         );
     }
 };
@@ -228,4 +238,9 @@ void ci::Console::textAttribute(Word attributes)
 void ci::Console::writeMatrix(const CharMatrix& matrix)
 {
     pImpl->writeMatrix(matrix);
+}
+
+void ci::Console::readInput(ci::InputRecord* inputBuffer, ci::Dword inputBufferLength, ci::Dword* eventsRead)
+{
+    pImpl->readInput(inputBuffer, inputBufferLength, eventsRead);
 }
