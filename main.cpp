@@ -2,19 +2,41 @@
 #include "source/include/definitions.hpp"
 #include "source/include/console.hpp"
 #include "source/include/window.hpp"
+#include "source/include/application.hpp"
 
 int main()
 {
     cinter::Window window;
-    cinter::EventLoop EventLoop(window.console());
-
-    EventLoop.bindKeyEvent([&window](cinter::KeyEventRecord keyEvent)
+    cinter::Console& console = window.console();
+    cinter::EventLoop eventLoop(console);
+    
+    console.cursorInfo(cinter::CursorInfo{ 1, false });
+    
+    bool proceed = true;
+    eventLoop.bindKeyEvent([&](cinter::KeyEventRecord keyEvent)
     {
-        window.putChar(0, 0, keyEvent.character, static_cast<cinter::Word>(cinter::Attribute::FgColorCyan));
+        static cinter::Coord position{ 0, 0 };
+        static const cinter::CharInfo black{ ' ', 0 };
+        static const cinter::CharInfo character{ '#', static_cast<cinter::Word>(cinter::Attribute::FgColorCyanBright) };
+    
+        window.putChar(position, black);
+        if (keyEvent.keyDown)
+        {
+            if (keyEvent.virtualScanCode == static_cast<cinter::Dword>(cinter::VirtualKey::Right))
+                ++position.x;
+            else if (keyEvent.virtualScanCode == static_cast<cinter::Dword>(cinter::VirtualKey::Left))
+                --position.x;
+            else if (keyEvent.virtualScanCode == static_cast<cinter::Dword>(cinter::VirtualKey::Down))
+                ++position.y;
+            else if (keyEvent.virtualScanCode == static_cast<cinter::Dword>(cinter::VirtualKey::Up))
+                --position.y;
+            else if (keyEvent.virtualScanCode == static_cast<cinter::Dword>(cinter::VirtualKey::Escape))
+                proceed = false;
+        }
+        window.putChar(position, character);
         window.render();
     });
-
-    EventLoop.execute();
+    eventLoop.execute(proceed);
 
     return 0;
 }

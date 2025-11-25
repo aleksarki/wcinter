@@ -33,12 +33,12 @@ public:
         windowBufferSizeEventBindings.push_front(std::move(callback));
     }
 
-    void execute()
+    void execute(bool& proceed)
     {
         ci::InputRecord inputBuffer[128];
         ci::Dword eventsRead;
 
-        while (true)
+        while (proceed)
         {
             console.readInput(inputBuffer, (ci::Dword)128, &eventsRead);
             for (ci::Dword i = 0; i < eventsRead; ++i)
@@ -46,17 +46,17 @@ public:
                 switch (inputBuffer[i].eventType)
                 {
                 case static_cast<ci::Word>(ci::EventType::KeyEvent):
-                    for (auto callback : keyEventBindings)
+                    for (auto& callback : keyEventBindings)
                         callback(inputBuffer[i].event.keyEvent);
                     break;
 
                 case static_cast<ci::Word>(ci::EventType::MouseEvent):
-                    for (auto callback : mouseEventBindings)
+                    for (auto& callback : mouseEventBindings)
                         callback(inputBuffer[i].event.mouseEvent);
                     break;
 
                 case static_cast<ci::Word>(ci::EventType::WindowBufferSizeEvent):
-                    for (auto callback : windowBufferSizeEventBindings)
+                    for (auto& callback : windowBufferSizeEventBindings)
                         callback(inputBuffer[i].event.windowBufferSizeEvent);
                     break;
                 }
@@ -81,7 +81,7 @@ void ci::EventLoop::bindWindowBufferSizeEvent(std::function<void(WindowBufferSiz
     pImpl->bindWindowBufferSizeEvent(std::move(callback));
 }
 
-void ci::EventLoop::execute()
+void ci::EventLoop::execute(bool& proceed)
 {
-    pImpl->execute();
+    pImpl->execute(proceed);
 }

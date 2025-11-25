@@ -19,7 +19,7 @@ namespace cinter {
         void bindMouseEvent(std::function<void(MouseEventRecord)> callback);
         void bindWindowBufferSizeEvent(std::function<void(WindowBufferSizeRecord)> callback);
 
-        void execute();
+        void execute(bool& proceed);
     
     private:
         class Impl;
