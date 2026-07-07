@@ -4,7 +4,7 @@
 
 #include <vector>
 
-namespace cinter {
+namespace wci {
 
     using Short = short;
     using Word = unsigned short;

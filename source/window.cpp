@@ -6,15 +6,13 @@
 #include "include/console.hpp"
 #include "include/window.hpp"
 
-namespace ci = cinter;
-
-class ci::Window::Impl
+class wci::Window::Impl
 {
 private:
-    ci::Console con;
-    ci::Coord size;
-    ci::Handle oldScreenBuffer;
-    ci::CharMatrix mat;
+    wci::Console con;
+    wci::Coord size;
+    wci::Handle oldScreenBuffer;
+    wci::CharMatrix mat;
 
 public:
     Impl() : con(), mat(con.screenBufferInfo().size)
@@ -27,7 +25,7 @@ public:
             CONSOLE_TEXTMODE_BUFFER,
             NULL
         );
-        con.activeScreenBuffer(static_cast<ci::Handle>(handle));
+        con.activeScreenBuffer(static_cast<wci::Handle>(handle));
     }
 
     ~Impl()
@@ -35,20 +33,20 @@ public:
         con.activeScreenBuffer(oldScreenBuffer);
     }
 
-    ci::Console& console() noexcept
+    wci::Console& console() noexcept
     {
         return con;
     }
-    const ci::Console& console() const noexcept
+    const wci::Console& console() const noexcept
     {
         return con;
     }
 
-    ci::CharMatrix& matrix() noexcept
+    wci::CharMatrix& matrix() noexcept
     {
         return mat;
     }
-    const ci::CharMatrix& matrix() const noexcept
+    const wci::CharMatrix& matrix() const noexcept
     {
         return mat;
     }
@@ -94,16 +92,16 @@ public:
         con.cursorPosition(position);
     }
 
-    void putChar(ci::Short x, ci::Short y, wchar_t character)
+    void putChar(wci::Short x, wci::Short y, wchar_t character)
     {
         mat.put(x, y, character, con.screenBufferInfo().attributes);
     }
-    void putChar(ci::Short x, ci::Short y, wchar_t character, ci::Word attributes)
+    void putChar(wci::Short x, wci::Short y, wchar_t character, wci::Word attributes)
     {
         mat.put(x, y, character, attributes);
     }
 
-    void putString(ci::Short x, ci::Short y, const wchar_t* string)
+    void putString(wci::Short x, wci::Short y, const wchar_t* string)
     {
         auto attributes = con.screenBufferInfo().attributes;
         unsigned length = 0;
@@ -113,7 +111,7 @@ public:
             ++length;
         }
     }
-    void putString(ci::Short x, ci::Short y, const wchar_t* string, ci::Word attributes)
+    void putString(wci::Short x, wci::Short y, const wchar_t* string, wci::Word attributes)
     {
         unsigned length = 0;
         while (string[length])
@@ -122,70 +120,70 @@ public:
             ++length;
         }
     }
-    void putString(ci::Short x, ci::Short y, const ci::CharInfo* charInfos, size_t length)
+    void putString(wci::Short x, wci::Short y, const wci::CharInfo* charInfos, size_t length)
     {
         for (size_t i = 0; i < length; ++i)
-            mat.put(x + static_cast<ci::Short>(i), y, charInfos[i]);
+            mat.put(x + static_cast<wci::Short>(i), y, charInfos[i]);
     }
 };
 
-ci::Window::Window() : pImpl(std::make_unique<Impl>()) {}
-ci::Window::~Window() = default;
+wci::Window::Window() : pImpl(std::make_unique<Impl>()) {}
+wci::Window::~Window() = default;
 
-ci::Console& ci::Window::console() noexcept
+wci::Console& wci::Window::console() noexcept
 {
     return pImpl->console();
 }
-const ci::Console& ci::Window::console() const noexcept
+const wci::Console& wci::Window::console() const noexcept
 {
     return pImpl->console();
 }
 
-ci::CharMatrix& ci::Window::matrix() noexcept
+wci::CharMatrix& wci::Window::matrix() noexcept
 {
     return pImpl->matrix();
 }
-const ci::CharMatrix& ci::Window::matrix() const noexcept
+const wci::CharMatrix& wci::Window::matrix() const noexcept
 {
     return pImpl->matrix();
 }
 
-void ci::Window::render()
+void wci::Window::render()
 {
     pImpl->render();
 }
 
-void ci::Window::printChar(wchar_t character)
+void wci::Window::printChar(wchar_t character)
 {
     pImpl->printChar(character);
 }
-void ci::Window::printString(const wchar_t* string)
+void wci::Window::printString(const wchar_t* string)
 {
     pImpl->printString(string);
 }
 
-void ci::Window::putChar(ci::Short x, ci::Short y, wchar_t character)
+void wci::Window::putChar(wci::Short x, wci::Short y, wchar_t character)
 {
     pImpl->putChar(x, y, character);
 }
-void ci::Window::putChar(ci::Short x, ci::Short y, wchar_t character, ci::Word attributes)
+void wci::Window::putChar(wci::Short x, wci::Short y, wchar_t character, wci::Word attributes)
 {
     pImpl->putChar(x, y, character, attributes);
 }
-void ci::Window::putChar(const ci::Coord& position, ci::CharInfo charInfo)
+void wci::Window::putChar(const wci::Coord& position, wci::CharInfo charInfo)
 {
     pImpl->putChar(position.x, position.y, charInfo.character, charInfo.attributes);
 }
 
-void ci::Window::putString(ci::Short x, ci::Short y, const wchar_t* string)
+void wci::Window::putString(wci::Short x, wci::Short y, const wchar_t* string)
 {
     pImpl->putString(x, y, string);
 }
-void ci::Window::putString(ci::Short x, ci::Short y, const wchar_t* string, ci::Word attributes)
+void wci::Window::putString(wci::Short x, wci::Short y, const wchar_t* string, wci::Word attributes)
 {
     pImpl->putString(x, y, string, attributes);
 }
-void ci::Window::putString(const Coord& position, const CharInfo* charInfos, size_t length)
+void wci::Window::putString(const Coord& position, const CharInfo* charInfos, size_t length)
 {
     pImpl->putString(position.x, position.y, charInfos, length);
 }

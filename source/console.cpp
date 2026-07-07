@@ -8,9 +8,7 @@
 #include "include/winapi.hpp"
 #include "include/console.hpp"
 
-namespace ci = cinter;
-
-class ci::Console::Impl
+class wci::Console::Impl
 {
 private:
     HANDLE hStdIn, hStdOut, hStdErr;
@@ -24,7 +22,7 @@ public:
         hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
         hStdErr = GetStdHandle(STD_ERROR_HANDLE);
         GetConsoleMode(hStdIn, &oldConsoleMode);
-        constexpr auto newConsoleMode = ci::api(ci::InputMode::EnableWindowsInput | ci::InputMode::EnableMouseInput);
+        constexpr auto newConsoleMode = wci::api(wci::InputMode::EnableWindowsInput | wci::InputMode::EnableMouseInput);
         SetConsoleMode(hStdIn, oldConsoleMode | newConsoleMode);
         oldConsoleCP = GetConsoleCP();
         oldConsoleOutputCP = GetConsoleOutputCP();
@@ -74,43 +72,43 @@ public:
         SetConsoleTitleW(newTitle.data());
     }
 
-    ci::ScreenBufferInfo getScreenBufferInfo()
+    wci::ScreenBufferInfo getScreenBufferInfo()
     {
         CONSOLE_SCREEN_BUFFER_INFO info;
         GetConsoleScreenBufferInfo(hStdOut, &info);
-        return ci::ScreenBufferInfo{
-            ci::Coord{
-                static_cast<ci::Short>(info.dwSize.X),
-                static_cast<ci::Short>(info.dwSize.Y)
+        return wci::ScreenBufferInfo{
+            wci::Coord{
+                static_cast<wci::Short>(info.dwSize.X),
+                static_cast<wci::Short>(info.dwSize.Y)
             },
-            ci::Coord{
-                static_cast<ci::Short>(info.dwCursorPosition.X),
-                static_cast<ci::Short>(info.dwCursorPosition.Y)
+            wci::Coord{
+                static_cast<wci::Short>(info.dwCursorPosition.X),
+                static_cast<wci::Short>(info.dwCursorPosition.Y)
             },
-            static_cast<ci::Word>(info.wAttributes),
-            ci::SmallRect{
-                static_cast<ci::Short>(info.srWindow.Left),
-                static_cast<ci::Short>(info.srWindow.Top),
-                static_cast<ci::Short>(info.srWindow.Right),
-                static_cast<ci::Short>(info.srWindow.Bottom)
+            static_cast<wci::Word>(info.wAttributes),
+            wci::SmallRect{
+                static_cast<wci::Short>(info.srWindow.Left),
+                static_cast<wci::Short>(info.srWindow.Top),
+                static_cast<wci::Short>(info.srWindow.Right),
+                static_cast<wci::Short>(info.srWindow.Bottom)
             },
-            ci::Coord{
-                static_cast<ci::Short>(info.dwMaximumWindowSize.X),
-                static_cast<ci::Short>(info.dwMaximumWindowSize.Y)
+            wci::Coord{
+                static_cast<wci::Short>(info.dwMaximumWindowSize.X),
+                static_cast<wci::Short>(info.dwMaximumWindowSize.Y)
             }
         };
     }
     
-    ci::CursorInfo getCursorInfo()
+    wci::CursorInfo getCursorInfo()
     {
         CONSOLE_CURSOR_INFO info;
         GetConsoleCursorInfo(hStdOut, &info);
-        return ci::CursorInfo{
-            static_cast<ci::Dword>(info.dwSize),
+        return wci::CursorInfo{
+            static_cast<wci::Dword>(info.dwSize),
             static_cast<bool>(info.bVisible)
         };
     }
-    void setCursorInfo(const ci::CursorInfo& info)
+    void setCursorInfo(const wci::CursorInfo& info)
     {
         CONSOLE_CURSOR_INFO winInfo{
             static_cast<DWORD>(info.size),
@@ -119,7 +117,7 @@ public:
         SetConsoleCursorInfo(hStdOut, &winInfo);
     }
 
-    void setCursorPosition(const ci::Coord& position)
+    void setCursorPosition(const wci::Coord& position)
     {
         COORD winCoord{
             static_cast<SHORT>(position.x),
@@ -128,23 +126,23 @@ public:
         SetConsoleCursorPosition(hStdOut, winCoord);
     }
 
-    ci::Handle getActiveScreenBuffer()
+    wci::Handle getActiveScreenBuffer()
     {
         return hStdOut;
     }
-    void setActiveScreenBuffer(ci::Handle handle)
+    void setActiveScreenBuffer(wci::Handle handle)
     {
         SetConsoleActiveScreenBuffer(static_cast<HANDLE>(handle));
         hStdOut = handle;
         hStdErr = handle;
     }
 
-    void setTextAttribute(ci::Word attributes)
+    void setTextAttribute(wci::Word attributes)
     {
         SetConsoleTextAttribute(hStdOut, static_cast<WORD>(attributes));
     }
 
-    void writeMatrix(const ci::CharMatrix& matrix)
+    void writeMatrix(const wci::CharMatrix& matrix)
     {
         auto info = getScreenBufferInfo();
         SMALL_RECT rect{
@@ -164,7 +162,7 @@ public:
         );
     }
 
-    void readInput(ci::InputRecord* inputBuffer, ci::Dword inputBufferLength, ci::Dword* eventsRead)
+    void readInput(wci::InputRecord* inputBuffer, wci::Dword inputBufferLength, wci::Dword* eventsRead)
     {
         ReadConsoleInputW(
             hStdIn,
@@ -175,74 +173,74 @@ public:
     }
 };
 
-ci::Console::Console() : pImpl(std::make_unique<Impl>()) {}
-ci::Console::~Console() = default;
+wci::Console::Console() : pImpl(std::make_unique<Impl>()) {}
+wci::Console::~Console() = default;
 
-void ci::Console::write(const char* string)
+void wci::Console::write(const char* string)
 {
     pImpl->write(string);
 }
-void ci::Console::write(const std::string& string)
+void wci::Console::write(const std::string& string)
 {
     pImpl->write(string.c_str());
 }
-void ci::Console::write(const wchar_t* wstring)
+void wci::Console::write(const wchar_t* wstring)
 {
     pImpl->write(wstring);
 }
-void ci::Console::write(const std::wstring& wstring)
+void wci::Console::write(const std::wstring& wstring)
 {
     pImpl->write(wstring.c_str());
 }
 
-std::wstring ci::Console::title()
+std::wstring wci::Console::title()
 {
     return pImpl->getTitle();
 }
-void ci::Console::title(const std::wstring& newTitle)
+void wci::Console::title(const std::wstring& newTitle)
 {
     pImpl->setTitle(newTitle);
 }
 
-ci::ScreenBufferInfo ci::Console::screenBufferInfo()
+wci::ScreenBufferInfo wci::Console::screenBufferInfo()
 {
     return pImpl->getScreenBufferInfo();
 }
 
-ci::CursorInfo ci::Console::cursorInfo()
+wci::CursorInfo wci::Console::cursorInfo()
 {
     return pImpl->getCursorInfo();
 }
-void ci::Console::cursorInfo(const ci::CursorInfo& info)
+void wci::Console::cursorInfo(const wci::CursorInfo& info)
 {
     pImpl->setCursorInfo(info);
 }
 
-void ci::Console::cursorPosition(const ci::Coord& position)
+void wci::Console::cursorPosition(const wci::Coord& position)
 {
     pImpl->setCursorPosition(position);
 }
 
-ci::Handle ci::Console::activeScreenBuffer()
+wci::Handle wci::Console::activeScreenBuffer()
 {
     return pImpl->getActiveScreenBuffer();
 }
-void ci::Console::activeScreenBuffer(ci::Handle handle)
+void wci::Console::activeScreenBuffer(wci::Handle handle)
 {
     pImpl->setActiveScreenBuffer(handle);
 }
 
-void ci::Console::textAttribute(Word attributes)
+void wci::Console::textAttribute(Word attributes)
 {
     pImpl->setTextAttribute(attributes);
 }
 
-void ci::Console::writeMatrix(const CharMatrix& matrix)
+void wci::Console::writeMatrix(const CharMatrix& matrix)
 {
     pImpl->writeMatrix(matrix);
 }
 
-void ci::Console::readInput(ci::InputRecord* inputBuffer, ci::Dword inputBufferLength, ci::Dword* eventsRead)
+void wci::Console::readInput(wci::InputRecord* inputBuffer, wci::Dword inputBufferLength, wci::Dword* eventsRead)
 {
     pImpl->readInput(inputBuffer, inputBufferLength, eventsRead);
 }

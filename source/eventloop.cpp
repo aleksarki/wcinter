@@ -7,18 +7,16 @@
 #include "include/console.hpp"
 #include "include/eventloop.hpp"
 
-namespace ci = cinter;
-
-class ci::EventLoop::Impl
+class wci::EventLoop::Impl
 {
 private:
-    ci::Console& console;
-    std::forward_list<std::function<void(ci::KeyEventRecord)>> keyEventBindings;
-    std::forward_list<std::function<void(ci::MouseEventRecord)>> mouseEventBindings;
-    std::forward_list<std::function<void(ci::WindowBufferSizeRecord)>> windowBufferSizeEventBindings;
+    wci::Console& console;
+    std::forward_list<std::function<void(wci::KeyEventRecord)>> keyEventBindings;
+    std::forward_list<std::function<void(wci::MouseEventRecord)>> mouseEventBindings;
+    std::forward_list<std::function<void(wci::WindowBufferSizeRecord)>> windowBufferSizeEventBindings;
     
 public:
-    Impl(ci::Console& console) : console(console), keyEventBindings{}, mouseEventBindings{}, windowBufferSizeEventBindings{} {}
+    Impl(wci::Console& console) : console(console), keyEventBindings{}, mouseEventBindings{}, windowBufferSizeEventBindings{} {}
 
     void bindKeyEvent(std::function<void(KeyEventRecord)> callback)
     {
@@ -35,27 +33,27 @@ public:
 
     void execute(bool& proceed)
     {
-        ci::InputRecord inputBuffer[128];
-        ci::Dword eventsRead;
+        wci::InputRecord inputBuffer[128];
+        wci::Dword eventsRead;
 
         while (proceed)
         {
-            console.readInput(inputBuffer, (ci::Dword)128, &eventsRead);
-            for (ci::Dword i = 0; i < eventsRead; ++i)
+            console.readInput(inputBuffer, (wci::Dword)128, &eventsRead);
+            for (wci::Dword i = 0; i < eventsRead; ++i)
             {
                 switch (inputBuffer[i].eventType)
                 {
-                case static_cast<ci::Word>(ci::EventType::KeyEvent):
+                case static_cast<wci::Word>(wci::EventType::KeyEvent):
                     for (auto& callback : keyEventBindings)
                         callback(inputBuffer[i].event.keyEvent);
                     break;
 
-                case static_cast<ci::Word>(ci::EventType::MouseEvent):
+                case static_cast<wci::Word>(wci::EventType::MouseEvent):
                     for (auto& callback : mouseEventBindings)
                         callback(inputBuffer[i].event.mouseEvent);
                     break;
 
-                case static_cast<ci::Word>(ci::EventType::WindowBufferSizeEvent):
+                case static_cast<wci::Word>(wci::EventType::WindowBufferSizeEvent):
                     for (auto& callback : windowBufferSizeEventBindings)
                         callback(inputBuffer[i].event.windowBufferSizeEvent);
                     break;
@@ -65,23 +63,23 @@ public:
     }
 };
 
-ci::EventLoop::EventLoop(ci::Console& console) : pImpl(std::make_unique<Impl>(console)) {}
-ci::EventLoop::~EventLoop() = default;
+wci::EventLoop::EventLoop(wci::Console& console) : pImpl(std::make_unique<Impl>(console)) {}
+wci::EventLoop::~EventLoop() = default;
 
-void ci::EventLoop::bindKeyEvent(std::function<void(KeyEventRecord)> callback)
+void wci::EventLoop::bindKeyEvent(std::function<void(KeyEventRecord)> callback)
 {
     pImpl->bindKeyEvent(std::move(callback));
 }
-void ci::EventLoop::bindMouseEvent(std::function<void(MouseEventRecord)> callback)
+void wci::EventLoop::bindMouseEvent(std::function<void(MouseEventRecord)> callback)
 {
     pImpl->bindMouseEvent(std::move(callback));
 }
-void ci::EventLoop::bindWindowBufferSizeEvent(std::function<void(WindowBufferSizeRecord)> callback)
+void wci::EventLoop::bindWindowBufferSizeEvent(std::function<void(WindowBufferSizeRecord)> callback)
 {
     pImpl->bindWindowBufferSizeEvent(std::move(callback));
 }
 
-void ci::EventLoop::execute(bool& proceed)
+void wci::EventLoop::execute(bool& proceed)
 {
     pImpl->execute(proceed);
 }

@@ -7,7 +7,7 @@
 #include "definitions.hpp"
 #include "console.hpp"
 
-namespace cinter {
+namespace wci {
 
     class EventLoop
     {

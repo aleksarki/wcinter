@@ -6,7 +6,7 @@
 #include <string>
 #include "definitions.hpp"
 
-namespace cinter {
+namespace wci {
 
     class Console
     {
@@ -46,7 +46,7 @@ namespace cinter {
         // Set new console title.
         void title(const std::wstring& newTitle);
 
-        // Get cinter::ScreenBufferInfo object describing console's screen buffer.
+        // Get wci::ScreenBufferInfo object describing console's screen buffer.
         ScreenBufferInfo screenBufferInfo();
 
         CursorInfo cursorInfo();

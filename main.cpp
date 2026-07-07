@@ -6,31 +6,31 @@
 
 int main()
 {
-    cinter::Window window;
-    cinter::Console& console = window.console();
-    cinter::EventLoop eventLoop(console);
-    
-    console.cursorInfo(cinter::CursorInfo{ 1, false });
-    
+    wci::Window window;
+    wci::Console& console = window.console();
+    wci::EventLoop eventLoop(console);
+
+    console.cursorInfo(wci::CursorInfo{ 1, false });
+
     bool proceed = true;
-    eventLoop.bindKeyEvent([&](cinter::KeyEventRecord keyEvent)
+    eventLoop.bindKeyEvent([&](wci::KeyEventRecord keyEvent)
     {
-        static cinter::Coord position{ 0, 0 };
-        static const cinter::CharInfo black{ ' ', 0 };
-        static const cinter::CharInfo character{ '#', static_cast<cinter::Word>(cinter::Attribute::FgColorCyanBright) };
-    
+        static wci::Coord position{ 0, 0 };
+        static const wci::CharInfo black{ ' ', 0 };
+        static const wci::CharInfo character{ '#', static_cast<wci::Word>(wci::Attribute::FgColorCyanBright) };
+
         window.putChar(position, black);
         if (keyEvent.keyDown)
         {
-            if (keyEvent.virtualScanCode == static_cast<cinter::Dword>(cinter::VirtualKey::Right))
+            if (keyEvent.virtualScanCode == static_cast<wci::Dword>(wci::VirtualKey::Right))
                 ++position.x;
-            else if (keyEvent.virtualScanCode == static_cast<cinter::Dword>(cinter::VirtualKey::Left))
+            else if (keyEvent.virtualScanCode == static_cast<wci::Dword>(wci::VirtualKey::Left))
                 --position.x;
-            else if (keyEvent.virtualScanCode == static_cast<cinter::Dword>(cinter::VirtualKey::Down))
+            else if (keyEvent.virtualScanCode == static_cast<wci::Dword>(wci::VirtualKey::Down))
                 ++position.y;
-            else if (keyEvent.virtualScanCode == static_cast<cinter::Dword>(cinter::VirtualKey::Up))
+            else if (keyEvent.virtualScanCode == static_cast<wci::Dword>(wci::VirtualKey::Up))
                 --position.y;
-            else if (keyEvent.virtualScanCode == static_cast<cinter::Dword>(cinter::VirtualKey::Escape))
+            else if (keyEvent.virtualScanCode == static_cast<wci::Dword>(wci::VirtualKey::Escape))
                 proceed = false;
         }
         window.putChar(position, character);

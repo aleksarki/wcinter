@@ -5,8 +5,7 @@
 #include <windows.h>
 #include "./definitions.hpp"
 
-namespace cinter
-{
+namespace wci {
 
     consteval DWORD api(StdHandle constant)
     {
