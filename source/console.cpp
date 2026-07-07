@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include "include/definitions.hpp"
+#include "include/winapi.hpp"
 #include "include/console.hpp"
 
 namespace ci = cinter;
@@ -23,7 +24,8 @@ public:
         hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
         hStdErr = GetStdHandle(STD_ERROR_HANDLE);
         GetConsoleMode(hStdIn, &oldConsoleMode);
-        SetConsoleMode(hStdIn, oldConsoleMode | ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT);
+        constexpr auto newConsoleMode = ci::api(ci::InputMode::EnableWindowsInput | ci::InputMode::EnableMouseInput);
+        SetConsoleMode(hStdIn, oldConsoleMode | newConsoleMode);
         oldConsoleCP = GetConsoleCP();
         oldConsoleOutputCP = GetConsoleOutputCP();
         SetConsoleCP(CP_UTF8);

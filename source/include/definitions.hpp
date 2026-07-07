@@ -11,6 +11,59 @@ namespace cinter {
     using Dword = unsigned long;
     using Handle = void*;
 
+    enum class StdHandle : Dword
+    {
+        Input =  -10,
+        Output = -11,
+        Error =  -12
+    };
+
+    // Input mode flags
+    enum class InputMode
+    {
+        EnableProcessedInput =       0x0001,
+        EnableLineInput =            0x0002,
+        EnableEchoInput =            0x0004,
+        EnableWindowsInput =         0x0008,
+        EnableMouseInput =           0x0010,
+        EnableInsertMode =           0x0020,
+        EnableQuickEditMode =        0x0040,
+        EnableExtendedFlags =        0x0080,
+        EnableAutoPosition =         0x0100,
+        EnableVirtualTerminalInput = 0x0200
+    };
+
+    constexpr InputMode operator|(InputMode a, InputMode b)
+    {
+        return static_cast<InputMode>
+        (
+            static_cast<std::underlying_type_t<InputMode>>(a) |
+            static_cast<std::underlying_type_t<InputMode>>(b)
+        );
+    }
+
+    constexpr InputMode operator&(InputMode a, InputMode b)
+    {
+        return static_cast<InputMode>
+        (
+            static_cast<std::underlying_type_t<InputMode>>(a) &
+            static_cast<std::underlying_type_t<InputMode>>(b)
+        );
+    }
+
+    //  Code Page Default Values.
+    //  Please Use Unicode, either UTF-16 (as in WCHAR) or UTF-8 (code page CP_ACP)
+    enum class CodePage
+    {
+        A =       0,      // default to ANSI code page
+        Oem =     1,      // default to OEM  code page
+        Mac =     2,      // default to MAC  code page
+        ThreadA = 3,      // current thread's ANSI code page
+        Symbol =  42,     // SYMBOL translations
+        Utf7 =    65000,  // UTF-7 translation
+        Utf8 =    65001,  // UTF-8 translation
+    };
+
     enum class Attribute : Word
     {
         ForegroundBlue =      0x0001,  // Text color contains blue.

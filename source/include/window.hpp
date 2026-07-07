@@ -10,10 +10,6 @@ namespace cinter {
 
     class Window
     {
-    private:
-        class Impl;
-        std::unique_ptr<Impl> pImpl;
-    
     public:
         Window();
         ~Window();
@@ -45,6 +41,10 @@ namespace cinter {
 
         void putMatrix(Short x, Short y, const CharMatrix& matrix);
         void putMatrix(const Coord& position, const CharMatrix& matrix);
+    
+    private:
+        class Impl;
+        std::unique_ptr<Impl> pImpl;
     };
 }
 

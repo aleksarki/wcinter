@@ -40,13 +40,13 @@ namespace cinter {
             read(buffer, N, charsToRead);
         }
 
-        // Get & set console title.
-
+        // Get console title.
         std::wstring title();
+
+        // Set new console title.
         void title(const std::wstring& newTitle);
 
-        // other
-
+        // Get cinter::ScreenBufferInfo object describing console's screen buffer.
         ScreenBufferInfo screenBufferInfo();
 
         CursorInfo cursorInfo();
