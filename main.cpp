@@ -2,7 +2,6 @@
 #include "source/include/definitions.hpp"
 #include "source/include/console.hpp"
 #include "source/include/window.hpp"
-#include "source/include/application.hpp"
 
 int main()
 {

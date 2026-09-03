@@ -2,7 +2,7 @@
 #ifndef CINTER_INCLUDE_DEFINITIONS_STRUCTS_HPP
 #define CINTER_INCLUDE_DEFINITIONS_STRUCTS_HPP
 
-#include "definitions/types.hpp"
+#include "types.hpp"
 
 namespace wci
 {

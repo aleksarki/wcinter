@@ -2,15 +2,15 @@
 #ifndef CINTER_INCLUDE_DEfINITIONS_ENUMS_HPP
 #define CINTER_INCLUDE_DEfINITIONS_ENUMS_HPP
 
-#include "definitions/types.hpp"
+#include "types.hpp"
 
 namespace wci
 {
     enum class StdHandle : Dword
     {
-        Input =  -10,
-        Output = -11,
-        Error =  -12
+        Input =  static_cast<Dword>(-10),
+        Output = static_cast<Dword>(-11),
+        Error =  static_cast<Dword>(-12)
     };
 
     // Input mode flags
