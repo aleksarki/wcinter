@@ -6,12 +6,18 @@
 
 namespace wci
 {
+    #pragma region StdHandle
+
     enum class StdHandle : Dword
     {
         Input =  static_cast<Dword>(-10),
         Output = static_cast<Dword>(-11),
         Error =  static_cast<Dword>(-12)
     };
+
+    #pragma endregion
+
+    #pragma region InputMode
 
     // Input mode flags
     enum class InputMode
@@ -46,6 +52,19 @@ namespace wci
         );
     }
 
+    constexpr InputMode operator^(InputMode a, InputMode b)
+    {
+        return static_cast<InputMode>
+        (
+            static_cast<std::underlying_type_t<InputMode>>(a) ^
+            static_cast<std::underlying_type_t<InputMode>>(b)
+        );
+    }
+
+    #pragma endregion
+
+    #pragma region CodePage
+
     //  Code Page Default Values.
     //  Please Use Unicode, either UTF-16 (as in WCHAR) or UTF-8 (code page CP_ACP)
     enum class CodePage
@@ -59,6 +78,11 @@ namespace wci
         Utf8 =    65001,  // UTF-8 translation
     };
 
+    #pragma endregion
+
+    #pragma region Attribute
+
+    // Attributes for character display.
     enum class Attribute : Word
     {
         ForegroundBlue =      0x0001,  // Text color contains blue.
@@ -117,6 +141,37 @@ namespace wci
         BgColorWhiteBright =   BgColorWhite   | BackgroundIntensity   // Background color is bright white.
     };
 
+    constexpr Attribute operator|(Attribute a, Attribute b)
+    {
+        return static_cast<Attribute>
+        (
+            static_cast<std::underlying_type_t<Attribute>>(a) |
+            static_cast<std::underlying_type_t<Attribute>>(b)
+        );
+    }
+
+    constexpr Attribute operator&(Attribute a, Attribute b)
+    {
+        return static_cast<Attribute>
+        (
+            static_cast<std::underlying_type_t<Attribute>>(a) &
+            static_cast<std::underlying_type_t<Attribute>>(b)
+        );
+    }
+
+    constexpr Attribute operator^(Attribute a, Attribute b)
+    {
+        return static_cast<Attribute>
+        (
+            static_cast<std::underlying_type_t<Attribute>>(a) ^
+            static_cast<std::underlying_type_t<Attribute>>(b)
+        );
+    }
+
+    #pragma endregion
+
+    #pragma region GenericRights
+
     enum class GenericRights : Dword
     {
         Read =    0x80000000L,
@@ -125,12 +180,68 @@ namespace wci
         All =     0x10000000L
     };
 
+    constexpr GenericRights operator|(GenericRights a, GenericRights b)
+    {
+        return static_cast<GenericRights>(
+            static_cast<std::underlying_type_t<GenericRights>>(a) |
+            static_cast<std::underlying_type_t<GenericRights>>(b)
+        );
+    }
+
+    constexpr GenericRights operator&(GenericRights a, GenericRights b)
+    {
+        return static_cast<GenericRights>(
+            static_cast<std::underlying_type_t<GenericRights>>(a) &
+            static_cast<std::underlying_type_t<GenericRights>>(b)
+        );
+    }
+
+    constexpr GenericRights operator^(GenericRights a, GenericRights b)
+    {
+        return static_cast<GenericRights>(
+            static_cast<std::underlying_type_t<GenericRights>>(a) ^
+            static_cast<std::underlying_type_t<GenericRights>>(b)
+        );
+    }
+
+    #pragma endregion
+
+    #pragma region FileAccessRights
+
     enum class FileAccessRights : Dword
     {
         ShareRead =   0x00000001,
         ShareWrite =  0x00000002,
         ShareDelete = 0x00000004
     };
+
+    constexpr FileAccessRights operator|(FileAccessRights a, FileAccessRights b)
+    {
+        return static_cast<FileAccessRights>(
+            static_cast<std::underlying_type_t<FileAccessRights>>(a) |
+            static_cast<std::underlying_type_t<FileAccessRights>>(b)
+        );
+    }
+
+    constexpr FileAccessRights operator&(FileAccessRights a, FileAccessRights b)
+    {
+        return static_cast<FileAccessRights>(
+            static_cast<std::underlying_type_t<FileAccessRights>>(a) &
+            static_cast<std::underlying_type_t<FileAccessRights>>(b)
+        );
+    }
+
+    constexpr FileAccessRights operator^(FileAccessRights a, FileAccessRights b)
+    {
+        return static_cast<FileAccessRights>(
+            static_cast<std::underlying_type_t<FileAccessRights>>(a) ^
+            static_cast<std::underlying_type_t<FileAccessRights>>(b)
+        );
+    }
+
+    #pragma endregion
+
+    #pragma region ControlKeyState
 
     enum class ControlKeyState : Dword
     {
@@ -153,6 +264,34 @@ namespace wci
         NlsImeDisable =    0x20000000   // DBCS for JPN: IME enable/disable.
     };
 
+    constexpr ControlKeyState operator|(ControlKeyState a, ControlKeyState b)
+    {
+        return static_cast<ControlKeyState>(
+            static_cast<std::underlying_type_t<ControlKeyState>>(a) |
+            static_cast<std::underlying_type_t<ControlKeyState>>(b)
+        );
+    }
+
+    constexpr ControlKeyState operator&(ControlKeyState a, ControlKeyState b)
+    {
+        return static_cast<ControlKeyState>(
+            static_cast<std::underlying_type_t<ControlKeyState>>(a) &
+            static_cast<std::underlying_type_t<ControlKeyState>>(b)
+        );
+    }
+
+    constexpr ControlKeyState operator^(ControlKeyState a, ControlKeyState b)
+    {
+        return static_cast<ControlKeyState>(
+            static_cast<std::underlying_type_t<ControlKeyState>>(a) ^
+            static_cast<std::underlying_type_t<ControlKeyState>>(b)
+        );
+    }
+
+    #pragma endregion
+
+    #pragma region ButtonState
+
     enum class ButtonState : Dword
     {
         FromLeft1stButtonPressed = 0x0001,
@@ -162,6 +301,34 @@ namespace wci
         FromLeft4thButtonPressed = 0x0010
     };
 
+    constexpr ButtonState operator|(ButtonState a, ButtonState b)
+    {
+        return static_cast<ButtonState>(
+            static_cast<std::underlying_type_t<ButtonState>>(a) |
+            static_cast<std::underlying_type_t<ButtonState>>(b)
+        );
+    }
+
+    constexpr ButtonState operator&(ButtonState a, ButtonState b)
+    {
+        return static_cast<ButtonState>(
+            static_cast<std::underlying_type_t<ButtonState>>(a) &
+            static_cast<std::underlying_type_t<ButtonState>>(b)
+        );
+    }
+
+    constexpr ButtonState operator^(ButtonState a, ButtonState b)
+    {
+        return static_cast<ButtonState>(
+            static_cast<std::underlying_type_t<ButtonState>>(a) ^
+            static_cast<std::underlying_type_t<ButtonState>>(b)
+        );
+    }
+
+    #pragma endregion
+
+    #pragma region EventFlag
+
     enum class EventFlag : Dword
     {
         MouseMoved =    0x0001,
@@ -169,6 +336,34 @@ namespace wci
         MouseWheeled =  0x0004,
         MouseHWheeled = 0x0008
     };
+    
+    constexpr EventFlag operator|(EventFlag a, EventFlag b)
+    {
+        return static_cast<EventFlag>(
+            static_cast<std::underlying_type_t<EventFlag>>(a) |
+            static_cast<std::underlying_type_t<EventFlag>>(b)
+        );
+    }
+
+    constexpr EventFlag operator&(EventFlag a, EventFlag b)
+    {
+        return static_cast<EventFlag>(
+            static_cast<std::underlying_type_t<EventFlag>>(a) &
+            static_cast<std::underlying_type_t<EventFlag>>(b)
+        );
+    }
+
+    constexpr EventFlag operator^(EventFlag a, EventFlag b)
+    {
+        return static_cast<EventFlag>(
+            static_cast<std::underlying_type_t<EventFlag>>(a) ^
+            static_cast<std::underlying_type_t<EventFlag>>(b)
+        );
+    }
+
+    #pragma endregion
+
+    #pragma region EventType
 
     enum class EventType : Word
     {
@@ -178,6 +373,10 @@ namespace wci
         MenuEvent =             0x0008,  // Event contains menu event record
         FocusEvent =            0x0010   // Event contains focus change
     };
+
+    #pragma endregion
+
+    #pragma region VirtualKey
 
     enum class VirtualKey : Word
     {
@@ -380,6 +579,8 @@ namespace wci
         Pa1 =                          0xFD,
         OemClear =                     0xFE
     };
+
+    #pragma endregion
 }
 
 #endif  // CINTER_INCLUDE_DEfINITIONS_ENUMS_HPP
