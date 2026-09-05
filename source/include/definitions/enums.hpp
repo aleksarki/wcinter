@@ -75,7 +75,7 @@ namespace wci
         ThreadA = 3,      // current thread's ANSI code page
         Symbol =  42,     // SYMBOL translations
         Utf7 =    65000,  // UTF-7 translation
-        Utf8 =    65001,  // UTF-8 translation
+        Utf8 =    65001   // UTF-8 translation
     };
 
     #pragma endregion
