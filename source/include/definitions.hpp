@@ -47,7 +47,7 @@ namespace wci
         {
             mat[y * siz.x + x] = charInfo;
         }
-        void put(Short x, Short y, wchar_t character, Word attributes)
+        void put(Short x, Short y, wchar_t character, Attribute attributes)
         {
             mat[y * siz.x + x] = CharInfo{ character, attributes };
         }
@@ -55,7 +55,7 @@ namespace wci
         {
             mat[position.y * siz.x + position.x] = charInfo;
         }
-        void put(const Coord& position, wchar_t character, Word attributes)
+        void put(const Coord& position, wchar_t character, Attribute attributes)
         {
             mat[position.y * siz.x + position.x] = CharInfo{ character, attributes };
         }

@@ -9,27 +9,27 @@ int main()
     wci::Console& console = window.console();
     wci::EventLoop eventLoop(console);
 
-    console.cursorInfo(wci::CursorInfo{ 1, false });
+    console.cursorInfo({ 1, false });
 
     bool proceed = true;
-    eventLoop.bindKeyEvent([&](wci::KeyEventRecord keyEvent)
+    eventLoop.bindKeyEvent([&](wci::KeyEventRecord& keyEvent)
     {
         static wci::Coord position{ 0, 0 };
-        static const wci::CharInfo black{ ' ', 0 };
-        static const wci::CharInfo character{ '#', static_cast<wci::Word>(wci::Attribute::FgColorCyanBright) };
+        static const wci::CharInfo black{ ' ', wci::Attribute::No };
+        static const wci::CharInfo character{ '#', wci::Attribute::FgColorCyanBright };
 
         window.putChar(position, black);
         if (keyEvent.keyDown)
         {
-            if (keyEvent.virtualScanCode == static_cast<wci::Dword>(wci::VirtualKey::Right))
+            if (keyEvent.virtualScanCode == wci::VirtualKey::Right)
                 ++position.x;
-            else if (keyEvent.virtualScanCode == static_cast<wci::Dword>(wci::VirtualKey::Left))
+            else if (keyEvent.virtualScanCode == wci::VirtualKey::Left)
                 --position.x;
-            else if (keyEvent.virtualScanCode == static_cast<wci::Dword>(wci::VirtualKey::Down))
+            else if (keyEvent.virtualScanCode == wci::VirtualKey::Down)
                 ++position.y;
-            else if (keyEvent.virtualScanCode == static_cast<wci::Dword>(wci::VirtualKey::Up))
+            else if (keyEvent.virtualScanCode == wci::VirtualKey::Up)
                 --position.y;
-            else if (keyEvent.virtualScanCode == static_cast<wci::Dword>(wci::VirtualKey::Escape))
+            else if (keyEvent.virtualScanCode == wci::VirtualKey::Escape)
                 proceed = false;
         }
         window.putChar(position, character);

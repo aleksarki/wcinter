@@ -15,9 +15,9 @@ namespace wci {
         EventLoop(Console& console);
         ~EventLoop();
 
-        void bindKeyEvent(std::function<void(KeyEventRecord)> callback);
-        void bindMouseEvent(std::function<void(MouseEventRecord)> callback);
-        void bindWindowBufferSizeEvent(std::function<void(WindowBufferSizeRecord)> callback);
+        void bindKeyEvent(std::function<void(KeyEventRecord&)> callback);
+        void bindMouseEvent(std::function<void(MouseEventRecord&)> callback);
+        void bindWindowBufferSizeEvent(std::function<void(WindowBufferSizeRecord&)> callback);
 
         void execute(bool& proceed);
     

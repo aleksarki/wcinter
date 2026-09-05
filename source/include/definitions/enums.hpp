@@ -85,6 +85,8 @@ namespace wci
     // Attributes for character display.
     enum class Attribute : Word
     {
+        No = 0,
+
         ForegroundBlue =      0x0001,  // Text color contains blue.
         ForegroundGreen =     0x0002,  // Text color contains green.
         ForegroundRed =       0x0004,  // Text color contains red.

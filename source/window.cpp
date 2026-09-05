@@ -96,7 +96,7 @@ public:
     {
         mat.put(x, y, character, con.screenBufferInfo().attributes);
     }
-    void putChar(wci::Short x, wci::Short y, wchar_t character, wci::Word attributes)
+    void putChar(wci::Short x, wci::Short y, wchar_t character, wci::Attribute attributes)
     {
         mat.put(x, y, character, attributes);
     }
@@ -111,7 +111,7 @@ public:
             ++length;
         }
     }
-    void putString(wci::Short x, wci::Short y, const wchar_t* string, wci::Word attributes)
+    void putString(wci::Short x, wci::Short y, const wchar_t* string, wci::Attribute attributes)
     {
         unsigned length = 0;
         while (string[length])
@@ -166,7 +166,7 @@ void wci::Window::putChar(wci::Short x, wci::Short y, wchar_t character)
 {
     pImpl->putChar(x, y, character);
 }
-void wci::Window::putChar(wci::Short x, wci::Short y, wchar_t character, wci::Word attributes)
+void wci::Window::putChar(wci::Short x, wci::Short y, wchar_t character, wci::Attribute attributes)
 {
     pImpl->putChar(x, y, character, attributes);
 }
@@ -179,7 +179,7 @@ void wci::Window::putString(wci::Short x, wci::Short y, const wchar_t* string)
 {
     pImpl->putString(x, y, string);
 }
-void wci::Window::putString(wci::Short x, wci::Short y, const wchar_t* string, wci::Word attributes)
+void wci::Window::putString(wci::Short x, wci::Short y, const wchar_t* string, wci::Attribute attributes)
 {
     pImpl->putString(x, y, string, attributes);
 }

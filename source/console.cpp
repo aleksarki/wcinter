@@ -85,7 +85,7 @@ public:
                 static_cast<wci::Short>(info.dwCursorPosition.X),
                 static_cast<wci::Short>(info.dwCursorPosition.Y)
             },
-            static_cast<wci::Word>(info.wAttributes),
+            static_cast<wci::Attribute>(info.wAttributes),
             wci::SmallRect{
                 static_cast<wci::Short>(info.srWindow.Left),
                 static_cast<wci::Short>(info.srWindow.Top),
