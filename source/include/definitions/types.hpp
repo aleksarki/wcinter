@@ -4,6 +4,7 @@
 
 namespace wci
 {
+    using Wchar = wchar_t;
     using Short = short;
     using Word = unsigned short;
     using Dword = unsigned long;

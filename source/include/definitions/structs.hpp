@@ -34,7 +34,7 @@ namespace wci
      */
     struct CharInfo
     {
-        wchar_t character;
+        Wchar character;
         Attribute attributes;  // Word
     };
 
@@ -74,7 +74,7 @@ namespace wci
         Word repeatCount;
         VirtualKey virtualKeyCode;  // Word
         VirtualKey virtualScanCode;  // Word
-        wchar_t character;
+        Wchar character;
         ControlKeyState controlKeyState;  // Dword
     };
 
