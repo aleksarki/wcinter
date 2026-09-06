@@ -45,6 +45,16 @@ namespace wci
         return static_cast<UINT>(ui);
     }
 
+    CONST CHAR_INFO* api(const CharInfo* cchip)
+    {
+        return reinterpret_cast<CONST CHAR_INFO*>(cchip);
+    }
+
+    LPDWORD api(Dword* dwp)
+    {
+        return reinterpret_cast<DWORD*>(dwp);
+    }
+
     #pragma endregion
 
     #pragma region enums
@@ -243,6 +253,16 @@ namespace wci
     constexpr unsigned int wci(UINT ui)
     {
         return static_cast<unsigned int>(ui);
+    }
+
+    const CharInfo* wci(CONST CHAR_INFO* cchip)
+    {
+        return reinterpret_cast<const CharInfo*>(cchip);
+    }
+
+    Dword* wci(LPDWORD dwp)
+    {
+        return reinterpret_cast<Dword*>(dwp);
     }
 
     #pragma endregion

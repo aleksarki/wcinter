@@ -8,7 +8,7 @@ Structure `KeyEventRecord` contains following fields:
 - [`Word`](../types/word.md) `repeatCount`
 - [`VirtualKey`](../enums/virtual_key.md) `virtualKeyCode`
 - [`VirtualKey`](../enums/virtual_key.md) `virtualScanCode`
-- `wchar_t` `character`
+- [`Wchar`](../types/wchar.md) `character`
 - [`ControlKeyState`](../enums/control_key_state.md) `controlKeyState`
 
 ---

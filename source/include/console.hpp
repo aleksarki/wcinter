@@ -17,9 +17,6 @@ namespace wci {
         Console(const Console&) = delete;
         Console& operator=(const Console&) = delete;
 
-        Console(Console&&) = default;
-        Console& operator=(Console&&) = default;
-
         // Write to console.
 
         void write(const char* string);
@@ -65,7 +62,7 @@ namespace wci {
 
     private:
         class Impl;
-        std::unique_ptr<Impl> pImpl;
+        std::unique_ptr<Impl> impl;
     };
 }
 

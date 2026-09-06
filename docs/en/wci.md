@@ -5,6 +5,7 @@ This library is built upon Win32, utilises its API and prevents it from pollutin
 
 ## Types
 
+- [`Wchar`](./types/wchar.md)
 - [`Short`](./types/short.md)
 - [`Word`](./types/word.md)
 - [`Dword`](./types/dword.md)
@@ -44,3 +45,4 @@ This library is built upon Win32, utilises its API and prevents it from pollutin
 ## Classes
 
 - [`CharMatrix`](./classes/char_matrix.md)
+- [`Console`](./classes/console.md)

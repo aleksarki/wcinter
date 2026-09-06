@@ -4,7 +4,7 @@
 
 Structure `SmallRect` contains following fields:
 
-- `wchar_t` `character`
+- [`Wchar`](../types/wchar.md) `character`
 - [`Attribute`](../enums/attribute.md) `attributes`
 
 ---
