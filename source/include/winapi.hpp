@@ -108,7 +108,101 @@ namespace wci
 
     #pragma region structs
 
-    //...
+    constexpr COORD api(const Coord& c)
+    {
+        return COORD{ api(c.x), api(c.y) };
+    }
+
+    constexpr SMALL_RECT api(const SmallRect& sr)
+    {
+        return SMALL_RECT{ api(sr.left), api(sr.top), api(sr.right), api(sr.bottom) };
+    }
+
+    constexpr CHAR_INFO api(const CharInfo& chi)
+    {
+        CHAR_INFO info;
+        info.Char.UnicodeChar = api(chi.character);
+        info.Attributes = api(chi.attributes);
+        return info;
+    }
+
+    constexpr CONSOLE_CURSOR_INFO api(const CursorInfo& ci)
+    {
+        return CONSOLE_CURSOR_INFO{ api(ci.size), api(ci.visible) };
+    }
+
+    constexpr CONSOLE_SCREEN_BUFFER_INFO api(const ScreenBufferInfo& sbi)
+    {
+        return CONSOLE_SCREEN_BUFFER_INFO{
+            api(sbi.size),
+            api(sbi.cursorPosition),
+            api(sbi.attributes),
+            api(sbi.window),
+            api(sbi.maxWindowSize)
+        };
+    }
+
+    constexpr KEY_EVENT_RECORD api(const KeyEventRecord ker)
+    {
+        KEY_EVENT_RECORD record;
+        record.bKeyDown = api(ker.keyDown);
+        record.wRepeatCount = api(ker.repeatCount);
+        record.wVirtualKeyCode = api(ker.virtualKeyCode);
+        record.wVirtualScanCode = api(ker.virtualScanCode);
+        record.uChar.UnicodeChar = api(ker.character);
+        record.dwControlKeyState = api(ker.controlKeyState);
+        return record;
+    }
+
+    constexpr MOUSE_EVENT_RECORD api(const MouseEventRecord& mer)
+    {
+        return MOUSE_EVENT_RECORD{
+            api(mer.mousePosition),
+            api(mer.buttonState),
+            api(mer.controlKeyState),
+            api(mer.eventFlags)
+        };
+    }
+
+    constexpr WINDOW_BUFFER_SIZE_RECORD api(const WindowBufferSizeRecord& wbsr)
+    {
+        return WINDOW_BUFFER_SIZE_RECORD{ api(wbsr.size) };
+    }
+
+    constexpr MENU_EVENT_RECORD api(const MenuEventRecord& mer)
+    {
+        return MENU_EVENT_RECORD{ api(mer.commandId) };
+    }
+
+    constexpr FOCUS_EVENT_RECORD api(const FocusEventRecord& fer)
+    {
+        return FOCUS_EVENT_RECORD{ api(fer.setFocus) };
+    }
+
+    constexpr INPUT_RECORD api(const InputRecord& ir)
+    {
+        INPUT_RECORD record;
+        record.EventType = api(ir.eventType);
+        switch (ir.eventType)
+        {
+        case EventType::KeyEvent:
+            record.Event.KeyEvent = api(ir.event.keyEvent);
+            break;
+        case EventType::MouseEvent:
+            record.Event.MouseEvent = api(ir.event.mouseEvent);
+            break;
+        case EventType::WindowBufferSizeEvent:
+            record.Event.WindowBufferSizeEvent = api(ir.event.windowBufferSizeEvent);
+            break;
+        case EventType::MenuEvent:
+            record.Event.MenuEvent = api(ir.event.menuEvent);
+            break;
+        case EventType::FocusEvent:
+            record.Event.FocusEvent = api(ir.event.focusEvent);
+            break;
+        }
+        return record;
+    }
 
     #pragma endregion
     #pragma endregion
