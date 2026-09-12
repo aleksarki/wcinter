@@ -45,16 +45,30 @@ namespace wci
         return static_cast<UINT>(ui);
     }
 
-    CONST CHAR_INFO* api(const CharInfo* cchip)
+    constexpr DWORD api(size_t s)
     {
-        return reinterpret_cast<CONST CHAR_INFO*>(cchip);
+        return static_cast<DWORD>(s);
     }
 
-    LPDWORD api(Dword* dwp)
+    inline CONST CHAR_INFO* api(const CharInfo* cchip)
+    {
+        return reinterpret_cast<CONST CHAR_INFO*>(cchip);  /* fixme this is not good */
+    }
+
+    inline LPCWSTR api(const Wchar* cwchp)
+    {
+        return reinterpret_cast<LPCWSTR>(cwchp);
+    }
+
+    inline LPWSTR api(Wchar* wchp)
+    {
+        return reinterpret_cast<LPWSTR>(wchp);
+    }
+
+    inline LPDWORD api(Dword* dwp)
     {
         return reinterpret_cast<DWORD*>(dwp);
     }
-
     #pragma endregion
 
     #pragma region enums
@@ -255,16 +269,25 @@ namespace wci
         return static_cast<unsigned int>(ui);
     }
 
-    const CharInfo* wci(CONST CHAR_INFO* cchip)
+    inline const CharInfo* wci(CONST CHAR_INFO* cchip)
     {
-        return reinterpret_cast<const CharInfo*>(cchip);
+        return reinterpret_cast<const CharInfo*>(cchip);   /* fixme this is not good */
     }
 
-    Dword* wci(LPDWORD dwp)
+    inline const Wchar* wci(CONST WCHAR* cwchp)
+    {
+        return reinterpret_cast<const Wchar*>(cwchp);
+    }
+
+    inline Wchar* wci(WCHAR* wchp)
+    {
+        return reinterpret_cast<Wchar*>(wchp);
+    }
+
+    inline Dword* wci(LPDWORD dwp)
     {
         return reinterpret_cast<Dword*>(dwp);
     }
-
     #pragma endregion
 
     #pragma region structs

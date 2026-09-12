@@ -17,9 +17,6 @@ namespace wci {
         Window(const Window&) = delete;
         Window& operator=(const Window&) = delete;
 
-        Window(Window&&) = default;
-        Window& operator=(Window&&) = default;
-
         Console& console() noexcept;
         const Console& console() const noexcept;
 
@@ -28,23 +25,26 @@ namespace wci {
 
         void render();
 
+        void resize();  // todo on buffer resize; recreate underlying matrix; use Matrix::merge to get the overlap
+
         void printChar(wchar_t character);
         void printString(const wchar_t* string);
 
         void putChar(Short x, Short y, wchar_t character);
-        void putChar(Short x, Short y, wchar_t character, Attribute attributes);
+        void putChar(Short x, Short y, Wchar character, Attribute attributes);
         void putChar(const Coord& position, CharInfo charInfo);
         
         void putString(Short x, Short y, const wchar_t* string);
-        void putString(Short x, Short y, const wchar_t* string, Attribute attributes);
-        void putString(const Coord& position, const CharInfo* charInfos, size_t length);
+        void putString(Short x, Short y, const Wchar* string, Attribute attributes);
+        void putString(const Coord& position, const CharInfo charInfos[], size_t length);
+        void putString(const Coord& position, const CharInfo* charInfos);
 
-        void putMatrix(Short x, Short y, const CharMatrix& matrix);
+        void putMatrix(Short x, Short y, const CharMatrix& matrix);  // todo use Matrix::merge to get the overlap
         void putMatrix(const Coord& position, const CharMatrix& matrix);
     
     private:
         class Impl;
-        std::unique_ptr<Impl> pImpl;
+        std::unique_ptr<Impl> impl;
     };
 }
 

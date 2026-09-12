@@ -38,27 +38,29 @@ namespace wci {
         }
 
         // Get console title.
-        std::wstring title();
+        std::wstring title() const;
 
         // Set new console title.
         void title(const std::wstring& newTitle);
 
         // Get wci::ScreenBufferInfo object describing console's screen buffer.
-        ScreenBufferInfo screenBufferInfo();
+        ScreenBufferInfo screenBufferInfo() const;
 
-        CursorInfo cursorInfo();
+        CursorInfo cursorInfo() const;
         void cursorInfo(const CursorInfo& info);
 
         void cursorPosition(const Coord& position);
 
-        Handle activeScreenBuffer();
+        Handle activeScreenBuffer() const;
         void activeScreenBuffer(Handle handle);
 
         void textAttribute(Word attributes);
 
-        void writeMatrix(const CharMatrix& matrix);
+        void readInput(InputRecord* inputBuffer, Dword inputBufferLength, Dword* eventsRead);  // redo
 
-        void readInput(InputRecord* inputBuffer, Dword inputBufferLength, Dword* eventsRead);
+        Handle stdInput() const;
+        Handle stdOutput() const;
+        Handle stdError() const;
 
     private:
         class Impl;

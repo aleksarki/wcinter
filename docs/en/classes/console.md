@@ -30,7 +30,7 @@ Write a string to the console in current cursor position and move it after.
 
 ---
 ```cpp
-std::wstring title();
+std::wstring title() const;
 ```
 
 Get current console title.
@@ -44,14 +44,14 @@ Set new console title.
 
 ---
 ```cpp
-ScreenBufferInfo screenBufferInfo();
+ScreenBufferInfo screenBufferInfo() const;
 ```
 
 Get description of console screen buffer.
 
 ---
 ```cpp
-CursorInfo cursorInfo();
+CursorInfo cursorInfo() const;
 ```
 
 Get description of console cursor.
@@ -72,7 +72,7 @@ Set new console cursor position.
 
 ---
 ```cpp
-Handle activeScreenBuffer();
+Handle activeScreenBuffer() const;
 ```
 
 Get handle of current active screen buffer.
@@ -93,18 +93,32 @@ Set attribute for text printed to console.
 
 ---
 ```cpp
-void writeMatrix(const CharMatrix& matrix);
-```
-
-Print a character matrix to console.
-
----
-```cpp
 void readInput(InputRecord* inputBuffer, Dword inputBufferLength, Dword* eventsRead);
 ```
 
 Read input events of console.
 
 ---
+```cpp
+Handle stdInput() const;
+```
 
-Class `Console` represents console.
+Get standard input handle of the console.
+
+---
+```cpp
+Handle stdOutput() const;
+```
+
+Get standard output handle of the console.
+
+---
+```cpp
+Handle stdError() const;
+```
+
+Get standard error handle of the console.
+
+---
+
+Class `Console` represents regular console.

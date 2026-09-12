@@ -2,66 +2,81 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <memory>
-#include "include/definitions.hpp"
+#include "include/apicast.hpp"
 #include "include/console.hpp"
+#include "include/definitions.hpp"
 #include "include/window.hpp"
 
 class wci::Window::Impl
 {
 private:
-    wci::Console con;
-    wci::Coord size;
-    wci::Handle oldScreenBuffer;
-    wci::CharMatrix mat;
+    struct {
+        wci::Console console;
+        wci::CharMatrix matrix;
+    } inner;
+    struct {  // setting to be restored on destruction
+        wci::Handle screenBuffer;
+    } old;
 
 public:
-    Impl() : con(), mat(con.screenBufferInfo().size)
+    Impl() : inner{ wci::Console(), wci::CharMatrix(inner.console.screenBufferInfo().size) }
     {
-        oldScreenBuffer = con.activeScreenBuffer();
+        old.screenBuffer = inner.console.activeScreenBuffer();
         HANDLE handle = CreateConsoleScreenBuffer(
-            static_cast<DWORD>(GenericRights::Read) | static_cast<DWORD>(GenericRights::Write),
-            static_cast<DWORD>(FileAccessRights::ShareRead) | static_cast<DWORD>(FileAccessRights::ShareWrite),
+            wci::api(GenericRights::Read | GenericRights::Write),
+            wci::api(FileAccessRights::ShareRead | FileAccessRights::ShareWrite),
             NULL,
             CONSOLE_TEXTMODE_BUFFER,
             NULL
         );
-        con.activeScreenBuffer(static_cast<wci::Handle>(handle));
+        inner.console.activeScreenBuffer(wci::wci(handle));
     }
-
     ~Impl()
     {
-        con.activeScreenBuffer(oldScreenBuffer);
+        inner.console.activeScreenBuffer(old.screenBuffer);
     }
 
     wci::Console& console() noexcept
     {
-        return con;
+        return inner.console;
     }
     const wci::Console& console() const noexcept
     {
-        return con;
+        return inner.console;
     }
 
     wci::CharMatrix& matrix() noexcept
     {
-        return mat;
+        return inner.matrix;
     }
     const wci::CharMatrix& matrix() const noexcept
     {
-        return mat;
+        return inner.matrix;
     }
 
     void render()
     {
-        con.writeMatrix(mat);
+        auto info = inner.console.screenBufferInfo();
+        SMALL_RECT rect{
+            0, 0,
+            wci::api(info.size.x),
+            wci::api(info.size.y)
+        };
+        WriteConsoleOutputW(
+            wci::api(inner.console.stdOutput()),
+            wci::api(inner.matrix.data()),
+            wci::api(inner.matrix.size()),
+            COORD{ 0, 0 },
+            &rect
+        );
     }
 
     void printChar(wchar_t character)
     {
-        auto info = con.screenBufferInfo();
+        auto info = inner.console.screenBufferInfo();
         auto position = info.cursorPosition;
         if (character != L'\n')
-            mat.put(position, character, info.attributes);
+            inner.matrix.put(position, character, info.attributes);
         if (position.x >= info.size.x || character == L'\n')  // go to next line
         {
             position.x = 0;
@@ -69,17 +84,17 @@ public:
         }
         else
             ++position.x;
-        con.cursorPosition(position);
+        inner.console.cursorPosition(position);
     }
     void printString(const wchar_t* string)
     {
-        auto info = con.screenBufferInfo();
+        auto info = inner.console.screenBufferInfo();
         auto position = info.cursorPosition;
         unsigned length = 0;
         while (string[length])
         {
             if (string[length] != L'\n')
-                mat.put(position, string[length], info.attributes);
+                inner.matrix.put(position, string[length], info.attributes);
             if (position.x >= info.size.x || string[length] == L'\n')  // go to next line
             {
                 position.x = 0;
@@ -89,25 +104,25 @@ public:
                 ++position.x;
             ++length;
         }
-        con.cursorPosition(position);
+        inner.console.cursorPosition(position);
     }
 
     void putChar(wci::Short x, wci::Short y, wchar_t character)
     {
-        mat.put(x, y, character, con.screenBufferInfo().attributes);
+        inner.matrix.put(x, y, character, inner.console.screenBufferInfo().attributes);
     }
     void putChar(wci::Short x, wci::Short y, wchar_t character, wci::Attribute attributes)
     {
-        mat.put(x, y, character, attributes);
+        inner.matrix.put(x, y, character, attributes);
     }
 
     void putString(wci::Short x, wci::Short y, const wchar_t* string)
     {
-        auto attributes = con.screenBufferInfo().attributes;
+        auto attributes = inner.console.screenBufferInfo().attributes;
         unsigned length = 0;
         while (string[length])
         {
-            mat.put(x + length, y, string[length], attributes);
+            inner.matrix.put(x + length, y, string[length], attributes);
             ++length;
         }
     }
@@ -116,74 +131,74 @@ public:
         unsigned length = 0;
         while (string[length])
         {
-            mat.put(x + length, y, string[length], attributes);
+            inner.matrix.put(x + length, y, string[length], attributes);
             ++length;
         }
     }
     void putString(wci::Short x, wci::Short y, const wci::CharInfo* charInfos, size_t length)
     {
         for (size_t i = 0; i < length; ++i)
-            mat.put(x + static_cast<wci::Short>(i), y, charInfos[i]);
+            inner.matrix.put(x + static_cast<wci::Short>(i), y, charInfos[i]);
     }
 };
 
-wci::Window::Window() : pImpl(std::make_unique<Impl>()) {}
+wci::Window::Window() : impl(std::make_unique<Impl>()) {}
 wci::Window::~Window() = default;
 
 wci::Console& wci::Window::console() noexcept
 {
-    return pImpl->console();
+    return impl->console();
 }
 const wci::Console& wci::Window::console() const noexcept
 {
-    return pImpl->console();
+    return impl->console();
 }
 
 wci::CharMatrix& wci::Window::matrix() noexcept
 {
-    return pImpl->matrix();
+    return impl->matrix();
 }
 const wci::CharMatrix& wci::Window::matrix() const noexcept
 {
-    return pImpl->matrix();
+    return impl->matrix();
 }
 
 void wci::Window::render()
 {
-    pImpl->render();
+    impl->render();
 }
 
 void wci::Window::printChar(wchar_t character)
 {
-    pImpl->printChar(character);
+    impl->printChar(character);
 }
 void wci::Window::printString(const wchar_t* string)
 {
-    pImpl->printString(string);
+    impl->printString(string);
 }
 
 void wci::Window::putChar(wci::Short x, wci::Short y, wchar_t character)
 {
-    pImpl->putChar(x, y, character);
+    impl->putChar(x, y, character);
 }
 void wci::Window::putChar(wci::Short x, wci::Short y, wchar_t character, wci::Attribute attributes)
 {
-    pImpl->putChar(x, y, character, attributes);
+    impl->putChar(x, y, character, attributes);
 }
 void wci::Window::putChar(const wci::Coord& position, wci::CharInfo charInfo)
 {
-    pImpl->putChar(position.x, position.y, charInfo.character, charInfo.attributes);
+    impl->putChar(position.x, position.y, charInfo.character, charInfo.attributes);
 }
 
 void wci::Window::putString(wci::Short x, wci::Short y, const wchar_t* string)
 {
-    pImpl->putString(x, y, string);
+    impl->putString(x, y, string);
 }
 void wci::Window::putString(wci::Short x, wci::Short y, const wchar_t* string, wci::Attribute attributes)
 {
-    pImpl->putString(x, y, string, attributes);
+    impl->putString(x, y, string, attributes);
 }
 void wci::Window::putString(const Coord& position, const CharInfo* charInfos, size_t length)
 {
-    pImpl->putString(position.x, position.y, charInfos, length);
+    impl->putString(position.x, position.y, charInfos, length);
 }
