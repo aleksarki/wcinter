@@ -46,3 +46,5 @@ This library is built upon Win32, utilises its API and prevents it from pollutin
 
 - [`CharMatrix`](./classes/char_matrix.md)
 - [`Console`](./classes/console.md)
+- [`EventLoop`](./classes/event_loop.md)
+- [`Window`](./classes/window.md)

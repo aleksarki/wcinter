@@ -12,7 +12,7 @@ int main()
     console.cursorInfo({ 1, false });
 
     bool proceed = true;
-    eventLoop.bindKeyEvent([&](wci::KeyEventRecord& keyEvent)
+    eventLoop.bindKeyEvent([&](const wci::KeyEventRecord& keyEvent)
     {
         static wci::Coord position{ 0, 0 };
         static const wci::CharInfo black{ ' ', wci::Attribute::No };

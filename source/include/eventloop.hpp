@@ -15,15 +15,17 @@ namespace wci {
         EventLoop(Console& console);
         ~EventLoop();
 
-        void bindKeyEvent(std::function<void(KeyEventRecord&)> callback);
-        void bindMouseEvent(std::function<void(MouseEventRecord&)> callback);
-        void bindWindowBufferSizeEvent(std::function<void(WindowBufferSizeRecord&)> callback);
+        void bindKeyEvent(std::function<void(const KeyEventRecord&)> callback);
+
+        void bindMouseEvent(std::function<void(const MouseEventRecord&)> callback);
+
+        void bindWindowBufferSizeEvent(std::function<void(const WindowBufferSizeRecord&)> callback);
 
         void execute(bool& proceed);
-    
+
     private:
         class Impl;
-        std::unique_ptr<Impl> pImpl;
+        std::unique_ptr<Impl> impl;
     };
 
 }
