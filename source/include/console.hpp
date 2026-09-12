@@ -54,7 +54,7 @@ namespace wci {
         Handle activeScreenBuffer() const;
         void activeScreenBuffer(Handle handle);
 
-        void textAttribute(Word attributes);
+        void textAttribute(Attribute attributes);
 
         void readInput(InputRecord* inputBuffer, Dword inputBufferLength, Dword* eventsRead);  // redo
 

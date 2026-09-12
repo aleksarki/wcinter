@@ -15,6 +15,8 @@ private:
     struct {  // settings to be restored on destruction
         DWORD mode;
         UINT codePage, outputCodePage;
+        wci::CursorInfo cursor;
+        wci::Attribute attributes;
     } old;
 
 public:
@@ -29,12 +31,16 @@ public:
         old.outputCodePage = GetConsoleOutputCP();
         SetConsoleCP(CP_UTF8);
         SetConsoleOutputCP(CP_UTF8);
+        old.cursor = getCursorInfo();
+        old.attributes = getScreenBufferInfo().attributes;
     }
     ~Impl()
     {
         SetConsoleMode(stdIn, old.mode);
         SetConsoleCP(old.codePage);
         SetConsoleOutputCP(old.outputCodePage);
+        setCursorInfo(old.cursor);
+        setTextAttribute(old.attributes);
     }
 
     void write(const char* string)
@@ -106,7 +112,7 @@ public:
         stdErr = handle;
     }
 
-    void setTextAttribute(wci::Word attributes)
+    void setTextAttribute(wci::Attribute attributes)
     {
         SetConsoleTextAttribute(stdOut, wci::api(attributes));
     }
@@ -192,7 +198,7 @@ void wci::Console::activeScreenBuffer(wci::Handle handle)
     impl->setActiveScreenBuffer(handle);
 }
 
-void wci::Console::textAttribute(Word attributes)
+void wci::Console::textAttribute(wci::Attribute attributes)
 {
     impl->setTextAttribute(attributes);
 }

@@ -8,7 +8,7 @@ Class `Console` contains following public methods:
 Console();
 ```
 
-Construct an instance of the class. Console will be set in new mode, enabling winows and mouse input; and code page will be set to UTF-8. Old console mode and code page will be restored upon deconstruction.
+Construct an instance of the class. Console will be set in new mode, enabling winows and mouse input; and code page will be set to UTF-8. Old console mode, code page, attributes and cursor info will be restored upon deconstruction.
 
 ---
 ```cpp
@@ -86,7 +86,7 @@ Set new active screen buffer.
 
 ---
 ```cpp
-void textAttribute(Word attributes);
+void textAttribute(Attribute attributes);
 ```
 
 Set attribute for text printed to console.

@@ -1,7 +1,7 @@
-#include "source/include/eventloop.hpp"
-#include "source/include/definitions.hpp"
-#include "source/include/console.hpp"
-#include "source/include/window.hpp"
+#include "../source/include/console.hpp"
+#include "../source/include/definitions.hpp"
+#include "../source/include/eventloop.hpp"
+#include "../source/include/window.hpp"
 
 int main()
 {
