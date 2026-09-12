@@ -54,13 +54,24 @@ public:
         return inner.matrix;
     }
 
+    const wci::Coord size() const
+    {
+        return inner.matrix.size();
+    }
+
+    void resize()
+    {
+        // fixme update inner matrix size, use Matrix::merge; on buffer resize recreate underlying matrix
+        inner.matrix = wci::CharMatrix(inner.console.screenBufferInfo().size);
+    }
+
     void render()
     {
-        auto info = inner.console.screenBufferInfo();
+        // resize();  // fixme
         SMALL_RECT rect{
             0, 0,
-            wci::api(info.size.x),
-            wci::api(info.size.y)
+            wci::api(size().x),
+            wci::api(size().y)
         };
         WriteConsoleOutputW(
             wci::api(inner.console.stdOutput()),
@@ -71,13 +82,13 @@ public:
         );
     }
 
-    void printChar(wchar_t character)
+    void printChar(Wchar character)  // review
     {
         auto info = inner.console.screenBufferInfo();
         auto position = info.cursorPosition;
         if (character != L'\n')
             inner.matrix.put(position, character, info.attributes);
-        if (position.x >= info.size.x || character == L'\n')  // go to next line
+        if (position.x >= info.size.x || character == L'\n')  // go to the next line
         {
             position.x = 0;
             ++position.y;
@@ -86,56 +97,43 @@ public:
             ++position.x;
         inner.console.cursorPosition(position);
     }
-    void printString(const wchar_t* string)
+
+    void printString(const Wchar* string)
     {
         auto info = inner.console.screenBufferInfo();
         auto position = info.cursorPosition;
-        unsigned length = 0;
-        while (string[length])
+        size_t i = 0;
+        while (string[i])
         {
-            if (string[length] != L'\n')
-                inner.matrix.put(position, string[length], info.attributes);
-            if (position.x >= info.size.x || string[length] == L'\n')  // go to next line
+            if (string[i] != L'\n')
+                inner.matrix.put(position, string[i], info.attributes);
+            if (position.x >= info.size.x || string[i] == L'\n')  // go to next line
             {
                 position.x = 0;
                 ++position.y;
             }
             else
                 ++position.x;
-            ++length;
+            ++i;
         }
         inner.console.cursorPosition(position);
     }
 
-    void putChar(wci::Short x, wci::Short y, wchar_t character)
-    {
-        inner.matrix.put(x, y, character, inner.console.screenBufferInfo().attributes);
-    }
-    void putChar(wci::Short x, wci::Short y, wchar_t character, wci::Attribute attributes)
+    void putChar(wci::Short x, wci::Short y, wci::Wchar character, wci::Attribute attributes)
     {
         inner.matrix.put(x, y, character, attributes);
     }
 
-    void putString(wci::Short x, wci::Short y, const wchar_t* string)
+    void putString(wci::Short x, wci::Short y, const wci::Wchar* string, wci::Attribute attributes)
     {
-        auto attributes = inner.console.screenBufferInfo().attributes;
-        unsigned length = 0;
-        while (string[length])
+        unsigned i = 0;
+        while (string[i])
         {
-            inner.matrix.put(x + length, y, string[length], attributes);
-            ++length;
+            inner.matrix.put(x + i, y, string[i], attributes);
+            ++i;
         }
     }
-    void putString(wci::Short x, wci::Short y, const wchar_t* string, wci::Attribute attributes)
-    {
-        unsigned length = 0;
-        while (string[length])
-        {
-            inner.matrix.put(x + length, y, string[length], attributes);
-            ++length;
-        }
-    }
-    void putString(wci::Short x, wci::Short y, const wci::CharInfo* charInfos, size_t length)
+    void putString(wci::Short x, wci::Short y, const wci::CharInfo charInfos[], size_t length)
     {
         for (size_t i = 0; i < length; ++i)
             inner.matrix.put(x + static_cast<wci::Short>(i), y, charInfos[i]);
@@ -163,25 +161,41 @@ const wci::CharMatrix& wci::Window::matrix() const noexcept
     return impl->matrix();
 }
 
+const wci::Coord wci::Window::size() const
+{
+    return impl->size();
+}
+
+void wci::Window::resize()
+{
+    impl->resize();
+}
+
 void wci::Window::render()
 {
     impl->render();
 }
 
-void wci::Window::printChar(wchar_t character)
+void wci::Window::printChar(wci::Wchar character)
 {
     impl->printChar(character);
 }
-void wci::Window::printString(const wchar_t* string)
+
+void wci::Window::printString(const wci::Wchar* string)
 {
     impl->printString(string);
 }
-
-void wci::Window::putChar(wci::Short x, wci::Short y, wchar_t character)
+void wci::Window::printString(const std::wstring& string)
 {
-    impl->putChar(x, y, character);
+    impl->printString(string.data());
 }
-void wci::Window::putChar(wci::Short x, wci::Short y, wchar_t character, wci::Attribute attributes)
+
+void wci::Window::putChar(wci::Short x, wci::Short y, wci::Wchar character)
+{
+    auto attributes = impl->console().screenBufferInfo().attributes;
+    impl->putChar(x, y, character, attributes);
+}
+void wci::Window::putChar(wci::Short x, wci::Short y, wci::Wchar character, wci::Attribute attributes)
 {
     impl->putChar(x, y, character, attributes);
 }
@@ -190,15 +204,16 @@ void wci::Window::putChar(const wci::Coord& position, wci::CharInfo charInfo)
     impl->putChar(position.x, position.y, charInfo.character, charInfo.attributes);
 }
 
-void wci::Window::putString(wci::Short x, wci::Short y, const wchar_t* string)
+void wci::Window::putString(wci::Short x, wci::Short y, const wci::Wchar* string)
 {
-    impl->putString(x, y, string);
+    auto attributes = impl->console().screenBufferInfo().attributes;
+    impl->putString(x, y, string, attributes);
 }
-void wci::Window::putString(wci::Short x, wci::Short y, const wchar_t* string, wci::Attribute attributes)
+void wci::Window::putString(wci::Short x, wci::Short y, const wci::Wchar* string, wci::Attribute attributes)
 {
     impl->putString(x, y, string, attributes);
 }
-void wci::Window::putString(const Coord& position, const CharInfo* charInfos, size_t length)
+void wci::Window::putString(const wci::Coord& position, const wci::CharInfo charInfos[], size_t length)
 {
     impl->putString(position.x, position.y, charInfos, length);
 }
