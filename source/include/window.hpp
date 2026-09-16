@@ -24,7 +24,7 @@ namespace wci {
         CharMatrix& matrix() noexcept;
         const CharMatrix& matrix() const noexcept;
 
-        const Coord size() const;
+        const Coord& size() const;
 
         void resize();
         
@@ -37,13 +37,13 @@ namespace wci {
 
         void putChar(Short x, Short y, Wchar character);
         void putChar(Short x, Short y, Wchar character, Attribute attributes);
-        void putChar(const Coord& position, CharInfo charInfo);
+        void putChar(const Coord& position, const CharInfo& charInfo);
         
         void putString(Short x, Short y, const Wchar* string);
         void putString(Short x, Short y, const Wchar* string, Attribute attributes);
         void putString(const Coord& position, const CharInfo charInfos[], size_t length);
 
-        void putMatrix(Short x, Short y, const CharMatrix& matrix);  // todo use Matrix::merge to get the overlap
+        void putMatrix(Short x, Short y, const CharMatrix& matrix);
         void putMatrix(const Coord& position, const CharMatrix& matrix);
     
     private:

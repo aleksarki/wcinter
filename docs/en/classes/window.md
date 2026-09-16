@@ -36,7 +36,7 @@ Get underlying `CharMatrix` instance.
 
 ---
 ```cpp
-const Coord size() const;
+const Coord& size() const;
 ```
 
 Get current dimensions of the window. If window has been resized, `Window::resize()` should be called beforehand.
@@ -74,7 +74,7 @@ Print a string at the current cursor position, then shift it. If window has been
 ```cpp
 void putChar(Short x, Short y, Wchar character);
 void putChar(Short x, Short y, Wchar character, Attribute attributes);
-void putChar(const Coord& position, CharInfo charInfo);
+void putChar(const Coord& position, const CharInfo& charInfo);
 ```
 
 Put a character at a given position. If window has been resized, `Window::resize()` should be called beforehand.
@@ -87,6 +87,14 @@ void putString(const Coord& position, const CharInfo charInfos[], size_t length)
 ```
 
 Put a character string at a given position. If window has been resized, `Window::resize()` should be called beforehand.
+
+---
+```cpp
+void putMatrix(Short x, Short y, const CharMatrix& matrix);
+void putMatrix(const Coord& position, const CharMatrix& matrix);
+```
+
+Put a matrix of characters at a given position. If window has been resized, `Window::resize()` should be called beforehand.
 
 ---
 

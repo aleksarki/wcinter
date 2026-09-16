@@ -2,20 +2,21 @@
 
 ## [WCI](../wci.md) > Class `CharMatrix`
 
-Class `CharMatrix` contains following public fields:
-
-- `static constexpr CharInfo` `nullChar` = `{ 0, Attribute::No }`
-
-Class `CharMatrix` contains following public methods:
+Class `CharMatrix` has following public fields:
 
 ```cpp
-CharMatrix(Short x, Short y) noexcept;
-CharMatrix(const Coord& size) noexcept;
+static constexpr CharInfo nullChar = { 0, Attribute::No };
 ```
 
-Construct an instance of the class. New matrix will be automatically filled with black null characters (`nullChar`).
+Class `CharMatrix` has following public methods:
 
----
+```cpp
+CharMatrix(Short x, Short y);
+CharMatrix(const Coord& size);
+```
+
+- Construct an instance of the class. New matrix will be automatically filled with black null characters (`nullChar`).
+
 ```cpp
 CharInfo& at(Short x, Short y);
 CharInfo& at(const Coord& position);
@@ -23,73 +24,101 @@ const CharInfo& at(Short x, Short y) const;
 const CharInfo& at(const Coord& position) const;
 ```
 
-Get `CharInfo` object by its position inside matrix. Trows `std::out_of_bounds` when out of bounds.
+- Get `CharInfo` object by its position inside matrix. Trows `std::out_of_bounds` when out of bounds.
 
----
 ```cpp
-CharInfo& operator[](const Coord& position);
-const CharInfo& operator[](const Coord& position) const;
+CharInfo& operator[](const Coord& position) noexcept;
+const CharInfo& operator[](const Coord& position) const noexcept;
 ```
 
-Get a `CharInfo` object by its position inside matrix. Trows `std::out_of_bounds` when out of bounds.
+- Get a `CharInfo` object by its position inside matrix. This does not check whether requested character is within bounds of matrix.
 
----
 ```cpp
-void put(Short x, Short y, wchar_t character, Attribute attributes);
+void put(Short x, Short y, Wchar character, Attribute attributes);
 void put(Short x, Short y, const CharInfo& charInfo);
-void put(const Coord& position, wchar_t character, Attribute attributes);
+void put(const Coord& position, Wchar character, Attribute attributes);
 void put(const Coord& position, const CharInfo& charInfo);
 ```
 
-Place a `CharInfo` object inside the matrix in certain position. Trows `std::out_of_bounds` when out of bounds.
+- Place a `CharInfo` object inside the matrix at certain position. Trows `std::out_of_bounds` when out of bounds.
 
----
 ```cpp
 CharInfo* data() noexcept;
 const CharInfo* data() const noexcept;
 ```
 
-Get access to the first element of the inner vector holding the data.
+- Get pointer to the first element of the inner vector holding the data.
 
----
 ```cpp
-const Coord size() const noexcept;
+bool empty() const noexcept;
 ```
 
-Get current dimensions of the matrix.
+- Check whether matrix holds no elements (at least one of its dimensions is 0).
 
----
 ```cpp
+const Coord& size() const noexcept;
+```
+
+- Get current dimensions of the matrix.
+
+```cpp
+void resize(Short x, Short y, Wchar character, Attribute attributes);
+void resize(const Coord& size, const CharInfo& charInfo);
 void resize(Short x, Short y);
 void resize(const Coord& size);
-void resize(Short x, Short y, wchar_t character, Attribute attributes);
-void resize(const Coord& size, const CharInfo& charInfo);
 ```
 
-Resize the matrix to new dimensions and fill it with a `CharInfo` object.
+- Resize the matrix to new dimensions and fill it with a `CharInfo` object. It fills with `nullChar` if no object is passed.
 
----
 ```cpp
-void fill(wchar_t character, Attribute attributes);
-void fill(const CharInfo& charInfo);
+void fill(Wchar character, Attribute attributes) noexcept;
+void fill(const CharInfo& charInfo) noexcept;
 ```
 
-Fill the matrix with a `CharInfo` object.
+- Fill the matrix with a `CharInfo` object.
 
----
 ```cpp
-void blank();
+void blank() noexcept;
 ```
 
-Fill the with black null characters (`nullChar`).
+- Fill the matrix with black null characters (`nullChar`).
 
----
 ```cpp
 bool within(Short x, Short y) const noexcept;
 bool within(const Coord& position) const noexcept;
 ```
 
-Check whether a given positions is within the matrix.
+- Check whether a given positions is within bounds of the matrix.
+
+```cpp
+void swap(CharMatrix& other) noexcept;
+friend void swap(CharMatrix& a, CharMatrix& b) noexcept;
+```
+
+- Swap two matrices.
+
+```cpp
+CharMatrix overlay(Short x, Short y, const CharMatrix& other) const;
+CharMatrix overlay(const Coord& offset, const CharMatrix& other) const;
+CharMatrix overlay(const CharMatrix& other) const;
+```
+
+- Produce new matrix which is a copy of current one with the other one stacked upon it at a certain offset. Elements of the other matrix that do not fit are ignored.
+
+```cpp
+void inlay(Short x, Short y, const CharMatrix& other);
+void inlay(const Coord& offset, const CharMatrix& other);
+void inlay(const CharMatrix& other);
+```
+
+- Place elements of other matrix on the current one at a certain offset. Elements of the other matrix that do not fit are ignored.
+
+```cpp
+CharMatrix slice(Short x1, Short y1, Short x2, Short y2) const;
+CharMatrix slice(const Coord& topLeft, const Coord& bottomRight) const;
+```
+
+- Produce new matrix that is a slice of the current one. The bottom-right point is excluded from resultant matrix.
 
 ---
 
