@@ -1,11 +1,9 @@
 #define UNICODE
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
-#include <windows.h>
+
 #include <forward_list>
-#include <functional>
-#include <memory>
-#include "include/console.hpp"
+#include <windows.h>
 #include "include/eventloop.hpp"
 
 class wci::EventLoop::Impl
@@ -15,7 +13,7 @@ private:
     std::forward_list<std::function<void(const wci::KeyEventRecord&)>> keyEventBindings;
     std::forward_list<std::function<void(const wci::MouseEventRecord&)>> mouseEventBindings;
     std::forward_list<std::function<void(const wci::WindowBufferSizeRecord&)>> windowBufferSizeEventBindings;
-    
+
 public:
     Impl(wci::Console& console) : console(console), keyEventBindings{}, mouseEventBindings{}, windowBufferSizeEventBindings{}
     {}
@@ -42,7 +40,7 @@ public:
 
         while (proceed)
         {
-            console.readInput(inputBuffer, (wci::Dword)128, &eventsRead);
+            console.readInput(inputBuffer, (wci::Dword)128, &eventsRead);  // todo implement literals
             for (wci::Dword i = 0; i < eventsRead; ++i)
             {
                 switch (inputBuffer[i].eventType)
@@ -67,20 +65,20 @@ public:
     }
 };
 
-wci::EventLoop::EventLoop(wci::Console& console) : impl(std::make_unique<Impl>(console)) {}
+wci::EventLoop::EventLoop(wci::Console& console) : impl(std::make_unique<wci::EventLoop::Impl>(console)) {}
 wci::EventLoop::~EventLoop() = default;
 
-void wci::EventLoop::bindKeyEvent(std::function<void(const KeyEventRecord&)> callback)
+void wci::EventLoop::bindKeyEvent(std::function<void(const wci::KeyEventRecord&)> callback)
 {
     impl->bindKeyEvent(std::move(callback));
 }
 
-void wci::EventLoop::bindMouseEvent(std::function<void(const MouseEventRecord&)> callback)
+void wci::EventLoop::bindMouseEvent(std::function<void(const wci::MouseEventRecord&)> callback)
 {
     impl->bindMouseEvent(std::move(callback));
 }
 
-void wci::EventLoop::bindWindowBufferSizeEvent(std::function<void(const WindowBufferSizeRecord&)> callback)
+void wci::EventLoop::bindWindowBufferSizeEvent(std::function<void(const wci::WindowBufferSizeRecord&)> callback)
 {
     impl->bindWindowBufferSizeEvent(std::move(callback));
 }
