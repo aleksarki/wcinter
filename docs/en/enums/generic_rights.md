@@ -11,6 +11,6 @@ Enumeration `GenericRights` is based off type [`Dword`](../types/dword.md) and p
 
 Following operators are overloaded for this enumeration:
 
-- `constexpr GenericRights operator|(GenericRights a, GenericRights b);`
-- `constexpr GenericRights operator&(GenericRights a, GenericRights b);`
-- `constexpr GenericRights operator^(GenericRights a, GenericRights b);`
+- `constexpr GenericRights operator|(GenericRights a, GenericRights b) noexcept;`
+- `constexpr GenericRights operator&(GenericRights a, GenericRights b) noexcept;`
+- `constexpr GenericRights operator^(GenericRights a, GenericRights b) noexcept;`

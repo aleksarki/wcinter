@@ -62,6 +62,6 @@ Enumeration `Attribute` is based off type [`Word`](../types/word.md) and provide
 
 Following operators are overloaded for this enumeration:
 
-- `constexpr Attribute operator|(Attribute a, Attribute b);`
-- `constexpr Attribute operator&(Attribute a, Attribute b);`
-- `constexpr Attribute operator^(Attribute a, Attribute b);`
+- `constexpr Attribute operator|(Attribute a, Attribute b) noexcept;`
+- `constexpr Attribute operator&(Attribute a, Attribute b) noexcept;`
+- `constexpr Attribute operator^(Attribute a, Attribute b) noexcept;`

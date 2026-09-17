@@ -17,6 +17,15 @@ namespace wci
         Short y;
     };
 
+    constexpr bool operator==(const Coord& a, const Coord& b) noexcept
+    {
+        return a.x == b.x && a.y == b.y;
+    }
+    constexpr bool operator!=(const Coord& a, const Coord& b) noexcept
+    {
+        return a.x != b.x || a.y != b.y;
+    }
+
     /*
      * Structure `SmallRect` defines coordinates of upper-left and lower-right corners of a rectangle.
      */
@@ -28,6 +37,25 @@ namespace wci
         Short bottom;  // Y of bottom right corner.
     };
 
+    constexpr bool operator==(const SmallRect& a, const SmallRect& b) noexcept
+    {
+        return (
+            a.left == b.left &&
+            a.top == b.top &&
+            a.right == b.right &&
+            a.bottom == b.bottom
+        );
+    }
+    constexpr bool operator!=(const SmallRect& a, const SmallRect& b) noexcept
+    {
+        return (
+            a.left != b.left ||
+            a.top != b.top ||
+            a.right != b.right ||
+            a.bottom != b.bottom
+        );
+    }
+
     /*
      * Structure `CharInfo` specifies a Unicode character and its attributes.
      * This structure is used by the console functions for reading from and writing to the console screen buffer.
@@ -37,6 +65,15 @@ namespace wci
         Wchar character;
         Attribute attributes;  // Word
     };
+
+    constexpr bool operator==(const CharInfo& a, const CharInfo& b) noexcept
+    {
+        return a.character == b.character && a.attributes == b.attributes;
+    }
+    constexpr bool operator!=(const CharInfo& a, const CharInfo& b) noexcept
+    {
+        return a.character != b.character || a.attributes != b.attributes;
+    }
 
     #pragma region Console info structures
 
@@ -49,6 +86,15 @@ namespace wci
         bool visible;
     };
 
+    constexpr bool operator==(const CursorInfo& a, const CursorInfo& b) noexcept
+    {
+        return a.size == b.size && a.visible == b.visible;
+    }
+    constexpr bool operator!=(const CursorInfo& a, const CursorInfo& b) noexcept
+    {
+        return a.size != b.size || a.visible != b.visible;
+    }
+
     /*
      * Structure `ScreenBufferInfo` contains information about the console screen buffer.
      */
@@ -60,6 +106,27 @@ namespace wci
         SmallRect window;
         Coord maxWindowSize;
     };
+
+    constexpr bool operator==(const ScreenBufferInfo& a, const ScreenBufferInfo& b) noexcept
+    {
+        return (
+            a.size == b.size &&
+            a.cursorPosition == b.cursorPosition &&
+            a.attributes == b.attributes &&
+            a.window == b.window &&
+            a.maxWindowSize == b.maxWindowSize
+        );
+    }
+    constexpr bool operator!=(const ScreenBufferInfo& a, const ScreenBufferInfo& b) noexcept
+    {
+        return (
+            a.size != b.size ||
+            a.cursorPosition != b.cursorPosition ||
+            a.attributes != b.attributes ||
+            a.window != b.window ||
+            a.maxWindowSize != b.maxWindowSize
+        );
+    }
 
     #pragma endregion
 

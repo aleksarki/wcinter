@@ -10,6 +10,11 @@ Structure `ScreenBufferInfo` contains following fields:
 - [`SmallRect`](./small_rect.md) `window`
 - [`Coord`](./coord.md) `maxWindowSize`
 
+Following operators are overloaded for this structure:
+
+- `constexpr bool operator==(const ScreenBufferInfo& a, const ScreenBufferInfo& b) noexcept;`
+- `constexpr bool operator!=(const ScreenBufferInfo& a, const ScreenBufferInfo& b) noexcept;`
+
 ---
 
 Structure `ScreenBufferInfo` contains information about the console screen buffer.

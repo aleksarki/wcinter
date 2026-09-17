@@ -24,6 +24,6 @@ Enumeration `ControlKeyState` is based off type [`Dword`](../types/dword.md) and
 
 Following operators are overloaded for this enumeration:
 
-- `constexpr ControlKeyState operator|(ControlKeyState a, ControlKeyState b);`
-- `constexpr ControlKeyState operator&(ControlKeyState a, ControlKeyState b);`
-- `constexpr ControlKeyState operator^(ControlKeyState a, ControlKeyState b);`
+- `constexpr ControlKeyState operator|(ControlKeyState a, ControlKeyState b) noexcept;`
+- `constexpr ControlKeyState operator&(ControlKeyState a, ControlKeyState b) noexcept;`
+- `constexpr ControlKeyState operator^(ControlKeyState a, ControlKeyState b) noexcept;`

@@ -12,6 +12,6 @@ Enumeration `ButtonState` is based off type [`Dword`](../types/dword.md) and pro
 
 Following operators are overloaded for this enumeration:
 
-- `constexpr ButtonState operator|(ButtonState a, ButtonState b);`
-- `constexpr ButtonState operator&(ButtonState a, ButtonState b);`
-- `constexpr ButtonState operator^(ButtonState a, ButtonState b);`
+- `constexpr ButtonState operator|(ButtonState a, ButtonState b) noexcept;`
+- `constexpr ButtonState operator&(ButtonState a, ButtonState b) noexcept;`
+- `constexpr ButtonState operator^(ButtonState a, ButtonState b) noexcept;`

@@ -34,7 +34,7 @@ namespace wci
         EnableVirtualTerminalInput = 0x0200
     };
 
-    constexpr InputMode operator|(InputMode a, InputMode b)
+    constexpr InputMode operator|(InputMode a, InputMode b) noexcept
     {
         return static_cast<InputMode>
         (
@@ -43,7 +43,7 @@ namespace wci
         );
     }
 
-    constexpr InputMode operator&(InputMode a, InputMode b)
+    constexpr InputMode operator&(InputMode a, InputMode b) noexcept
     {
         return static_cast<InputMode>
         (
@@ -52,7 +52,7 @@ namespace wci
         );
     }
 
-    constexpr InputMode operator^(InputMode a, InputMode b)
+    constexpr InputMode operator^(InputMode a, InputMode b) noexcept
     {
         return static_cast<InputMode>
         (
@@ -143,7 +143,7 @@ namespace wci
         BgColorWhiteBright =   BgColorWhite   | BackgroundIntensity   // Background color is bright white.
     };
 
-    constexpr Attribute operator|(Attribute a, Attribute b)
+    constexpr Attribute operator|(Attribute a, Attribute b) noexcept
     {
         return static_cast<Attribute>
         (
@@ -152,7 +152,7 @@ namespace wci
         );
     }
 
-    constexpr Attribute operator&(Attribute a, Attribute b)
+    constexpr Attribute operator&(Attribute a, Attribute b) noexcept
     {
         return static_cast<Attribute>
         (
@@ -161,7 +161,7 @@ namespace wci
         );
     }
 
-    constexpr Attribute operator^(Attribute a, Attribute b)
+    constexpr Attribute operator^(Attribute a, Attribute b) noexcept
     {
         return static_cast<Attribute>
         (
@@ -182,7 +182,7 @@ namespace wci
         All =     0x10000000L
     };
 
-    constexpr GenericRights operator|(GenericRights a, GenericRights b)
+    constexpr GenericRights operator|(GenericRights a, GenericRights b) noexcept
     {
         return static_cast<GenericRights>(
             static_cast<std::underlying_type_t<GenericRights>>(a) |
@@ -190,7 +190,7 @@ namespace wci
         );
     }
 
-    constexpr GenericRights operator&(GenericRights a, GenericRights b)
+    constexpr GenericRights operator&(GenericRights a, GenericRights b) noexcept
     {
         return static_cast<GenericRights>(
             static_cast<std::underlying_type_t<GenericRights>>(a) &
@@ -198,7 +198,7 @@ namespace wci
         );
     }
 
-    constexpr GenericRights operator^(GenericRights a, GenericRights b)
+    constexpr GenericRights operator^(GenericRights a, GenericRights b) noexcept
     {
         return static_cast<GenericRights>(
             static_cast<std::underlying_type_t<GenericRights>>(a) ^
@@ -217,7 +217,7 @@ namespace wci
         ShareDelete = 0x00000004
     };
 
-    constexpr FileAccessRights operator|(FileAccessRights a, FileAccessRights b)
+    constexpr FileAccessRights operator|(FileAccessRights a, FileAccessRights b) noexcept
     {
         return static_cast<FileAccessRights>(
             static_cast<std::underlying_type_t<FileAccessRights>>(a) |
@@ -225,7 +225,7 @@ namespace wci
         );
     }
 
-    constexpr FileAccessRights operator&(FileAccessRights a, FileAccessRights b)
+    constexpr FileAccessRights operator&(FileAccessRights a, FileAccessRights b) noexcept
     {
         return static_cast<FileAccessRights>(
             static_cast<std::underlying_type_t<FileAccessRights>>(a) &
@@ -233,7 +233,7 @@ namespace wci
         );
     }
 
-    constexpr FileAccessRights operator^(FileAccessRights a, FileAccessRights b)
+    constexpr FileAccessRights operator^(FileAccessRights a, FileAccessRights b) noexcept
     {
         return static_cast<FileAccessRights>(
             static_cast<std::underlying_type_t<FileAccessRights>>(a) ^
@@ -266,7 +266,7 @@ namespace wci
         NlsImeDisable =    0x20000000   // DBCS for JPN: IME enable/disable.
     };
 
-    constexpr ControlKeyState operator|(ControlKeyState a, ControlKeyState b)
+    constexpr ControlKeyState operator|(ControlKeyState a, ControlKeyState b) noexcept
     {
         return static_cast<ControlKeyState>(
             static_cast<std::underlying_type_t<ControlKeyState>>(a) |
@@ -274,7 +274,7 @@ namespace wci
         );
     }
 
-    constexpr ControlKeyState operator&(ControlKeyState a, ControlKeyState b)
+    constexpr ControlKeyState operator&(ControlKeyState a, ControlKeyState b) noexcept
     {
         return static_cast<ControlKeyState>(
             static_cast<std::underlying_type_t<ControlKeyState>>(a) &
@@ -282,7 +282,7 @@ namespace wci
         );
     }
 
-    constexpr ControlKeyState operator^(ControlKeyState a, ControlKeyState b)
+    constexpr ControlKeyState operator^(ControlKeyState a, ControlKeyState b) noexcept
     {
         return static_cast<ControlKeyState>(
             static_cast<std::underlying_type_t<ControlKeyState>>(a) ^
@@ -303,7 +303,7 @@ namespace wci
         FromLeft4thButtonPressed = 0x0010
     };
 
-    constexpr ButtonState operator|(ButtonState a, ButtonState b)
+    constexpr ButtonState operator|(ButtonState a, ButtonState b) noexcept
     {
         return static_cast<ButtonState>(
             static_cast<std::underlying_type_t<ButtonState>>(a) |
@@ -311,7 +311,7 @@ namespace wci
         );
     }
 
-    constexpr ButtonState operator&(ButtonState a, ButtonState b)
+    constexpr ButtonState operator&(ButtonState a, ButtonState b) noexcept
     {
         return static_cast<ButtonState>(
             static_cast<std::underlying_type_t<ButtonState>>(a) &
@@ -319,7 +319,7 @@ namespace wci
         );
     }
 
-    constexpr ButtonState operator^(ButtonState a, ButtonState b)
+    constexpr ButtonState operator^(ButtonState a, ButtonState b) noexcept
     {
         return static_cast<ButtonState>(
             static_cast<std::underlying_type_t<ButtonState>>(a) ^
@@ -339,7 +339,7 @@ namespace wci
         MouseHWheeled = 0x0008
     };
     
-    constexpr EventFlag operator|(EventFlag a, EventFlag b)
+    constexpr EventFlag operator|(EventFlag a, EventFlag b) noexcept
     {
         return static_cast<EventFlag>(
             static_cast<std::underlying_type_t<EventFlag>>(a) |
@@ -347,7 +347,7 @@ namespace wci
         );
     }
 
-    constexpr EventFlag operator&(EventFlag a, EventFlag b)
+    constexpr EventFlag operator&(EventFlag a, EventFlag b) noexcept
     {
         return static_cast<EventFlag>(
             static_cast<std::underlying_type_t<EventFlag>>(a) &
@@ -355,7 +355,7 @@ namespace wci
         );
     }
 
-    constexpr EventFlag operator^(EventFlag a, EventFlag b)
+    constexpr EventFlag operator^(EventFlag a, EventFlag b) noexcept
     {
         return static_cast<EventFlag>(
             static_cast<std::underlying_type_t<EventFlag>>(a) ^

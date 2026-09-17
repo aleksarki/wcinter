@@ -7,6 +7,11 @@ Structure `SmallRect` contains following fields:
 - [`Wchar`](../types/wchar.md) `character`
 - [`Attribute`](../enums/attribute.md) `attributes`
 
+Following operators are overloaded for this structure:
+
+- `constexpr bool operator==(const CharInfo& a, const CharInfo& b) noexcept;`
+- `constexpr bool operator!=(const CharInfo& a, const CharInfo& b) noexcept;`
+
 ---
 
 Structure `CharInfo` specifies a Unicode character and its attributes.

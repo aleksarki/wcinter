@@ -64,7 +64,7 @@ public:
     void resize()  // idea optimize this
     {
         auto newSize = console().screenBufferInfo().size;
-        if (newSize.x == size().x && newSize.y == size().y)  // todo implement operator==
+        if (newSize == size())
             return;
         wci::CharMatrix newMatrix(newSize);
         newMatrix.inlay(matrix());

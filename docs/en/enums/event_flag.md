@@ -11,6 +11,6 @@ Enumeration `EventFlag` is based off type [`Dword`](../types/dword.md) and provi
 
 Following operators are overloaded for this enumeration:
 
-- `constexpr EventFlag operator|(EventFlag a, EventFlag b);`
-- `constexpr EventFlag operator&(EventFlag a, EventFlag b);`
-- `constexpr EventFlag operator^(EventFlag a, EventFlag b);`
+- `constexpr EventFlag operator|(EventFlag a, EventFlag b) noexcept;`
+- `constexpr EventFlag operator&(EventFlag a, EventFlag b) noexcept;`
+- `constexpr EventFlag operator^(EventFlag a, EventFlag b) noexcept;`

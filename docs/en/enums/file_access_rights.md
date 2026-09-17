@@ -10,6 +10,6 @@ Enumeration `FileAccessRights` is based off type [`Dword`](../types/dword.md) an
 
 Following operators are overloaded for this enumeration:
 
-- `constexpr FileAccessRights operator|(FileAccessRights a, FileAccessRights b);`
-- `constexpr FileAccessRights operator&(FileAccessRights a, FileAccessRights b);`
-- `constexpr FileAccessRights operator^(FileAccessRights a, FileAccessRights b);`
+- `constexpr FileAccessRights operator|(FileAccessRights a, FileAccessRights b) noexcept;`
+- `constexpr FileAccessRights operator&(FileAccessRights a, FileAccessRights b) noexcept;`
+- `constexpr FileAccessRights operator^(FileAccessRights a, FileAccessRights b) noexcept;`

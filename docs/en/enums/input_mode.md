@@ -17,6 +17,6 @@ Enumeration `InputMode` provides following options:
 
 Following operators are overloaded for this enumeration:
 
-- `constexpr InputMode operator|(InputMode a, InputMode b);`
-- `constexpr InputMode operator&(InputMode a, InputMode b);`
-- `constexpr InputMode operator^(InputMode a, InputMode b);`
+- `constexpr InputMode operator|(InputMode a, InputMode b) noexcept;`
+- `constexpr InputMode operator&(InputMode a, InputMode b) noexcept;`
+- `constexpr InputMode operator^(InputMode a, InputMode b) noexcept;`
