@@ -19,19 +19,28 @@ int main()
         static const wci::CharInfo character{ '#', wci::Attribute::FgColorCyanBright };
 
         window.putChar(position, black);
-        if (keyEvent.keyDown)
+        if (!keyEvent.keyDown)
+            return;
+
+        switch (keyEvent.virtualKeyCode)
         {
-            if (keyEvent.virtualScanCode == wci::VirtualKey::Right)
-                ++position.x;
-            else if (keyEvent.virtualScanCode == wci::VirtualKey::Left)
-                --position.x;
-            else if (keyEvent.virtualScanCode == wci::VirtualKey::Down)
-                ++position.y;
-            else if (keyEvent.virtualScanCode == wci::VirtualKey::Up)
-                --position.y;
-            else if (keyEvent.virtualScanCode == wci::VirtualKey::Escape)
-                proceed = false;
+        case wci::VirtualKey::Right:
+            ++position.x;
+            break;
+        case wci::VirtualKey::Left:
+            --position.x;
+            break;
+        case wci::VirtualKey::Down:
+            ++position.y;
+            break;
+        case wci::VirtualKey::Up:
+            --position.y;
+            break;
+        case wci::VirtualKey::Escape:
+            proceed = false;
+            return;
         }
+
         window.putChar(position, character);
         window.render();
     });

@@ -29,7 +29,7 @@ int main()
         if (!event.keyDown)
             return;
 
-        switch (event.virtualScanCode)
+        switch (event.virtualKeyCode)
         {
         case wci::VirtualKey::Escape:
             proceed = false;

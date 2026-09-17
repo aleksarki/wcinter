@@ -93,7 +93,7 @@ Set attribute for text printed to console.
 
 ---
 ```cpp
-void readInput(InputRecord* inputBuffer, Dword inputBufferLength, Dword* eventsRead);
+void readInput(InputRecord inputBuffer[], Dword inputBufferLength, Dword* eventsRead);
 ```
 
 Read input events of console.

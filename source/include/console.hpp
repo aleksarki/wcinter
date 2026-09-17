@@ -56,7 +56,7 @@ namespace wci {
 
         void textAttribute(Attribute attributes);
 
-        void readInput(InputRecord* inputBuffer, Dword inputBufferLength, Dword* eventsRead);  // redo
+        void readInput(InputRecord inputBuffer[], Dword inputBufferLength, Dword* eventsRead);
 
         Handle stdInput() const;
         Handle stdOutput() const;

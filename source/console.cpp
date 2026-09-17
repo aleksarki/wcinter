@@ -19,6 +19,7 @@ private:
         wci::CursorInfo cursor;
         wci::Attribute attributes;
     } old;
+    std::vector<INPUT_RECORD> rawInputBuffer;  // for input events reading
 
 public:
     Impl()
@@ -118,14 +119,22 @@ public:
         SetConsoleTextAttribute(stdOut, wci::api(attributes));
     }
 
-    void readInput(wci::InputRecord* inputBuffer, wci::Dword inputBufferLength, wci::Dword* eventsRead)
+    void readInput(wci::InputRecord inputBuffer[], wci::Dword inputBufferLength, wci::Dword* eventsRead)
     {
-        ReadConsoleInputW(
+        rawInputBuffer.resize(inputBufferLength);
+        auto success = ReadConsoleInputW(
             stdIn,
-            reinterpret_cast<PINPUT_RECORD>(inputBuffer),  /* fixme: this is definitely not good */
+            rawInputBuffer.data(),
             wci::api(inputBufferLength),
             wci::api(eventsRead)
         );
+        if (!success)
+        {
+            *eventsRead = 0;
+            return;
+        }
+        for (wci::Dword i = 0; i < *eventsRead; ++i)
+            inputBuffer[i] = wci::wci(rawInputBuffer[i]);
     }
 
     Handle getStdInput() const
@@ -204,7 +213,7 @@ void wci::Console::textAttribute(wci::Attribute attributes)
     impl->setTextAttribute(attributes);
 }
 
-void wci::Console::readInput(wci::InputRecord* inputBuffer, wci::Dword inputBufferLength, wci::Dword* eventsRead)
+void wci::Console::readInput(wci::InputRecord inputBuffer[], wci::Dword inputBufferLength, wci::Dword* eventsRead)
 {
     impl->readInput(inputBuffer, inputBufferLength, eventsRead);
 }
