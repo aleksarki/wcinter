@@ -11,11 +11,14 @@ static constexpr CharInfo nullChar = { 0, Attribute::No };
 Class `CharMatrix` has following public methods:
 
 ```cpp
-CharMatrix(Short x, Short y);
-CharMatrix(const Coord& size);
+CharMatrix()
+CharMatrix(Short x, Short y)
+CharMatrix(Short x, Short y, Wchar character, Attribute attributes)
+CharMatrix(const Coord& size)
+CharMatrix(const Coord& size, const CharInfo& character)
 ```
 
-- Construct an instance of the class. New matrix will be automatically filled with black null characters (`nullChar`).
+- Construct an instance of the class. Character to fill the matrix with defaults to black null characters (`nullChar`). If size is not provided, it will be assumed zero.
 
 ```cpp
 CharInfo& at(Short x, Short y);
@@ -50,13 +53,13 @@ const CharInfo* data() const noexcept;
 - Get pointer to the first element of the inner vector holding the data.
 
 ```cpp
-bool empty() const noexcept;
+constexpr bool empty() const noexcept;
 ```
 
 - Check whether matrix holds no elements (at least one of its dimensions is 0).
 
 ```cpp
-const Coord& size() const noexcept;
+Coord size() const noexcept;
 ```
 
 - Get current dimensions of the matrix.
@@ -84,8 +87,8 @@ void blank() noexcept;
 - Fill the matrix with black null characters (`nullChar`).
 
 ```cpp
-bool within(Short x, Short y) const noexcept;
-bool within(const Coord& position) const noexcept;
+constexpr bool within(Short x, Short y) const noexcept;
+constexpr bool within(const Coord& position) const noexcept;
 ```
 
 - Check whether a given positions is within bounds of the matrix.
@@ -98,17 +101,17 @@ friend void swap(CharMatrix& a, CharMatrix& b) noexcept;
 - Swap two matrices.
 
 ```cpp
-CharMatrix overlay(Short x, Short y, const CharMatrix& other) const;
-CharMatrix overlay(const Coord& offset, const CharMatrix& other) const;
-CharMatrix overlay(const CharMatrix& other) const;
+CharMatrix overlay(Short x, Short y, const CharMatrix& charMatrix) const;
+CharMatrix overlay(const Coord& offset, const CharMatrix& charMatrix) const;
+CharMatrix overlay(const CharMatrix& charMatrix) const;
 ```
 
 - Produce new matrix which is a copy of current one with the other one stacked upon it at a certain offset. Elements of the other matrix that do not fit are ignored.
 
 ```cpp
-void inlay(Short x, Short y, const CharMatrix& other);
-void inlay(const Coord& offset, const CharMatrix& other);
-void inlay(const CharMatrix& other);
+void inlay(Short x, Short y, const CharMatrix& charMatrix);
+void inlay(const Coord& offset, const CharMatrix& charMatrix);
+void inlay(const CharMatrix& charMatrix);
 ```
 
 - Place elements of other matrix on the current one at a certain offset. Elements of the other matrix that do not fit are ignored.
