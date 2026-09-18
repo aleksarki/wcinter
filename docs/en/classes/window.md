@@ -36,7 +36,7 @@ Get underlying `CharMatrix` instance.
 
 ---
 ```cpp
-const Coord& size() const;
+Coord size() const;
 ```
 
 Get current dimensions of the window. If window has been resized, `Window::resize()` should be called beforehand.

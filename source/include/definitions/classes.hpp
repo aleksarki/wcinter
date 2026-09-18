@@ -54,13 +54,13 @@ namespace wci
         }
         CharString(const std::wstring& string)
         {
-            resize(string.length());
+            resize(static_cast<Short>(string.length()));
             for (Short i = 0; i < string.length(); ++i)
                 inner.string[i] = CharInfo{ string[i], stdAttr };
         }
         CharString(const std::wstring& string, Attribute attributes)
         {
-            resize(string.length());
+            resize(static_cast<Short>(string.length()));
             for (Short i = 0; i < string.length(); ++i)
                 inner.string[i] = CharInfo{ string[i], attributes };
         }
@@ -327,6 +327,8 @@ namespace wci
             return inner.size != other.inner.size || inner.string != other.inner.string;
         }
 
+        CharMatrix toMatrix() const;
+
         CharInfo* begin() noexcept
         {
             return data();
@@ -357,7 +359,6 @@ namespace wci
 
         // idea write iterators for characters and attributes separately
         // idea write methods for setting text/attributes
-        // idea write method to convert to matrix
     };
 
     /*

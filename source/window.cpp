@@ -56,7 +56,7 @@ public:
         return inner.matrix;
     }
 
-    const wci::Coord& size() const
+    wci::Coord size() const
     {
         return matrix().size();
     }
@@ -167,7 +167,7 @@ const wci::CharMatrix& wci::Window::matrix() const noexcept
     return impl->matrix();
 }
 
-const wci::Coord& wci::Window::size() const
+wci::Coord wci::Window::size() const
 {
     return impl->size();
 }

@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <iostream>
 #include <random>
 #include <string>
@@ -110,9 +111,9 @@ int main()
         wci::Attribute::BgColorBlue | wci::Attribute::FgColorYellow |
         wci::Attribute::CommonLvbGridHorizontal | wci::Attribute::CommonLvbUnderscore
     );
-    print("stdin is", std::to_wstring((int)console.stdInput()));
-    print("stdout is", std::to_wstring((int)console.stdOutput()));
-    print("stderr is", std::to_wstring((int)console.stdError()));
+    print("stdin is", std::to_wstring(reinterpret_cast<std::uintptr_t>(console.stdInput())));
+    print("stdout is", std::to_wstring(reinterpret_cast<std::uintptr_t>(console.stdOutput())));
+    print("stderr is", std::to_wstring(reinterpret_cast<std::uintptr_t>(console.stdError())));
 
     std::getchar();
     return 0;
