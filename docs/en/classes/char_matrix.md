@@ -30,8 +30,8 @@ const CharInfo& at(const Coord& position) const;
 - Get `CharInfo` object by its position inside matrix. Trows `std::out_of_bounds` when out of bounds.
 
 ```cpp
-CharInfo& operator[](const Coord& position) noexcept;
-const CharInfo& operator[](const Coord& position) const noexcept;
+constexpr CharInfo& operator[](const Coord& position) noexcept;
+constexpr const CharInfo& operator[](const Coord& position) const noexcept;
 ```
 
 - Get a `CharInfo` object by its position inside matrix. This does not check whether requested character is within bounds of matrix.
@@ -46,8 +46,8 @@ void put(const Coord& position, const CharInfo& charInfo);
 - Place a `CharInfo` object inside the matrix at certain position. Trows `std::out_of_bounds` when out of bounds.
 
 ```cpp
-CharInfo* data() noexcept;
-const CharInfo* data() const noexcept;
+constexpr CharInfo* data() noexcept;
+constexpr const CharInfo* data() const noexcept;
 ```
 
 - Get pointer to the first element of the inner vector holding the data.
@@ -59,7 +59,7 @@ constexpr bool empty() const noexcept;
 - Check whether matrix holds no elements (at least one of its dimensions is 0).
 
 ```cpp
-Coord size() const noexcept;
+constexpr Coord size() const noexcept;
 ```
 
 - Get current dimensions of the matrix.
