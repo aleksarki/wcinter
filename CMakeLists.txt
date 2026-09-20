@@ -22,8 +22,15 @@ add_executable(console
 
 add_executable(events
     examples/events.cpp
-    source/eventloop.cpp
     source/console.cpp
+    source/eventloop.cpp
+    source/window.cpp
+)
+
+add_executable(frames
+    examples/frames.cpp
+    source/console.cpp
+    source/frameloop.cpp
     source/window.cpp
 )
 

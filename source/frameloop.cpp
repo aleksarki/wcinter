@@ -20,12 +20,14 @@ private:
     std::forward_list<std::function<void(const wci::KeyEventRecord&)>> keyEventBindings;
     std::forward_list<std::function<void(const wci::MouseEventRecord&)>> mouseEventBindings;
     std::forward_list<std::function<void(const wci::WindowBufferSizeRecord&)>> resizeEventBindings;
-    std::chrono::milliseconds frameTime;
     bool proceed;  // idea make atomic
+    struct {
+        std::chrono::milliseconds frameTime;
+    } inner;
 
 public:
     Impl(wci::Console& console) :
-        console(console), frameTime(16ms), onTickBindings(), onEventBindings(),
+        console(console), inner{ 16ms }, onTickBindings(), onEventBindings(),
         keyEventBindings(), mouseEventBindings(), resizeEventBindings()
     {}
 
@@ -33,22 +35,22 @@ public:
     {
         if (ft <= 0ms)
             throw std::invalid_argument("FrameLoop::frameTime() got invalid frame time");
-        frameTime = ft;
+        inner.frameTime = ft;
     }
     std::chrono::milliseconds frameTime() const noexcept
     {
-        return frameTime;
+        return inner.frameTime;
     }
 
     void framesPerSecond(unsigned fps)
     {
         if (fps == 0)
             throw std::invalid_argument("FrameLoop::framesPerSecond() got invalid amount");
-        frameTime = std::max(1000ms / fps, 1ms);
+        inner.frameTime = std::max(1000ms / fps, 1ms);
     }
     unsigned framesPerSecond() const noexcept
     {
-        return 1000ms / frameTime;
+        return static_cast<unsigned>(1000ms / inner.frameTime);
     }
 
     void bindOnTick(std::function<void()> callback)
@@ -124,7 +126,7 @@ public:
             for (const auto& callback : onTickBindings)
                 callback();
 
-            nextTime += frameTime;
+            nextTime += inner.frameTime;
             std::this_thread::sleep_until(nextTime);
         }
     }

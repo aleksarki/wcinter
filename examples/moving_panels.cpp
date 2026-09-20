@@ -15,7 +15,7 @@ int main()
 
     auto draw = [&]()
     {
-        window.matrix().blank();
+        window.matrix().blank();  // todo make Window:: method
         window.putMatrix(positionBottom, panelBottom.overlay(positionTop, panelTop));
         window.render();
     };
