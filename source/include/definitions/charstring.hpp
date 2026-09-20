@@ -11,6 +11,7 @@
 #include <utility>
 #include <vector>
 
+#include "charmatrix.hpp"
 #include "enums.hpp"
 #include "structs.hpp"
 #include "types.hpp"
@@ -110,11 +111,7 @@ namespace wci
 
         constexpr bool operator!=(const CharString& other) const;
 
-        CharMatrix toMatrix() const;  // todo implement
-        // {
-        //     CharMatrix matrix(size(), 1);
-        //     return matrix;
-        // }
+        CharMatrix toMatrix() const;
 
         constexpr CharInfo* begin() noexcept;
         constexpr const CharInfo* begin() const noexcept;
@@ -431,6 +428,16 @@ inline constexpr bool wci::CharString::operator==(const wci::CharString& other) 
 inline constexpr bool wci::CharString::operator!=(const wci::CharString& other) const
 {
     return inner.size != other.inner.size || inner.string != other.inner.string;
+}
+
+inline wci::CharMatrix wci::CharString::toMatrix() const
+{
+    wci::CharMatrix matrix(size(), 1);
+    auto dest = matrix.data();
+    auto source = data();
+    for (Short i = 0; i < size(); ++i)
+        dest[i] = source[i];
+    return matrix;
 }
 
 inline constexpr wci::CharInfo* wci::CharString::begin() noexcept

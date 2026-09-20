@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <span>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -30,6 +31,11 @@ namespace wci
         } inner;
 
     public:
+        template<typename T>
+        class BasicRow;
+        using Row = BasicRow<CharInfo>;
+        using ConstRow = BasicRow<const CharInfo>;
+
         static constexpr CharInfo nullChar{ 0, Attribute::No };
 
         CharMatrix();
@@ -45,6 +51,8 @@ namespace wci
 
         constexpr CharInfo& operator[](const Coord& position) noexcept;
         constexpr const CharInfo& operator[](const Coord& position) const noexcept;
+        constexpr Row operator[](Short row) noexcept;
+        constexpr ConstRow operator[](Short row) const noexcept;
 
         void put(Short x, Short y, Wchar character, Attribute attributes);
         void put(Short x, Short y, const CharInfo& charInfo);
@@ -103,7 +111,31 @@ namespace wci
         CharMatrix slice(const Coord& topLeft, const Coord& bottomRight) const;
 
         // idea write begin/end methods
-        // idea implement row-string iterators
+        // idea implement row iterators
+
+        template<typename T>
+        class BasicRow
+        {
+        private:
+            std::span<T> row;
+
+        public:
+            constexpr BasicRow(T* data, Short size);
+
+            constexpr Short size() const noexcept;
+
+            constexpr T& operator[](Short j) const noexcept;
+
+            constexpr T* data() const noexcept;
+
+            constexpr T* begin() const noexcept;
+
+            constexpr const T* cbegin() const noexcept;
+
+            constexpr T* end() const noexcept;
+
+            constexpr const T* cend() const noexcept;
+        };
     };
 }
 
@@ -166,6 +198,16 @@ inline constexpr wci::CharInfo& wci::CharMatrix::operator[](const wci::Coord& po
 inline constexpr const wci::CharInfo& wci::CharMatrix::operator[](const wci::Coord& position) const noexcept
 {
     return inner.matrix[position.y * inner.size.x + position.x];
+}
+
+inline constexpr wci::CharMatrix::Row wci::CharMatrix::operator[](wci::Short i) noexcept
+{
+    return wci::CharMatrix::Row(data() + i * size().x, size().x);
+}
+
+inline constexpr wci::CharMatrix::ConstRow wci::CharMatrix::operator[](wci::Short i) const noexcept
+{
+    return wci::CharMatrix::ConstRow(data() + i * size().x, size().x);
 }
 
 inline void wci::CharMatrix::put(wci::Short x, wci::Short y, wci::Wchar character, wci::Attribute attributes)
@@ -359,6 +401,52 @@ inline wci::CharMatrix wci::CharMatrix::slice(wci::Short x1, wci::Short y1, wci:
 inline wci::CharMatrix wci::CharMatrix::slice(const wci::Coord& topLeft, const wci::Coord& bottomRight) const
 {
     return slice(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y);
+}
+
+template<typename T>
+inline constexpr wci::CharMatrix::BasicRow<T>::BasicRow(T* data, wci::Short size) : row(data, size)
+{}
+
+template<typename T>
+inline constexpr wci::Short wci::CharMatrix::BasicRow<T>::size() const noexcept
+{
+    return static_cast<wci::Short>(row.size());
+}
+
+template<typename T>
+inline constexpr T& wci::CharMatrix::BasicRow<T>::operator[](wci::Short j) const noexcept
+{
+    return row[j];
+}
+
+template<typename T>
+inline constexpr T* wci::CharMatrix::BasicRow<T>::data() const noexcept
+{
+    return row.data();
+}
+
+template<typename T>
+inline constexpr T* wci::CharMatrix::BasicRow<T>::begin() const noexcept
+{
+    return row.data();
+}
+
+template<typename T>
+inline constexpr const T* wci::CharMatrix::BasicRow<T>::cbegin() const noexcept
+{
+    return row.data();
+}
+
+template<typename T>
+inline constexpr T* wci::CharMatrix::BasicRow<T>::end() const noexcept
+{
+    return row.data() + row.size();
+}
+
+template<typename T>
+inline constexpr const T* wci::CharMatrix::BasicRow<T>::cend() const noexcept
+{
+    return row.data() + row.size();
 }
 
 #endif  // CINTER_INCLUDE_DEFINITIONS_CHARMATRIX_HPP
