@@ -17,38 +17,38 @@ add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 
 add_executable(console
     examples/console.cpp
-    source/console.cpp
+    source/core/console.cpp
 )
 
 add_executable(events
     examples/events.cpp
-    source/console.cpp
-    source/eventloop.cpp
-    source/window.cpp
+    source/core/console.cpp
+    source/core/eventloop.cpp
+    source/core/window.cpp
 )
 
 add_executable(frames
     examples/frames.cpp
-    source/console.cpp
-    source/frameloop.cpp
-    source/window.cpp
+    source/core/console.cpp
+    source/core/frameloop.cpp
+    source/core/window.cpp
 )
 
 add_executable(matrix
     examples/matrix.cpp
-    source/console.cpp
-    source/window.cpp
+    source/core/console.cpp
+    source/core/window.cpp
 )
 
 add_executable(moving_panels
     examples/moving_panels.cpp
-    source/console.cpp
-    source/eventloop.cpp
-    source/window.cpp
+    source/core/console.cpp
+    source/core/eventloop.cpp
+    source/core/window.cpp
 )
 
 add_executable(window
     examples/window.cpp
-    source/console.cpp
-    source/window.cpp
+    source/core/console.cpp
+    source/core/window.cpp
 )

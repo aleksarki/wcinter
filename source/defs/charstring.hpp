@@ -1,6 +1,6 @@
 #pragma once
-#ifndef CINTER_INCLUDE_DEFINITIONS_CHARSTRING_HPP
-#define CINTER_INCLUDE_DEFINITIONS_CHARSTRING_HPP
+#ifndef WCI_SOURCE_DEFS_CHARSTRING_HPP
+#define WCI_SOURCE_DEFS_CHARSTRING_HPP
 
 #include <algorithm>
 #include <cassert>
@@ -468,4 +468,4 @@ inline constexpr const wci::CharInfo* wci::CharString::cend() const noexcept
     return data() + size();
 }
 
-#endif  // CINTER_INCLUDE_DEFINITIONS_CHARSTRING_HPP
+#endif  // WCI_SOURCE_DEFS_CHARSTRING_HPP

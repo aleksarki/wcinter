@@ -1,10 +1,8 @@
 #include <chrono>
 #include <string>
 #include <utility>
-#include "../source/include/console.hpp"
-#include "../source/include/definitions.hpp"
-#include "../source/include/frameloop.hpp"
-#include "../source/include/window.hpp"
+#include "../source/core.hpp"
+#include "../source/defs.hpp"
 
 using namespace std::chrono_literals;
 

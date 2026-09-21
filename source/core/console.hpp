@@ -1,10 +1,11 @@
 #pragma once
-#ifndef CINTER_INCLUDE_CONSOLE_HPP
-#define CINTER_INCLUDE_CONSOLE_HPP
+#ifndef WCI_SOURCE_CORE_CONSOLE_HPP
+#define WCI_SOURCE_CORE_CONSOLE_HPP
 
 #include <memory>
 #include <string>
-#include "definitions.hpp"
+
+#include "../defs.hpp"
 
 namespace wci {
 
@@ -68,4 +69,4 @@ namespace wci {
     };
 }
 
-#endif  // CINTER_INCLUDE_CONSOLE_HPP
+#endif  // WCI_SOURCE_CORE_CONSOLE_HPP

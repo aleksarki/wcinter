@@ -1,6 +1,6 @@
 #pragma once
-#ifndef CINTER_INCLUDE_DEFINITIONS_CHARMATRIX_HPP
-#define CINTER_INCLUDE_DEFINITIONS_CHARMATRIX_HPP
+#ifndef WCI_SOURCE_DEFS_CHARMATRIX_HPP
+#define WCI_SOURCE_DEFS_CHARMATRIX_HPP
 
 #include <algorithm>
 #include <cassert>
@@ -449,4 +449,4 @@ inline constexpr const T* wci::CharMatrix::BasicRow<T>::cend() const noexcept
     return row.data() + row.size();
 }
 
-#endif  // CINTER_INCLUDE_DEFINITIONS_CHARMATRIX_HPP
+#endif  // WCI_SOURCE_DEFS_CHARMATRIX_HPP

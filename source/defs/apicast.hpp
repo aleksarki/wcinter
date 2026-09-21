@@ -1,9 +1,9 @@
 #pragma once
-#ifndef CINTER_INCLUDE_WINAPI_HPP
-#define CINTER_INCLUDE_WINAPI_HPP
+#ifndef WCI_SOURCE_DEFS_APICAST_HPP
+#define WCI_SOURCE_DEFS_APICAST_HPP
 
 #include <windows.h>
-#include "./definitions.hpp"
+#include "../defs.hpp"
 
 namespace wci
 {
@@ -389,4 +389,4 @@ namespace wci
     #pragma endregion
 }
 
-#endif  // CINTER_INCLUDE_WINAPI_HPP
+#endif  // WCI_SOURCE_DEFS_APICAST_HPP

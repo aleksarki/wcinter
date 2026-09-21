@@ -1,11 +1,12 @@
 #pragma once
-#ifndef CINTER_INCLUDE_EVENTLOOP_HPP
-#define CINTER_INCLUDE_EVENTLOOP_HPP
+#ifndef WCI_SOURCE_CORE_EVENTLOOP_HPP
+#define WCI_SOURCE_CORE_EVENTLOOP_HPP
 
 #include <functional>
 #include <memory>
+
+#include "../defs.hpp"
 #include "console.hpp"
-#include "definitions.hpp"
 
 namespace wci {
 
@@ -30,4 +31,4 @@ namespace wci {
 
 }
 
-#endif  // CINTER_INCLUDE_EVENTLOOP_HPP
+#endif  // WCI_SOURCE_CORE_EVENTLOOP_HPP

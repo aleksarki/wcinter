@@ -1,5 +1,5 @@
-#include "../source/include/definitions.hpp"
-#include "../source/include/window.hpp"
+#include "../source/core.hpp"
+#include "../source/defs.hpp"
 
 int main()
 {

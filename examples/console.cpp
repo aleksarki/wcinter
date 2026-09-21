@@ -2,8 +2,8 @@
 #include <iostream>
 #include <random>
 #include <string>
-#include "../source/include/console.hpp"
-#include "../source/include/definitions.hpp"
+#include "../source/core.hpp"
+#include "../source/defs.hpp"
 
 int main()
 {

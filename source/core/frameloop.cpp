@@ -6,8 +6,9 @@
 #include <thread>
 #include <windows.h>
 #include <forward_list>
-#include "include/frameloop.hpp"
-#include "include/apicast.hpp"
+
+#include "frameloop.hpp"
+#include "../defs/apicast.hpp"
 
 using namespace std::chrono_literals;
 
@@ -89,8 +90,8 @@ public:
 
         while (proceed)
         {
-            auto success = GetNumberOfConsoleInputEvents(console.stdInput(), wci::api(&eventsNum));
-            if (success && eventsNum)
+            auto success = GetNumberOfConsoleInputEvents(wci::api(console.stdInput()), wci::api(&eventsNum));
+            if (wci::wci(success) && eventsNum)
             {
                 console.readInput(inputBuffer, (wci::Dword)128, &eventsRead);  // todo implement literals
                 handled = false;

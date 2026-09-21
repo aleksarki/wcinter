@@ -1,12 +1,12 @@
 #define UNICODE
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
-#include <windows.h>
+
 #include <memory>
-#include "include/apicast.hpp"
-#include "include/console.hpp"
-#include "include/definitions.hpp"
-#include "include/window.hpp"
+#include <windows.h>
+
+#include "window.hpp"
+#include "../defs/apicast.hpp"
 
 class wci::Window::Impl
 {
