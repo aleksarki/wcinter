@@ -54,7 +54,8 @@ int main()
         }
     });
 
-    loop.bindOnTick([&](){
+    loop.bindOnTick([&]()
+    {
         window.matrix().blank();  // todo make Window:: method
 
         plate.blank();
@@ -65,7 +66,7 @@ int main()
         plate.inlay(0, 6, (msg5 + std::to_wstring(loop.framesPerSecond())).toMatrix());
         plate.inlay(0, 7, (msg6 + std::to_wstring(loop.frameTime().count())).toMatrix());
 
-        window.putMatrix(point, plate);
+        window.put(point, plate);
         window.render();
     });
 

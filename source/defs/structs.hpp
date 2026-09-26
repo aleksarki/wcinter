@@ -21,6 +21,7 @@ namespace wci
     {
         return a.x == b.x && a.y == b.y;
     }
+
     constexpr bool operator!=(const Coord& a, const Coord& b) noexcept
     {
         return a.x != b.x || a.y != b.y;
@@ -46,6 +47,7 @@ namespace wci
             a.bottom == b.bottom
         );
     }
+
     constexpr bool operator!=(const SmallRect& a, const SmallRect& b) noexcept
     {
         return (
@@ -70,6 +72,7 @@ namespace wci
     {
         return a.character == b.character && a.attributes == b.attributes;
     }
+
     constexpr bool operator!=(const CharInfo& a, const CharInfo& b) noexcept
     {
         return a.character != b.character || a.attributes != b.attributes;
@@ -90,6 +93,7 @@ namespace wci
     {
         return a.size == b.size && a.visible == b.visible;
     }
+
     constexpr bool operator!=(const CursorInfo& a, const CursorInfo& b) noexcept
     {
         return a.size != b.size || a.visible != b.visible;
@@ -117,6 +121,7 @@ namespace wci
             a.maxWindowSize == b.maxWindowSize
         );
     }
+
     constexpr bool operator!=(const ScreenBufferInfo& a, const ScreenBufferInfo& b) noexcept
     {
         return (
@@ -198,6 +203,42 @@ namespace wci
             MenuEventRecord menuEvent;
             FocusEventRecord focusEvent;
         } event;
+    };
+
+    struct PositionSpec
+    {
+        LenPercent x;
+        LenPercent y;
+    };
+
+    struct Geometry
+    {
+        Short width;
+        Short height;
+    };
+
+    constexpr bool operator==(const Geometry& a, const Geometry& b) noexcept
+    {
+        return a.width == b.width && a.height == b.height;
+    }
+
+    constexpr bool operator!=(const Geometry& a, const Geometry& b) noexcept
+    {
+        return a.width != b.width || a.height != b.height;
+    }
+
+    struct FixedGeometry  // fixme reimplement
+    {
+        bool width;
+        bool height;
+    };
+
+    struct Borders
+    {
+        BorderWidth left;
+        BorderWidth top;
+        BorderWidth right;
+        BorderWidth bottom;
     };
 }
 

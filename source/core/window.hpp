@@ -2,6 +2,7 @@
 #ifndef WCI_SOURCE_CORE_WINDOW_HPP
 #define WCI_SOURCE_CORE_WINDOW_HPP
 
+#include <cstddef>
 #include <memory>
 #include <string>
 
@@ -27,26 +28,40 @@ namespace wci {
 
         Coord size() const;
 
-        void resize();
-        
+        void resize();  // idea rename to fit
+
         void render();
 
-        void printChar(Wchar character);
+        // character
+        void put(Short x, Short y, Wchar character);
+        void put(Short x, Short y, Wchar character, Attribute attributes);
+        void put(Short x, Short y, const CharInfo& charInfo);  // todo implement
+        void put(const Coord& position, const CharInfo& charInfo);
 
-        void printString(const Wchar* string);
-        void printString(const std::wstring& string);
+        // string
+        void put(Short x, Short y, const Wchar* string);
+        void put(Short x, Short y, const Wchar* string, Attribute attributes);
+        void put(Short x, Short y, const std::wstring& string);  // todo implement
+        void put(const Coord& position, const CharInfo charInfos[], size_t length);
+        void put(const Coord& position, const std::wstring& string);  // todo implement
 
-        void putChar(Short x, Short y, Wchar character);
-        void putChar(Short x, Short y, Wchar character, Attribute attributes);
-        void putChar(const Coord& position, const CharInfo& charInfo);
-        
-        void putString(Short x, Short y, const Wchar* string);
-        void putString(Short x, Short y, const Wchar* string, Attribute attributes);
-        void putString(const Coord& position, const CharInfo charInfos[], size_t length);
+        // matrix
+        void put(Short x, Short y, const CharMatrix& matrix);
+        void put(const Coord& position, const CharMatrix& matrix);
 
-        void putMatrix(Short x, Short y, const CharMatrix& matrix);
-        void putMatrix(const Coord& position, const CharMatrix& matrix);
-    
+        std::size_t place(const LenPercent& x, const LenPercent& y, Widget& widget, Anchor anchor = Anchor::TopLeft);
+        std::size_t place(const LenPercent& x, const LenPercent& y, Widget&& widget, Anchor anchor = Anchor::TopLeft);
+        std::size_t place(const PositionSpec& position, Widget& widget, Anchor anchor = Anchor::TopLeft);
+        std::size_t place(const PositionSpec& position, Widget&& widget, Anchor anchor = Anchor::TopLeft);
+
+        void unplace(std::size_t id);
+        void unplace(Widget& widget);
+
+        bool placed(std::size_t id) const noexcept;
+        bool placed(const Widget& widget) const noexcept;
+
+        // todo implement placed widget by id; get by id
+
     private:
         class Impl;
         std::unique_ptr<Impl> impl;

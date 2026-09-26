@@ -16,7 +16,7 @@ int main()
         static const wci::CharInfo black{ ' ', wci::Attribute::No };
         static const wci::CharInfo character{ '#', wci::Attribute::FgColorCyanBright };
 
-        window.putChar(position, black);
+        window.put(position, black);
         if (!keyEvent.keyDown)
             return;
 
@@ -39,7 +39,7 @@ int main()
             return;
         }
 
-        window.putChar(position, character);
+        window.put(position, character);
         window.render();
     });
     eventLoop.execute(proceed);

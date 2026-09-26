@@ -2,7 +2,14 @@
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 
-#include <memory>
+#include <algorithm>
+#include <cmath>
+#include <cstddef>
+#include <deque>
+#include <ranges>
+#include <utility>
+#include <variant>
+#include <vector>
 #include <windows.h>
 
 #include "window.hpp"
@@ -18,6 +25,10 @@ private:
     struct {  // setting to be restored on destruction
         wci::Handle screenBuffer;
     } old;
+    wci::CharMatrix frameBuffer;
+    std::vector<std::pair<std::size_t, wci::Widget*>> widgets;  // todo make sth abt it
+    std::deque<wci::Widget> orphanWidgets;  // todo switch to list  // deque because it does not invalidate pointers on relocation
+    std::size_t widgetCounter = 0;
 
 public:
     Impl() : inner{ wci::Console(), wci::CharMatrix(0, 0) }
@@ -71,9 +82,81 @@ public:
         matrix().swap(newMatrix);
     }
 
+    wci::Coord calculateWidgetStart(
+        const wci::LenPercent& x, const wci::LenPercent& y, wci::Coord widgetSize, wci::Anchor anchor
+    ) const
+    {
+        wci::Coord anchorPoint, startPoint;
+
+        if (std::holds_alternative<wci::Short>(x))  // absolute
+            anchorPoint.x = std::get<wci::Short>(x);
+        else if (std::holds_alternative<double>(x))  // relative
+            anchorPoint.x = static_cast<wci::Short>(std::lround(std::get<double>(x) * size().x));
+
+        if (std::holds_alternative<wci::Short>(y))  // absolute
+            anchorPoint.y = std::get<wci::Short>(y);
+        else if (std::holds_alternative<double>(y))  // relative
+            anchorPoint.y = static_cast<wci::Short>(std::lround(std::get<double>(y) * size().y));
+
+        switch (anchor)
+        {
+        case wci::Anchor::TopLeft:
+            startPoint = anchorPoint;
+            break;
+        case wci::Anchor::Top:
+            startPoint.x = anchorPoint.x - widgetSize.x / 2;
+            startPoint.y = anchorPoint.y;
+            break;
+        case wci::Anchor::TopRight:
+            startPoint.x = anchorPoint.x - widgetSize.x;
+            startPoint.y = anchorPoint.y;
+            break;
+        case wci::Anchor::Right:
+            startPoint.x = anchorPoint.x - widgetSize.x;
+            startPoint.y = anchorPoint.y - widgetSize.y / 2;
+            break;
+        case wci::Anchor::BottomRight:
+            startPoint.x = anchorPoint.x - widgetSize.x;
+            startPoint.y = anchorPoint.y - widgetSize.y;
+            break;
+        case wci::Anchor::Bottom:
+            startPoint.x = anchorPoint.x - widgetSize.x / 2;
+            startPoint.y = anchorPoint.y - widgetSize.y;
+            break;
+        case wci::Anchor::BottomLeft:
+            startPoint.x = anchorPoint.x;
+            startPoint.y = anchorPoint.y - widgetSize.y;
+            break;
+        case wci::Anchor::Left:
+            startPoint.x = anchorPoint.x;
+            startPoint.y = anchorPoint.y - widgetSize.y / 2;
+            break;
+        case wci::Anchor::Center:
+            startPoint.x = anchorPoint.x - widgetSize.x / 2;
+            startPoint.y = anchorPoint.y - widgetSize.y / 2;
+            break;
+        }
+
+        return startPoint;
+    }
+
     void render()
     {
         resize();
+        if (frameBuffer.size() != size())
+            frameBuffer.resize(size());
+        std::copy(matrix().data(), matrix().data() + size().x * size().y, frameBuffer.data());
+
+        for (const auto& [id, widget] : widgets)
+        {
+            wci::Coord widgetSize = widget->render().size();  // fixme make size() property of Widget(object)
+            wci::Coord startPoint = calculateWidgetStart(
+                widget->position().x, widget->position().y, widgetSize, widget->anchor()
+            );   
+            widget->absolute(startPoint);
+            frameBuffer.inlay(widget->absolute(), widget->render());
+        }
+
         SMALL_RECT rect{
             0, 0,
             wci::api(size().x) - 1,
@@ -81,48 +164,11 @@ public:
         };
         WriteConsoleOutputW(
             wci::api(console().stdOutput()),  // check or console().activeScreenBuffer()?
-            wci::api(matrix().data()),
-            wci::api(matrix().size()),
+            wci::api(frameBuffer.data()),
+            wci::api(frameBuffer.size()),
             COORD{ 0, 0 },
             &rect
         );
-    }
-
-    void printChar(Wchar character)  // review
-    {
-        auto info = console().screenBufferInfo();
-        auto position = info.cursorPosition;
-        if (character != L'\n')
-            matrix().put(position, character, info.attributes);
-        if (position.x >= info.size.x || character == L'\n')  // go to the next line
-        {
-            position.x = 0;
-            ++position.y;
-        }
-        else
-            ++position.x;
-        console().cursorPosition(position);
-    }
-
-    void printString(const Wchar* string)  // review
-    {
-        auto info = console().screenBufferInfo();
-        auto position = info.cursorPosition;
-        size_t i = 0;
-        while (string[i])
-        {
-            if (string[i] != L'\n')
-                matrix().put(position, string[i], info.attributes);
-            if (position.x >= info.size.x || string[i] == L'\n')  // go to next line
-            {
-                position.x = 0;
-                ++position.y;
-            }
-            else
-                ++position.x;
-            ++i;
-        }
-        console().cursorPosition(position);
     }
 
     void putString(wci::Short x, wci::Short y, const wci::Wchar* string, wci::Attribute attributes)
@@ -143,6 +189,65 @@ public:
     void putMatrix(wci::Short x, wci::Short y, const wci::CharMatrix& matrix)
     {
         inner.matrix.inlay(x, y, matrix);
+    }
+
+    bool widgetPlaced(std::size_t id) const noexcept
+    {
+        return std::ranges::any_of(widgets, [id](const std::pair<size_t, wci::Widget*>& pair) -> bool
+        {
+            return pair.first == id;
+        });
+    }
+    bool widgetPlaced(const wci::Widget& widget) const noexcept
+    {
+        return std::ranges::any_of(widgets, [&widget](const std::pair<size_t, wci::Widget*>& pair) -> bool
+        {
+            return pair.second == &widget;
+        });
+    }
+
+    std::size_t placeWidget(const wci::LenPercent& x, const wci::LenPercent& y, wci::Widget& widget, wci::Anchor anchor)
+    {
+        wci::Coord widgetSize = widget.render().size();  // todo make size() property of Widget(object)
+        wci::Coord startPoint = calculateWidgetStart(x, y, widgetSize, anchor);
+
+        widget.position(wci::PositionSpec{ x, y });
+        widget.anchor(anchor);
+        widget.absolute(startPoint);
+
+        for (const auto& [id, placed] : widgets)
+            if (placed == &widget)  // this widget has already been placed
+                return id;
+
+        widgets.push_back(std::make_pair(++widgetCounter, &widget));
+        widget.placed(true);
+        return widgetCounter;
+    }
+    std::size_t placeWidget(const wci::LenPercent& x, const wci::LenPercent& y, wci::Widget&& widget, wci::Anchor anchor)
+    {
+        orphanWidgets.push_back(std::move(widget));
+        return placeWidget(x, y, orphanWidgets.back(), anchor);
+    }
+
+    void unplaceWidget(std::size_t id)
+    {
+        std::erase_if(widgets, [id](const std::pair<size_t, wci::Widget*>& pair) -> bool
+        {
+            bool found = pair.first == id;
+            if (found)
+                pair.second->placed(false);
+            return found;
+        });
+    }
+    void unplaceWidget(wci::Widget& widget)
+    {
+        std::erase_if(widgets, [&widget](const std::pair<size_t, wci::Widget*>& pair) -> bool
+        {
+            bool found = pair.second == &widget;
+            if (found)
+                pair.second->placed(false);
+            return found;
+        });
     }
 };
 
@@ -182,53 +287,72 @@ void wci::Window::render()
     impl->render();
 }
 
-void wci::Window::printChar(wci::Wchar character)
-{
-    impl->printChar(character);
-}
-
-void wci::Window::printString(const wci::Wchar* string)
-{
-    impl->printString(string);
-}
-void wci::Window::printString(const std::wstring& string)
-{
-    impl->printString(string.data());
-}
-
-void wci::Window::putChar(wci::Short x, wci::Short y, wci::Wchar character)
+void wci::Window::put(wci::Short x, wci::Short y, wci::Wchar character)
 {
     auto attributes = impl->console().screenBufferInfo().attributes;
     impl->matrix().put(x, y, character, attributes);
 }
-void wci::Window::putChar(wci::Short x, wci::Short y, wci::Wchar character, wci::Attribute attributes)
+void wci::Window::put(wci::Short x, wci::Short y, wci::Wchar character, wci::Attribute attributes)
 {
     impl->matrix().put(x, y, character, attributes);
 }
-void wci::Window::putChar(const wci::Coord& position, const wci::CharInfo& charInfo)
+void wci::Window::put(const wci::Coord& position, const wci::CharInfo& charInfo)
 {
     impl->matrix().put(position, charInfo);
 }
-
-void wci::Window::putString(wci::Short x, wci::Short y, const wci::Wchar* string)
+void wci::Window::put(wci::Short x, wci::Short y, const wci::Wchar* string)
 {
     auto attributes = impl->console().screenBufferInfo().attributes;
     impl->putString(x, y, string, attributes);
 }
-void wci::Window::putString(wci::Short x, wci::Short y, const wci::Wchar* string, wci::Attribute attributes)
+void wci::Window::put(wci::Short x, wci::Short y, const wci::Wchar* string, wci::Attribute attributes)
 {
     impl->putString(x, y, string, attributes);
 }
-void wci::Window::putString(const wci::Coord& position, const wci::CharInfo charInfos[], size_t length)
+void wci::Window::put(const wci::Coord& position, const wci::CharInfo charInfos[], size_t length)
 {
     impl->putString(position.x, position.y, charInfos, length);
 }
-
-void wci::Window::putMatrix(wci::Short x, wci::Short y, const wci::CharMatrix& matrix)
+void wci::Window::put(wci::Short x, wci::Short y, const wci::CharMatrix& matrix)
 {
     impl->putMatrix(x, y, matrix);
 }
-void wci::Window::putMatrix(const wci::Coord& position, const wci::CharMatrix& matrix)
+void wci::Window::put(const wci::Coord& position, const wci::CharMatrix& matrix)
 {
     impl->putMatrix(position.x, position.y, matrix);
+}
+
+std::size_t wci::Window::place(const wci::LenPercent& x, const wci::LenPercent& y, wci::Widget& widget, wci::Anchor anchor)
+{
+    return impl->placeWidget(x, y, widget, anchor);
+}
+std::size_t wci::Window::place(const wci::LenPercent& x, const wci::LenPercent& y, wci::Widget&& widget, wci::Anchor anchor)
+{
+    return impl->placeWidget(x, y, std::move(widget), anchor);
+}
+std::size_t wci::Window::place(const wci::PositionSpec& position, wci::Widget& widget, wci::Anchor anchor)
+{
+    return impl->placeWidget(position.x, position.y, widget, anchor);
+}
+std::size_t wci::Window::place(const wci::PositionSpec &position, wci::Widget&& widget, wci::Anchor anchor)
+{
+    return impl->placeWidget(position.x, position.y, std::move(widget), anchor);
+}
+
+void wci::Window::unplace(std::size_t id)
+{
+    impl->unplaceWidget(id);
+}
+void wci::Window::unplace(wci::Widget& widget)
+{
+    impl->unplaceWidget(widget);
+}
+
+bool wci::Window::placed(std::size_t id) const noexcept
+{
+    return impl->widgetPlaced(id);
+}
+bool wci::Window::placed(const Widget& widget) const noexcept
+{
+    return impl->widgetPlaced(widget);
 }

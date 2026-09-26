@@ -110,6 +110,8 @@ namespace wci
         // bottom right point is exclusive
         CharMatrix slice(const Coord& topLeft, const Coord& bottomRight) const;
 
+        CharMatrix toMatrix() const noexcept;
+
         // idea write begin/end methods
         // idea implement row iterators
 
@@ -401,6 +403,11 @@ inline wci::CharMatrix wci::CharMatrix::slice(wci::Short x1, wci::Short y1, wci:
 inline wci::CharMatrix wci::CharMatrix::slice(const wci::Coord& topLeft, const wci::Coord& bottomRight) const
 {
     return slice(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y);
+}
+
+inline wci::CharMatrix wci::CharMatrix::toMatrix() const noexcept
+{
+    return *this;
 }
 
 template<typename T>

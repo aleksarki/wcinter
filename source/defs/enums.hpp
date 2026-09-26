@@ -583,6 +583,34 @@ namespace wci
     };
 
     #pragma endregion
+
+    #pragma region Anchor
+
+    enum class Anchor
+    {
+        TopLeft,
+        Top,
+        TopRight,
+        Right,
+        BottomRight,
+        Bottom,
+        BottomLeft,
+        Left,
+        Center
+    };
+
+    #pragma endregion
+
+    #pragma region BorderWidth
+
+    enum class BorderWidth
+    {
+        No,
+        Thin,
+        Thick
+    };
+
+    #pragma endregion
 }
 
 #endif  // CINTER_INCLUDE_DEfINITIONS_ENUMS_HPP

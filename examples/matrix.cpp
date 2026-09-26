@@ -24,8 +24,8 @@ int main()
     matrix2.inlay(3, 3, matrix3);
     matrix1.inlay(4, 2, matrix2);
 
-    window.putString(0, 1, L"dummy srirgn", wci::Attribute::FgColorYellow);
-    window.putMatrix(1, 1, matrix1);
+    window.put(0, 1, L"dummy srirgn", wci::Attribute::FgColorYellow);
+    window.put(1, 1, matrix1);
 
     window.render();
 
