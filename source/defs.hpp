@@ -4,6 +4,7 @@
 
 #include "defs/classes.hpp"
 #include "defs/enums.hpp"
+#include "defs/literals.hpp"
 #include "defs/structs.hpp"
 #include "defs/types.hpp"
 
