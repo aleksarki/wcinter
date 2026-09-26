@@ -8,7 +8,6 @@
 #include <deque>
 #include <ranges>
 #include <utility>
-#include <variant>
 #include <vector>
 #include <windows.h>
 
@@ -88,15 +87,15 @@ public:
     {
         wci::Coord anchorPoint, startPoint;
 
-        if (std::holds_alternative<wci::Short>(x))  // absolute
-            anchorPoint.x = std::get<wci::Short>(x);
-        else if (std::holds_alternative<double>(x))  // relative
-            anchorPoint.x = static_cast<wci::Short>(std::lround(std::get<double>(x) * size().x));
+        if (x.isAbsolute())
+            anchorPoint.x = x.absolute();
+        else if (x.isRelative())
+            anchorPoint.x = static_cast<wci::Short>(std::lround(x.relative() * size().x));
 
-        if (std::holds_alternative<wci::Short>(y))  // absolute
-            anchorPoint.y = std::get<wci::Short>(y);
-        else if (std::holds_alternative<double>(y))  // relative
-            anchorPoint.y = static_cast<wci::Short>(std::lround(std::get<double>(y) * size().y));
+        if (y.isAbsolute())
+            anchorPoint.y = y.absolute();
+        else if (y.isRelative())
+            anchorPoint.y = static_cast<wci::Short>(std::lround(y.relative() * size().y));
 
         switch (anchor)
         {

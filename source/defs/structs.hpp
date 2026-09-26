@@ -3,6 +3,7 @@
 #define CINTER_INCLUDE_DEFINITIONS_STRUCTS_HPP
 
 #include "enums.hpp"
+#include "lenpercent.hpp"
 #include "types.hpp"
 
 namespace wci
