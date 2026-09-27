@@ -7,8 +7,12 @@
 
 #include "charmatrix.hpp"
 #include "enums.hpp"
+#include "lenpercent.hpp"
+#include "literals.hpp"
 #include "structs.hpp"
 #include "types.hpp"
+
+using namespace wci::literals;
 
 namespace wci
 {
@@ -76,7 +80,7 @@ namespace wci
 template<wci::renderable T>
 inline wci::Widget::Widget(T& object) :
     inner{
-        wci::PositionSpec{ wci::Short(0), wci::Short(0) },
+        wci::PositionSpec{ 0_abs, 0_abs },
         wci::Anchor::TopLeft,
         wci::Coord{ 0, 0 },
         true,

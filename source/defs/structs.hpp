@@ -16,17 +16,11 @@ namespace wci
     {
         Short x;
         Short y;
+
+        constexpr bool operator==(const Coord& other) const noexcept;
+
+        constexpr bool operator!=(const Coord& other) const noexcept;
     };
-
-    constexpr bool operator==(const Coord& a, const Coord& b) noexcept
-    {
-        return a.x == b.x && a.y == b.y;
-    }
-
-    constexpr bool operator!=(const Coord& a, const Coord& b) noexcept
-    {
-        return a.x != b.x || a.y != b.y;
-    }
 
     /*
      * Structure `SmallRect` defines coordinates of upper-left and lower-right corners of a rectangle.
@@ -37,27 +31,11 @@ namespace wci
         Short top;     // Y of top left corner.
         Short right;   // X of bottom right corner.
         Short bottom;  // Y of bottom right corner.
+
+        constexpr bool operator==(const SmallRect& other) const noexcept;
+
+        constexpr bool operator!=(const SmallRect& other) const noexcept;
     };
-
-    constexpr bool operator==(const SmallRect& a, const SmallRect& b) noexcept
-    {
-        return (
-            a.left == b.left &&
-            a.top == b.top &&
-            a.right == b.right &&
-            a.bottom == b.bottom
-        );
-    }
-
-    constexpr bool operator!=(const SmallRect& a, const SmallRect& b) noexcept
-    {
-        return (
-            a.left != b.left ||
-            a.top != b.top ||
-            a.right != b.right ||
-            a.bottom != b.bottom
-        );
-    }
 
     /*
      * Structure `CharInfo` specifies a Unicode character and its attributes.
@@ -66,18 +44,12 @@ namespace wci
     struct CharInfo
     {
         Wchar character;
-        Attribute attributes;  // Word
+        Attribute attributes;
+
+        constexpr bool operator==(const CharInfo& other) const noexcept;
+
+        constexpr bool operator!=(const CharInfo& other) const noexcept;
     };
-
-    constexpr bool operator==(const CharInfo& a, const CharInfo& b) noexcept
-    {
-        return a.character == b.character && a.attributes == b.attributes;
-    }
-
-    constexpr bool operator!=(const CharInfo& a, const CharInfo& b) noexcept
-    {
-        return a.character != b.character || a.attributes != b.attributes;
-    }
 
     #pragma region Console info structures
 
@@ -88,17 +60,11 @@ namespace wci
     {
         Dword size;
         bool visible;
+
+        constexpr bool operator==(const CursorInfo& other) const noexcept;
+
+        constexpr bool operator!=(const CursorInfo& other) const noexcept;
     };
-
-    constexpr bool operator==(const CursorInfo& a, const CursorInfo& b) noexcept
-    {
-        return a.size == b.size && a.visible == b.visible;
-    }
-
-    constexpr bool operator!=(const CursorInfo& a, const CursorInfo& b) noexcept
-    {
-        return a.size != b.size || a.visible != b.visible;
-    }
 
     /*
      * Structure `ScreenBufferInfo` contains information about the console screen buffer.
@@ -107,32 +73,13 @@ namespace wci
     {
         Coord size;
         Coord cursorPosition;
-        Attribute attributes;  // Word
+        Attribute attributes;
         SmallRect window;
         Coord maxWindowSize;
+
+        constexpr bool operator==(const ScreenBufferInfo& other) const noexcept;
+        constexpr bool operator!=(const ScreenBufferInfo& other) const noexcept;
     };
-
-    constexpr bool operator==(const ScreenBufferInfo& a, const ScreenBufferInfo& b) noexcept
-    {
-        return (
-            a.size == b.size &&
-            a.cursorPosition == b.cursorPosition &&
-            a.attributes == b.attributes &&
-            a.window == b.window &&
-            a.maxWindowSize == b.maxWindowSize
-        );
-    }
-
-    constexpr bool operator!=(const ScreenBufferInfo& a, const ScreenBufferInfo& b) noexcept
-    {
-        return (
-            a.size != b.size ||
-            a.cursorPosition != b.cursorPosition ||
-            a.attributes != b.attributes ||
-            a.window != b.window ||
-            a.maxWindowSize != b.maxWindowSize
-        );
-    }
 
     #pragma endregion
 
@@ -145,10 +92,10 @@ namespace wci
     {
         bool keyDown;
         Word repeatCount;
-        VirtualKey virtualKeyCode;  // Word
-        VirtualKey virtualScanCode;  // Word
+        VirtualKey virtualKeyCode;
+        VirtualKey virtualScanCode;
         Wchar character;
-        ControlKeyState controlKeyState;  // Dword
+        ControlKeyState controlKeyState;
     };
 
     /*
@@ -157,9 +104,9 @@ namespace wci
     struct MouseEventRecord
     {
         Coord mousePosition;
-        ButtonState buttonState;  // Dword
-        ControlKeyState controlKeyState;  // Dword
-        EventFlag eventFlags;  // Dword
+        ButtonState buttonState;
+        ControlKeyState controlKeyState;
+        EventFlag eventFlags;
     };
 
     /*
@@ -194,9 +141,9 @@ namespace wci
     /*
      * Structure `InputRecord` is used for recording data input events for console input buffer.
      */
-    struct InputRecord
+    struct InputRecord  // idea make variant
     {
-        EventType eventType;  // Word
+        EventType eventType;
         union {
             KeyEventRecord keyEvent;
             MouseEventRecord mouseEvent;
@@ -206,166 +153,60 @@ namespace wci
         } event;
     };
 
-    #pragma region PositionSpec
-
     struct PositionSpec
     {
         LenPercent x;
         LenPercent y;
+
+        constexpr PositionSpec& operator+=(const PositionSpec& other);
+        constexpr PositionSpec& operator+=(int other);
+
+        constexpr PositionSpec& operator-=(const PositionSpec& other);
+        constexpr PositionSpec& operator-=(int other);
+
+        constexpr PositionSpec& operator*=(int other) noexcept;
+
+        constexpr PositionSpec& operator/=(int other);
+
+        constexpr PositionSpec& operator%=(int other);
+
+        constexpr PositionSpec operator+(const PositionSpec& other) const;
+        constexpr PositionSpec operator+(int other) const;
+
+        constexpr PositionSpec operator-(const PositionSpec& other) const;
+        constexpr PositionSpec operator-(int other) const;
+
+        constexpr PositionSpec operator*(int other) const noexcept;
+
+        constexpr PositionSpec operator/(int other) const;
+
+        constexpr PositionSpec operator%(int other) const;
+
+        constexpr PositionSpec operator+() const noexcept;
+
+        constexpr PositionSpec operator-() const;
+
+        constexpr bool operator==(const PositionSpec& other) const noexcept;
+
+        constexpr bool operator!=(const PositionSpec& other) const noexcept;
+
+        constexpr PositionSpec& operator++();
+
+        constexpr PositionSpec& operator--();
+
+        constexpr PositionSpec operator++(int);
+
+        constexpr PositionSpec operator--(int);
     };
-
-    inline constexpr PositionSpec& operator+=(PositionSpec& ps, const PositionSpec& other)
-    {
-        ps.x += other.x;
-        ps.y += other.y;
-        return ps;
-    }
-    inline constexpr PositionSpec& operator+=(PositionSpec& ps, int other)
-    {
-        ps.x += other;
-        ps.y += other;
-        return ps;
-    }
-
-    inline constexpr PositionSpec& operator-=(PositionSpec& ps, const PositionSpec& other)
-    {
-        ps.x -= other.x;
-        ps.y -= other.y;
-        return ps;
-    }
-    inline constexpr PositionSpec& operator-=(PositionSpec& ps, int other)
-    {
-        ps.x -= other;
-        ps.y -= other;
-        return ps;
-    }
-
-    inline constexpr PositionSpec& operator*=(PositionSpec& ps, int other) noexcept
-    {
-        ps.x *= other;
-        ps.y *= other;
-        return ps;
-    }
-
-    inline constexpr PositionSpec& operator/=(PositionSpec& ps, int other)
-    {
-        ps.x /= other;
-        ps.y /= other;
-        return ps;
-    }
-
-    inline constexpr PositionSpec& operator%=(PositionSpec& ps, int other)
-    {
-        ps.x %= other;
-        ps.y %= other;
-        return ps;
-    }
-
-    inline constexpr PositionSpec operator+(const PositionSpec& ps, const PositionSpec& other)
-    {
-        auto result = ps;
-        return result += other;
-    }
-    inline constexpr PositionSpec operator+(const PositionSpec& ps, int other)
-    {
-        auto result = ps;
-        return result += other;
-    }
-
-    inline constexpr PositionSpec operator-(const PositionSpec& ps, const PositionSpec& other)
-    {
-        auto result = ps;
-        return result -= other;
-    }
-    inline constexpr PositionSpec operator-(const PositionSpec& ps, int other)
-    {
-        auto result = ps;
-        return result -= other;
-    }
-    
-    inline constexpr PositionSpec operator*(const PositionSpec& ps, int other) noexcept
-    {
-        auto result = ps;
-        return result *= other;
-    }
-    
-    inline constexpr PositionSpec operator/(const PositionSpec& ps, int other)
-    {
-        auto result = ps;
-        return result /= other;
-    }
-    
-    inline constexpr PositionSpec operator%(const PositionSpec& ps, int other)
-    {
-        auto result = ps;
-        return result %= other;
-    }
-
-    inline constexpr PositionSpec operator+(const PositionSpec& ps) noexcept
-    {
-        return ps;
-    }
-
-    inline constexpr PositionSpec operator-(const PositionSpec& ps)
-    {
-        return PositionSpec{ -ps.x, -ps.y };
-    }
-
-    inline constexpr bool operator==(const PositionSpec& ps, const PositionSpec& other) noexcept
-    {
-        return ps.x == other.x && ps.y == other.y;
-    }
-
-    inline constexpr bool operator!=(const PositionSpec& ps, const PositionSpec& other) noexcept
-    {
-        return !(ps == other);
-    }
-
-    inline constexpr PositionSpec& operator++(PositionSpec& ps)
-    {
-        ++ps.x;
-        ++ps.y;
-        return ps;
-    }
-
-    inline constexpr PositionSpec& operator--(PositionSpec& ps)
-    {
-        --ps.x;
-        --ps.y;
-        return ps;
-    }
-
-    inline constexpr PositionSpec operator++(PositionSpec& ps, int)
-    {
-        auto old = ps;
-        ++ps;
-        return old;
-    }
-
-    inline constexpr PositionSpec operator--(PositionSpec& ps, int)
-    {
-        auto old = ps;
-        --ps;
-        return old;
-    }
-
-    #pragma endregion
 
     struct Geometry
     {
         Short width;
         Short height;
+
+        constexpr bool operator==(const Geometry& other) const noexcept;
+        constexpr bool operator!=(const Geometry& other) const noexcept;
     };
-
-    constexpr bool operator==(const Geometry& a, const Geometry& b) noexcept
-    {
-        return a.width == b.width && a.height == b.height;
-    }
-
-    constexpr bool operator!=(const Geometry& a, const Geometry& b) noexcept
-    {
-        return a.width != b.width || a.height != b.height;
-    }
 
     struct FixedGeometry  // fixme reimplement
     {
@@ -380,6 +221,215 @@ namespace wci
         BorderWidth right;
         BorderWidth bottom;
     };
+}
+
+inline constexpr bool wci::Coord::operator==(const wci::Coord& other) const noexcept
+{
+    return x == other.x && y == other.y;
+}
+
+inline constexpr bool wci::Coord::operator!=(const wci::Coord& other) const noexcept
+{
+    return !(*this == other);
+}
+
+inline constexpr bool wci::SmallRect::operator==(const wci::SmallRect& other) const noexcept
+{
+    return
+    (
+        left ==   other.left  &&
+        top ==    other.top   &&
+        right ==  other.right &&
+        bottom == other.bottom
+    );
+}
+
+inline constexpr bool wci::SmallRect::operator!=(const wci::SmallRect& other) const noexcept
+{
+    return !(*this == other);
+}
+
+inline constexpr bool wci::CharInfo::operator==(const wci::CharInfo& other) const noexcept
+{
+    return character == other.character && attributes == other.attributes;
+}
+
+inline constexpr bool wci::CharInfo::operator!=(const wci::CharInfo& other) const noexcept
+{
+    return !(*this == other);
+}
+
+inline constexpr bool wci::CursorInfo::operator==(const CursorInfo& other) const noexcept
+{
+    return size == other.size && visible == other.visible;
+}
+
+inline constexpr bool wci::CursorInfo::operator!=(const CursorInfo& other) const noexcept
+{
+    return !(*this == other);
+}
+
+inline constexpr bool wci::ScreenBufferInfo::operator==(const ScreenBufferInfo& other) const noexcept
+{
+    return
+    (
+        size ==           other.size           &&
+        cursorPosition == other.cursorPosition &&
+        attributes ==     other.attributes     &&
+        window ==         other.window         &&
+        maxWindowSize ==  other.maxWindowSize
+    );
+}
+
+inline constexpr bool wci::ScreenBufferInfo::operator!=(const ScreenBufferInfo& other) const noexcept
+{
+    return !(*this == other);
+}
+
+inline constexpr wci::PositionSpec& wci::PositionSpec::operator+=(const wci::PositionSpec& other)
+{
+    x += other.x;
+    y += other.y;
+    return *this;
+}
+
+inline constexpr wci::PositionSpec& wci::PositionSpec::operator+=(int other)
+{
+    x += other;
+    y += other;
+    return *this;
+}
+inline constexpr wci::PositionSpec& wci::PositionSpec::operator-=(const wci::PositionSpec& other)
+{
+    x -= other.x;
+    y -= other.y;
+    return *this;
+}
+
+inline constexpr wci::PositionSpec& wci::PositionSpec::operator-=(int other)
+{
+    x -= other;
+    y -= other;
+    return *this;
+}
+
+inline constexpr wci::PositionSpec& wci::PositionSpec::operator*=(int other) noexcept
+{
+    x *= other;
+    y *= other;
+    return *this;
+}
+
+inline constexpr wci::PositionSpec& wci::PositionSpec::operator/=(int other)
+{
+    x /= other;
+    y /= other;
+    return *this;
+}
+
+inline constexpr wci::PositionSpec& wci::PositionSpec::operator%=(int other)
+{
+    x %= other;
+    y %= other;
+    return *this;
+}
+
+inline constexpr wci::PositionSpec wci::PositionSpec::operator+(const wci::PositionSpec& other) const
+{
+    auto result = *this;
+    return result += other;
+}
+inline constexpr wci::PositionSpec wci::PositionSpec::operator+(int other) const
+{
+    auto result = *this;
+    return result += other;
+}
+
+inline constexpr wci::PositionSpec wci::PositionSpec::operator-(const wci::PositionSpec& other) const
+{
+    auto result = *this;
+    return result -= other;
+}
+inline constexpr wci::PositionSpec wci::PositionSpec::operator-(int other) const
+{
+    auto result = *this;
+    return result -= other;
+}
+
+inline constexpr wci::PositionSpec wci::PositionSpec::operator*(int other) const noexcept
+{
+    auto result = *this;
+    return result *= other;
+}
+
+inline constexpr wci::PositionSpec wci::PositionSpec::operator/(int other) const
+{
+    auto result = *this;
+    return result /= other;
+}
+
+inline constexpr wci::PositionSpec wci::PositionSpec::operator%(int other) const
+{
+    auto result = *this;
+    return result %= other;
+}
+
+inline constexpr wci::PositionSpec wci::PositionSpec::operator+() const noexcept
+{
+    return *this;
+}
+
+inline constexpr wci::PositionSpec wci::PositionSpec::operator-() const
+{
+    return wci::PositionSpec{ -x, -y };
+}
+
+inline constexpr bool wci::PositionSpec::operator==(const wci::PositionSpec& other) const noexcept
+{
+    return x == other.x && y == other.y;
+}
+
+inline constexpr bool wci::PositionSpec::operator!=(const wci::PositionSpec& other) const noexcept
+{
+    return !(*this == other);
+}
+
+inline constexpr wci::PositionSpec& wci::PositionSpec::operator++()
+{
+    ++x;
+    ++y;
+    return *this;
+}
+
+inline constexpr wci::PositionSpec& wci::PositionSpec::operator--()
+{
+    --x;
+    --y;
+    return *this;
+}
+
+inline constexpr wci::PositionSpec wci::PositionSpec::operator++(int)
+{
+    auto old = *this;
+    ++*this;
+    return old;
+}
+
+inline constexpr wci::PositionSpec wci::PositionSpec::operator--(int)
+{
+    auto old = *this;
+    --*this;
+    return old;
+}
+
+inline constexpr bool wci::Geometry::operator==(const wci::Geometry& other) const noexcept
+{
+    return width == other.width && height == other.height;
+}
+
+inline constexpr bool wci::Geometry::operator!=(const wci::Geometry& other) const noexcept
+{
+    return !(*this == other);
 }
 
 #endif  // CINTER_INCLUDE_DEFINITIONS_STRUCTS_HPP

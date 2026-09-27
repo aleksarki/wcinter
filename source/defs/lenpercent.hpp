@@ -73,10 +73,10 @@ namespace wci
 
 }
 
-inline constexpr explicit wci::LenPercent::LenPercent(wci::Short sh) : value(sh)
+inline constexpr wci::LenPercent::LenPercent(wci::Short sh) : value(sh)
 {}
 
-inline constexpr explicit wci::LenPercent::LenPercent(double d) : value(d)
+inline constexpr wci::LenPercent::LenPercent(double d) : value(d)
 {}
 
 inline constexpr bool wci::LenPercent::isAbsolute() const noexcept
