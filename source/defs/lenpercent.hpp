@@ -17,8 +17,8 @@ namespace wci
         std::variant<Short, double> value;
 
     public:
-        constexpr LenPercent(Short sh);
-        constexpr LenPercent(double d);
+        constexpr explicit LenPercent(Short sh);
+        constexpr explicit LenPercent(double d);
 
         constexpr bool isAbsolute() const noexcept;
 
@@ -42,25 +42,25 @@ namespace wci
 
         constexpr LenPercent& operator%=(int other);
 
-        constexpr LenPercent operator+(const LenPercent& other);
-        constexpr LenPercent operator+(int other);
+        constexpr LenPercent operator+(const LenPercent& other) const;
+        constexpr LenPercent operator+(int other) const;
 
-        constexpr LenPercent operator-(const LenPercent& other);
-        constexpr LenPercent operator-(int other);
+        constexpr LenPercent operator-(const LenPercent& other) const;
+        constexpr LenPercent operator-(int other) const;
 
-        constexpr LenPercent operator*(int other);
+        constexpr LenPercent operator*(int other) const noexcept;
 
-        constexpr LenPercent operator/(int other);
+        constexpr LenPercent operator/(int other) const;
 
-        constexpr LenPercent operator%(int other);
+        constexpr LenPercent operator%(int other) const;
 
-        constexpr LenPercent operator+() noexcept;
+        constexpr LenPercent operator+() const noexcept;  // unary
 
-        constexpr LenPercent operator-();
+        constexpr LenPercent operator-() const;  // unary
 
-        constexpr bool operator==(const LenPercent& other) noexcept;
+        constexpr bool operator==(const LenPercent& other) const noexcept;
 
-        constexpr bool operator!=(const LenPercent& other);
+        constexpr bool operator!=(const LenPercent& other) const noexcept;
 
         constexpr LenPercent& operator++();  // prefix
 
@@ -73,10 +73,10 @@ namespace wci
 
 }
 
-inline constexpr wci::LenPercent::LenPercent(wci::Short sh) : value(sh)
+inline constexpr explicit wci::LenPercent::LenPercent(wci::Short sh) : value(sh)
 {}
 
-inline constexpr wci::LenPercent::LenPercent(double d) : value(d)
+inline constexpr explicit wci::LenPercent::LenPercent(double d) : value(d)
 {}
 
 inline constexpr bool wci::LenPercent::isAbsolute() const noexcept
@@ -193,52 +193,52 @@ inline constexpr wci::LenPercent& wci::LenPercent::operator%=(int other)
     throw std::invalid_argument("constexpr wci::LenPercent& wci::operator%=(wci::LenPercent&, int) got invalid value");
 }
 
-inline constexpr wci::LenPercent wci::LenPercent::operator+(const wci::LenPercent& other)
+inline constexpr wci::LenPercent wci::LenPercent::operator+(const wci::LenPercent& other) const
 {
     auto result = *this;
     return result += other;
 }
-inline constexpr wci::LenPercent wci::LenPercent::operator+(int other)
+inline constexpr wci::LenPercent wci::LenPercent::operator+(int other) const
 {
     auto result = *this;
     return result += other;
 }
 
-inline constexpr wci::LenPercent wci::LenPercent::operator-(const wci::LenPercent& other)
+inline constexpr wci::LenPercent wci::LenPercent::operator-(const wci::LenPercent& other) const
 {
     auto result = *this;
     return result -= other;
 }
-inline constexpr wci::LenPercent wci::LenPercent::operator-(int other)
+inline constexpr wci::LenPercent wci::LenPercent::operator-(int other) const
 {
     auto result = *this;
     return result -= other;
 }
 
-inline constexpr wci::LenPercent wci::LenPercent::operator*(int other)
+inline constexpr wci::LenPercent wci::LenPercent::operator*(int other) const noexcept
 {
     auto result = *this;
     return result *= other;
 }
 
-inline constexpr wci::LenPercent wci::LenPercent::operator/(int other)
+inline constexpr wci::LenPercent wci::LenPercent::operator/(int other) const
 {
     auto result = *this;
     return result /= other;
 }
 
-inline constexpr wci::LenPercent wci::LenPercent::operator%(int other)
+inline constexpr wci::LenPercent wci::LenPercent::operator%(int other) const
 {
     auto result = *this;
     return result %= other;
 }
 
-inline constexpr wci::LenPercent wci::LenPercent::operator+() noexcept
+inline constexpr wci::LenPercent wci::LenPercent::operator+() const noexcept
 {
     return *this;
 }
 
-inline constexpr wci::LenPercent wci::LenPercent::operator-()
+inline constexpr wci::LenPercent wci::LenPercent::operator-() const
 {
     if (isAbsolute())
     {
@@ -250,16 +250,16 @@ inline constexpr wci::LenPercent wci::LenPercent::operator-()
     throw std::invalid_argument("constexpr wci::LenPercent wci::operator-(const wci::LenPercent&) got invalid value");
 }
 
-inline constexpr bool wci::LenPercent::operator==(const wci::LenPercent& other) noexcept
+inline constexpr bool wci::LenPercent::operator==(const wci::LenPercent& other) const noexcept
 {
     if (isAbsolute() && other.isAbsolute())
-        return absolute() == absolute();
+        return absolute() == other.absolute();
     if (isRelative() && other.isRelative())
         return relative() == other.relative();
     return false;
 }
 
-inline constexpr bool wci::LenPercent::operator!=(const wci::LenPercent& other)
+inline constexpr bool wci::LenPercent::operator!=(const wci::LenPercent& other) const noexcept
 {
     return !(*this == other);
 }
@@ -289,7 +289,7 @@ inline constexpr wci::LenPercent wci::LenPercent::operator++(int)
     if (isAbsolute())
     {
         auto old = *this;
-        ++absolute();
+        ++*this;
         return old;
     }
     throw std::invalid_argument("constexpr wci::LenPercent& wci::operator++(wci::LenPercent&, int) got invalid value");
@@ -300,7 +300,7 @@ inline constexpr wci::LenPercent wci::LenPercent::operator--(int)
     if (isAbsolute())
     {
         auto old = *this;
-        --absolute();
+        --*this;
         return old;
     }
     throw std::invalid_argument("constexpr wci::LenPercent& wci::operator--(wci::LenPercent&, int) got invalid value");

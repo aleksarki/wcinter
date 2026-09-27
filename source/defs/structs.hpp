@@ -206,11 +206,150 @@ namespace wci
         } event;
     };
 
+    #pragma region PositionSpec
+
     struct PositionSpec
     {
         LenPercent x;
         LenPercent y;
     };
+
+    inline constexpr PositionSpec& operator+=(PositionSpec& ps, const PositionSpec& other)
+    {
+        ps.x += other.x;
+        ps.y += other.y;
+        return ps;
+    }
+    inline constexpr PositionSpec& operator+=(PositionSpec& ps, int other)
+    {
+        ps.x += other;
+        ps.y += other;
+        return ps;
+    }
+
+    inline constexpr PositionSpec& operator-=(PositionSpec& ps, const PositionSpec& other)
+    {
+        ps.x -= other.x;
+        ps.y -= other.y;
+        return ps;
+    }
+    inline constexpr PositionSpec& operator-=(PositionSpec& ps, int other)
+    {
+        ps.x -= other;
+        ps.y -= other;
+        return ps;
+    }
+
+    inline constexpr PositionSpec& operator*=(PositionSpec& ps, int other) noexcept
+    {
+        ps.x *= other;
+        ps.y *= other;
+        return ps;
+    }
+
+    inline constexpr PositionSpec& operator/=(PositionSpec& ps, int other)
+    {
+        ps.x /= other;
+        ps.y /= other;
+        return ps;
+    }
+
+    inline constexpr PositionSpec& operator%=(PositionSpec& ps, int other)
+    {
+        ps.x %= other;
+        ps.y %= other;
+        return ps;
+    }
+
+    inline constexpr PositionSpec operator+(const PositionSpec& ps, const PositionSpec& other)
+    {
+        auto result = ps;
+        return result += other;
+    }
+    inline constexpr PositionSpec operator+(const PositionSpec& ps, int other)
+    {
+        auto result = ps;
+        return result += other;
+    }
+
+    inline constexpr PositionSpec operator-(const PositionSpec& ps, const PositionSpec& other)
+    {
+        auto result = ps;
+        return result -= other;
+    }
+    inline constexpr PositionSpec operator-(const PositionSpec& ps, int other)
+    {
+        auto result = ps;
+        return result -= other;
+    }
+    
+    inline constexpr PositionSpec operator*(const PositionSpec& ps, int other) noexcept
+    {
+        auto result = ps;
+        return result *= other;
+    }
+    
+    inline constexpr PositionSpec operator/(const PositionSpec& ps, int other)
+    {
+        auto result = ps;
+        return result /= other;
+    }
+    
+    inline constexpr PositionSpec operator%(const PositionSpec& ps, int other)
+    {
+        auto result = ps;
+        return result %= other;
+    }
+
+    inline constexpr PositionSpec operator+(const PositionSpec& ps) noexcept
+    {
+        return ps;
+    }
+
+    inline constexpr PositionSpec operator-(const PositionSpec& ps)
+    {
+        return PositionSpec{ -ps.x, -ps.y };
+    }
+
+    inline constexpr bool operator==(const PositionSpec& ps, const PositionSpec& other) noexcept
+    {
+        return ps.x == other.x && ps.y == other.y;
+    }
+
+    inline constexpr bool operator!=(const PositionSpec& ps, const PositionSpec& other) noexcept
+    {
+        return !(ps == other);
+    }
+
+    inline constexpr PositionSpec& operator++(PositionSpec& ps)
+    {
+        ++ps.x;
+        ++ps.y;
+        return ps;
+    }
+
+    inline constexpr PositionSpec& operator--(PositionSpec& ps)
+    {
+        --ps.x;
+        --ps.y;
+        return ps;
+    }
+
+    inline constexpr PositionSpec operator++(PositionSpec& ps, int)
+    {
+        auto old = ps;
+        ++ps;
+        return old;
+    }
+
+    inline constexpr PositionSpec operator--(PositionSpec& ps, int)
+    {
+        auto old = ps;
+        --ps;
+        return old;
+    }
+
+    #pragma endregion
 
     struct Geometry
     {
