@@ -77,34 +77,34 @@ int main()
     std::mt19937 gen(rd());
     std::uniform_int_distribution<short> dist(1, 20);
 
-    short x = dist(gen), y = dist(gen);
-    console.textAttribute(wci::Attribute::BgColorBlack | wci::Attribute::FgColorWhite | wci::Attribute::CommonLvbReverseVideo);
-    console.cursorPosition({ x, y });
-    console.write("black|white");
+    console
+        << wci::at(dist(gen), dist(gen))
+        << (wci::Attribute::BgColorBlack | wci::Attribute::FgColorWhite | wci::Attribute::CommonLvbReverseVideo)
+        << "black|white";
     std::getchar();
 
-    x = dist(gen), y = dist(gen);
-    console.textAttribute(wci::Attribute::BgColorBlueBright | wci::Attribute::FgColorMagentaBright);
-    console.cursorPosition({ x, y });
-    console.write("blue bright|magenta bright");
+    console
+        << wci::at(dist(gen), dist(gen))
+        << (wci::Attribute::BgColorBlueBright | wci::Attribute::FgColorMagentaBright)
+        << "blue bright|magenta bright";
     std::getchar();
 
-    x = dist(gen), y = dist(gen);
-    console.textAttribute(wci::Attribute::FgColorCyan | wci::Attribute::BgColorYellowBright);
-    console.cursorPosition({ x, y });
-    console.write("yellow bright|cyan");
+    console
+        << wci::at(dist(gen), dist(gen))
+        << (wci::Attribute::FgColorCyan | wci::Attribute::BgColorYellowBright)
+        << "yellow bright|cyan";
     std::getchar();
 
-    x = dist(gen), y = dist(gen);
-    console.textAttribute(wci::Attribute::BgColorBlackBright | wci::Attribute::FgColorGreenBright);
-    console.cursorPosition({ x, y });
-    console.write("black bright|green bright");
+    console
+        << wci::at(dist(gen), dist(gen))
+        << (wci::Attribute::BgColorBlackBright | wci::Attribute::FgColorGreenBright)
+        << "black bright|green bright";
     std::getchar();
 
-    x = dist(gen), y = dist(gen);
-    console.textAttribute(wci::Attribute::BgColorMagenta | wci::Attribute::FgColorRedBright);
-    console.cursorPosition({ x, y });
-    console.write("magenta|red bright");
+    console
+        << wci::at(dist(gen), dist(gen))
+        << (wci::Attribute::BgColorMagenta | wci::Attribute::FgColorRedBright)
+        << "magenta|red bright";
     std::getchar();
 
     console.textAttribute(

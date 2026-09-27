@@ -2,10 +2,10 @@
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 
-#include <windows.h>
 #include <memory>
 #include <string>
 #include <vector>
+#include <windows.h>
 
 #include "console.hpp"
 #include "../defs/apicast.hpp"
@@ -46,13 +46,23 @@ public:
         setTextAttribute(old.attributes);
     }
 
+    void write(char character)
+    {
+        wchar_t wide = '\0';
+        MultiByteToWideChar(CP_UTF8, 0, &character, 1, &wide, 1);
+        WriteConsoleW(stdOut, &wide, 1, NULL, NULL);
+    }
+    void write(wchar_t character)
+    {
+        WriteConsoleW(stdOut, &character, 1, NULL, NULL);
+    }
     void write(const char* string)
     {
         int wideLength = MultiByteToWideChar(CP_UTF8, 0, string, -1, NULL, 0);
         if (wideLength > 0)
         {
             std::wstring wideString(wideLength, 0);
-            MultiByteToWideChar(CP_UTF8, 0, string, -1, &wideString[0], wideLength);
+            MultiByteToWideChar(CP_UTF8, 0, string, -1, wideString.data(), wideLength);  // check
             // if (!wideString.empty() && wideString.back() == L'\0')
                 // wideString.pop_back();
             write(wideString.c_str());
@@ -72,7 +82,7 @@ public:
             return L"";
         std::vector<wchar_t> buffer(length + 1, 0);
         GetConsoleTitleW(wci::api(buffer.data()), wci::api(buffer.size()));
-        return std::wstring(buffer.data());
+        return std::wstring(buffer.data(), length);
     }
     void setTitle(const std::wstring& newTitle)
     {
@@ -155,21 +165,88 @@ public:
 wci::Console::Console() : impl(std::make_unique<Impl>()) {}
 wci::Console::~Console() = default;
 
+void wci::Console::write(char character)
+{
+    impl->write(character);
+}
+void wci::Console::write(char character, wci::Attribute attributes)
+{
+    auto info = impl->getScreenBufferInfo();
+    impl->setTextAttribute(attributes);
+    impl->write(character);
+    impl->setTextAttribute(info.attributes);
+}
+void wci::Console::write(wci::Wchar character)
+{
+    impl->write(character);
+}
+void wci::Console::write(wci::Wchar character, wci::Attribute attributes)
+{
+    auto info = impl->getScreenBufferInfo();
+    impl->setTextAttribute(attributes);
+    impl->write(character);
+    impl->setTextAttribute(info.attributes);
+}
+void wci::Console::write(const wci::CharInfo& charInfo)
+{
+    auto info = impl->getScreenBufferInfo();
+    impl->setTextAttribute(charInfo.attributes);
+    impl->write(charInfo.character);
+    impl->setTextAttribute(info.attributes);
+}
 void wci::Console::write(const char* string)
 {
     impl->write(string);
+}
+void wci::Console::write(const char* string, wci::Attribute attributes)
+{
+    auto info = impl->getScreenBufferInfo();
+    impl->setTextAttribute(attributes);
+    impl->write(string);
+    impl->setTextAttribute(info.attributes);
 }
 void wci::Console::write(const std::string& string)
 {
     impl->write(string.c_str());
 }
+void wci::Console::write(const std::string& string, wci::Attribute attributes)
+{
+    auto info = impl->getScreenBufferInfo();
+    impl->setTextAttribute(attributes);
+    impl->write(string.c_str());
+    impl->setTextAttribute(info.attributes);
+}
 void wci::Console::write(const wchar_t* wstring)
 {
     impl->write(wstring);
 }
+void wci::Console::write(const wchar_t* wstring, wci::Attribute attributes)
+{
+    auto info = impl->getScreenBufferInfo();
+    impl->setTextAttribute(attributes);
+    impl->write(wstring);
+    impl->setTextAttribute(info.attributes);
+}
 void wci::Console::write(const std::wstring& wstring)
 {
     impl->write(wstring.c_str());
+}
+void wci::Console::write(const std::wstring& wstring, wci::Attribute attributes)
+{
+    auto info = impl->getScreenBufferInfo();
+    impl->setTextAttribute(attributes);
+    impl->write(wstring.c_str());
+    impl->setTextAttribute(info.attributes);
+}
+void wci::Console::write(const wci::CharString& string)
+{
+    auto info = impl->getScreenBufferInfo();
+    for (const auto& charInfo : string)  // todo optimize
+    {
+        impl->setTextAttribute(charInfo.attributes);
+        impl->write(charInfo.character);
+    }
+    impl->setTextAttribute(info.attributes);
 }
 
 std::wstring wci::Console::title() const
@@ -223,11 +300,54 @@ wci::Handle wci::Console::stdInput() const
 {
     return impl->getStdInput();
 }
+
 wci::Handle wci::Console::stdOutput() const
 {
     return impl->getStdOutput();
 }
+
 wci::Handle wci::Console::stdError() const
 {
     return impl->getStdError();
+}
+
+wci::Console& wci::Console::operator<<(const wci::Coord& position)
+{
+    cursorPosition(position);
+    return *this;
+}
+wci::Console& wci::Console::operator<<(wci::Attribute attributes)
+{
+    textAttribute(attributes);
+    return *this;
+}
+wci::Console& wci::Console::operator<<(char character)
+{
+    write(character);
+    return *this;
+}
+wci::Console& wci::Console::operator<<(wci::Wchar character)
+{
+    write(character);
+    return *this;
+}
+wci::Console& wci::Console::operator<<(const wci::CharInfo& charInfo)
+{
+    write(charInfo);
+    return *this;
+}
+wci::Console& wci::Console::operator<<(const std::string& string)
+{
+    write(string);
+    return *this;
+}
+wci::Console& wci::Console::operator<<(const std::wstring& string)
+{
+    write(string);
+    return *this;
+}
+wci::Console& wci::Console::operator<<(const CharString& string)
+{
+    write(string);
+    return *this;
 }
