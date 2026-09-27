@@ -10,6 +10,7 @@
 #include <utility>
 #include <vector>
 
+#include "consts.hpp"
 #include "enums.hpp"
 #include "structs.hpp"
 #include "types.hpp"
@@ -35,8 +36,6 @@ namespace wci
         class BasicRow;
         using Row = BasicRow<CharInfo>;
         using ConstRow = BasicRow<const CharInfo>;
-
-        static constexpr CharInfo nullChar{ 0, Attribute::No };
 
         CharMatrix();
         CharMatrix(Short x, Short y);
@@ -264,11 +263,11 @@ inline void wci::CharMatrix::resize(const wci::Coord& size, const wci::CharInfo&
 }
 inline void wci::CharMatrix::resize(wci::Short x, wci::Short y)
 {
-    resize(wci::Coord{ x, y }, nullChar);
+    resize(wci::Coord{ x, y }, wci::nullch);
 }
 inline void wci::CharMatrix::resize(const wci::Coord& size)
 {
-    resize(size, nullChar);
+    resize(size, wci::nullch);
 }
 
 inline void wci::CharMatrix::fill(wci::Wchar character, wci::Attribute attributes) noexcept
@@ -283,7 +282,7 @@ inline void wci::CharMatrix::fill(const wci::CharInfo& charInfo) noexcept
 
 inline void wci::CharMatrix::blank() noexcept
 {
-    fill(nullChar);
+    fill(wci::nullch);
 }
 
 inline constexpr bool wci::CharMatrix::within(wci::Short x, wci::Short y) const noexcept

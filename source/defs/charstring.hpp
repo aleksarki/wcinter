@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "charmatrix.hpp"
+#include "consts.hpp"
 #include "enums.hpp"
 #include "structs.hpp"
 #include "types.hpp"
@@ -30,10 +31,6 @@ namespace wci
         } inner;
 
     public:
-        static constexpr Attribute stdAttr = Attribute::BgColorBlack | Attribute::FgColorWhite;
-        static constexpr CharInfo nullChar{ 0, Attribute::No };
-        static constexpr CharInfo stdChar{ 0, stdAttr };
-
         CharString();
         CharString(Short size);
         CharString(Short size, Wchar character, Attribute attributes);
@@ -157,7 +154,7 @@ inline wci::CharString::CharString(const std::wstring& string)
         throw std::length_error("CharString::CharString() got a string too long");
     resize(static_cast<wci::Short>(length));
     for (wci::Short i = 0; i < string.length(); ++i)
-        inner.string[i] = wci::CharInfo{ string[i], stdAttr };
+        inner.string[i] = wci::CharInfo{ string[i], wci::normal };
 }
 inline wci::CharString::CharString(const std::wstring& string, wci::Attribute attributes)
 {
@@ -176,7 +173,7 @@ inline wci::CharString::CharString(const wci::Wchar* string)
         throw std::length_error("CharString::CharString() got a string too long");
     resize(static_cast<wci::Short>(length));
     for (wci::Short i = 0; i < length; ++i)
-        inner.string[i] = wci::CharInfo{ string[i], stdAttr };
+        inner.string[i] = wci::CharInfo{ string[i], wci::normal };
 }
 inline wci::CharString::CharString(const wci::Wchar* string, wci::Attribute attributes)
 {
@@ -194,7 +191,7 @@ inline wci::CharString::CharString(const wci::Wchar string[], wci::Short length)
         throw std::invalid_argument("CharString::CharString() got a negative size.");
     resize(length);
     for (wci::Short i = 0; i < length; ++i)
-        inner.string[i] = wci::CharInfo{ string[i], stdAttr };
+        inner.string[i] = wci::CharInfo{ string[i], wci::normal };
 }
 inline wci::CharString::CharString(const wci::Wchar string[], wci::Short length, wci::Attribute attributes)
 {
@@ -273,7 +270,7 @@ inline void wci::CharString::resize(wci::Short size, const wci::CharInfo& charIn
 }
 inline void wci::CharString::resize(wci::Short size)
 {
-    resize(size, stdChar);
+    resize(size, wci::normalch);
 }
 
 inline void wci::CharString::fill(wci::Wchar character, wci::Attribute attributes) noexcept
@@ -287,7 +284,7 @@ inline void wci::CharString::fill(const wci::CharInfo& charInfo) noexcept
 
 inline void wci::CharString::blank() noexcept
 {
-    fill(stdChar);
+    fill(wci::normalch);
 }
 
 inline constexpr bool wci::CharString::within(wci::Short i) const noexcept

@@ -79,6 +79,7 @@ namespace wci {
 
         Console& operator<<(const Coord& position);
         Console& operator<<(Attribute attributes);
+        Console& operator<<(Reset);
         Console& operator<<(char character);
         Console& operator<<(Wchar character);
         Console& operator<<(const CharInfo& charInfo);
@@ -90,13 +91,6 @@ namespace wci {
         class Impl;
         std::unique_ptr<Impl> impl;
     };
-
-    constexpr Coord at(Short x, Short y) noexcept;
-}
-
-inline constexpr wci::Coord wci::at(wci::Short x, wci::Short y) noexcept
-{
-    return wci::Coord{ x, y };
 }
 
 #endif  // WCI_SOURCE_CORE_CONSOLE_HPP

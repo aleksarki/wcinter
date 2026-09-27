@@ -321,6 +321,11 @@ wci::Console& wci::Console::operator<<(wci::Attribute attributes)
     textAttribute(attributes);
     return *this;
 }
+wci::Console& wci::Console::operator<<(wci::Reset)
+{
+    textAttribute(wci::normal);
+    return *this;
+}
 wci::Console& wci::Console::operator<<(char character)
 {
     write(character);

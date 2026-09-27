@@ -19,6 +19,12 @@ int main()
     console.write(L"tête\n");
     console.write(L"τεςτ\n");
 
+    console << wci::Attribute::FgColorRed    << "Error"     << wci::nline;
+    console << wci::Attribute::FgColorYellow << "Attention" << wci::nline;
+    console << wci::Attribute::FgColorGreen  << "Ok"        << wci::nline;
+    console << wci::Attribute::FgColorBlue   << "Info"      << wci::nline;
+    console << wci::normal;
+
     print("Current title is", console.title());
     console.title(L"New Title");
 
