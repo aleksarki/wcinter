@@ -148,7 +148,7 @@ public:
 
         for (const auto& [id, widget] : widgets)
         {
-            wci::Coord widgetSize = widget->render().size();  // fixme make size() property of Widget(object)
+            wci::Coord widgetSize = widget->size();
             wci::Coord startPoint = calculateWidgetStart(
                 widget->position().x, widget->position().y, widgetSize, widget->anchor()
             );   
@@ -207,7 +207,7 @@ public:
 
     std::size_t placeWidget(const wci::LenPercent& x, const wci::LenPercent& y, wci::Widget& widget, wci::Anchor anchor)
     {
-        wci::Coord widgetSize = widget.render().size();  // todo make size() property of Widget(object)
+        wci::Coord widgetSize = widget.size();
         wci::Coord startPoint = calculateWidgetStart(x, y, widgetSize, anchor);
 
         widget.position(wci::PositionSpec{ x, y });
@@ -218,9 +218,10 @@ public:
             if (placed == &widget)  // this widget has already been placed
                 return id;
 
-        widgets.push_back(std::make_pair(++widgetCounter, &widget));
+        auto id = widgetCounter++;
+        widgets.push_back(std::make_pair(id, &widget));
         widget.placed(true);
-        return widgetCounter;
+        return id;
     }
     std::size_t placeWidget(const wci::LenPercent& x, const wci::LenPercent& y, wci::Widget&& widget, wci::Anchor anchor)
     {
@@ -333,7 +334,7 @@ std::size_t wci::Window::place(const wci::PositionSpec& position, wci::Widget& w
 {
     return impl->placeWidget(position.x, position.y, widget, anchor);
 }
-std::size_t wci::Window::place(const wci::PositionSpec &position, wci::Widget&& widget, wci::Anchor anchor)
+std::size_t wci::Window::place(const wci::PositionSpec& position, wci::Widget&& widget, wci::Anchor anchor)
 {
     return impl->placeWidget(position.x, position.y, std::move(widget), anchor);
 }

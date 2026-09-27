@@ -4,15 +4,15 @@
 
 #include <concepts>
 #include <functional>
+#include <memory>
+#include <string>
 
 #include "charmatrix.hpp"
+#include "charstring.hpp"
 #include "enums.hpp"
 #include "lenpercent.hpp"
-#include "literals.hpp"
 #include "structs.hpp"
 #include "types.hpp"
-
-using namespace wci::literals;
 
 namespace wci
 {
@@ -22,9 +22,10 @@ namespace wci
     concept renderable = requires(const T& t)
     {
         { t.toMatrix() } -> std::convertible_to<CharMatrix>;
-        // { t.size() } -> std::convertible_to<Coord>;
+        { t.size() } -> std::convertible_to<Coord>;
     };
 
+    // NB: if widget constructs from an lvalue-object, the object must outlive the widget!
     class Widget
     {
         friend class Window;
@@ -38,17 +39,30 @@ namespace wci
             bool placed;
         } inner;
         std::function<CharMatrix()> renderer;
-        // std::function<Coord()> sizer;
+        std::function<Coord()> sizer;
+
+        // ctor for delegating and filling inner struct with default values
+        Widget(std::function<CharMatrix()> renderer, std::function<Coord()> sizer);
 
     public:
-        template<renderable T>
-        Widget(T& object);
+        template<renderable R>
+        Widget(R& object);
+        Widget(Wchar character);
+        Widget(const CharInfo& charInfo);
+        Widget(CharInfo&& charInfo);
+        Widget(const std::wstring& string);
+        Widget(std::wstring&& string);
+        Widget(const CharString& charString);
+        Widget(CharString&& charString);
+        Widget(CharMatrix&& charMatrix);
 
         Widget(const Widget&) = delete;
         Widget& operator=(const Widget&) = delete;
 
         Widget(Widget&&) = default;
         Widget& operator=(Widget&&) = default;
+
+        Coord size() const noexcept;
 
         const PositionSpec& position() const noexcept;
 
@@ -65,7 +79,7 @@ namespace wci
 
     private:
         // these are private for now
-        // todo make position() and absolute() public
+        // todo make position() and absolute() public through Window
 
         void position(const PositionSpec& newPosition) noexcept;
 
@@ -77,17 +91,68 @@ namespace wci
     };
 }
 
-template<wci::renderable T>
-inline wci::Widget::Widget(T& object) :
+inline wci::Widget::Widget(std::function<wci::CharMatrix()> renderer, std::function<wci::Coord()> sizer) :
     inner{
-        wci::PositionSpec{ 0_abs, 0_abs },
+        wci::PositionSpec{ wci::LenPercent(wci::Short(0)), wci::LenPercent(wci::Short(0)) },
         wci::Anchor::TopLeft,
         wci::Coord{ 0, 0 },
         true,
         false
     },
-    renderer([&object]() -> wci::CharMatrix { return object.toMatrix(); })
+    renderer(std::move(renderer)),
+    sizer(std::move(sizer))
 {}
+template<wci::renderable R>
+inline wci::Widget::Widget(R& object) : wci::Widget(
+    [&object]() -> wci::CharMatrix { return object.toMatrix(); },
+    [&object]() -> wci::Coord { return object.size(); }
+)
+{}
+inline wci::Widget::Widget(wci::Wchar character) : wci::Widget(
+    [matrix = wci::CharMatrix(wci::Coord{ 1, 1 }, wci::CharInfo{ character, wci::normal })]() -> wci::CharMatrix { return matrix; },
+    [size = wci::Coord{ 1, 1 }]() -> wci::Coord { return size; }
+)
+{}
+inline wci::Widget::Widget(const CharInfo& charInfo) : wci::Widget(
+    [&charInfo]() -> wci::CharMatrix { return wci::CharMatrix(wci::Coord{ 1, 1 }, charInfo); },
+    [size = wci::Coord{ 1, 1 }]() -> wci::Coord { return size; }
+)
+{}
+inline wci::Widget::Widget(wci::CharInfo&& charInfo) : wci::Widget(
+    [matrix = wci::CharMatrix(wci::Coord{ 1, 1 }, charInfo)]() -> wci::CharMatrix { return matrix; },
+    [size = wci::Coord{ 1, 1 }]() -> wci::Coord { return size; }
+)
+{}
+inline wci::Widget::Widget(const std::wstring& string) : wci::Widget(
+    [&string]() -> wci::CharMatrix { return wci::CharString(string).toMatrix(); },
+    [&string]() -> wci::Coord { return wci::Coord{ wci::CharString(string).size(), 1 }; }
+)
+{}
+inline wci::Widget::Widget(std::wstring&& string) : wci::Widget(
+    [matrix = wci::CharString(string).toMatrix()]() -> wci::CharMatrix { return matrix; },
+    [size = wci::Coord{ wci::CharString(string).size(), 1 }]() -> wci::Coord { return size; }
+)
+{}
+inline wci::Widget::Widget(const CharString& charString) : wci::Widget (
+    [&charString]() -> wci::CharMatrix { return charString.toMatrix(); },
+    [&charString]() -> wci::Coord { return wci::Coord{ charString.size(), 1 }; }
+)
+{}
+inline wci::Widget::Widget(CharString&& charString) : wci::Widget(
+    [matrix = charString.toMatrix()]() -> wci::CharMatrix { return matrix; },
+    [size = wci::Coord{ charString.size(), 1 }]() -> wci::Coord { return size; }
+)
+{}
+inline wci::Widget::Widget(CharMatrix&& charMatrix) : wci::Widget(
+    [charMatrix]() -> wci::CharMatrix { return charMatrix; },
+    [size = charMatrix.size()]() -> wci::Coord { return size; }
+)
+{}
+
+inline wci::Coord wci::Widget::size() const noexcept
+{
+    return sizer();
+}
 
 inline const wci::PositionSpec& wci::Widget::position() const noexcept
 {
