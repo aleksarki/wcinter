@@ -14,7 +14,7 @@ namespace wci::literals
             throw std::invalid_argument("constexpr wci::LenPercent wci::literals::operator\"\"_abs(unsigned long long) got invalid value");
         return LenPercent(static_cast<Short>(value));
     }
-    constexpr LenPercent operator""_a(unsigned long long value)
+    constexpr LenPercent operator""_a(unsigned long long value)  // alias for wci::LenPercent wci::literals::operator ""_abs
     {
         return operator""_abs(value);
     }
@@ -29,10 +29,20 @@ namespace wci::literals
     constexpr LenPercent operator""_rel(long double value)
     {
         if (!(0. <= value && value <= 1.))
-            throw std::invalid_argument("wci::literals::operator\"\"_rel() got invalid value");
+            throw std::invalid_argument("constexpr wci::LenPercent wci::literals::operator\"\"_rel(long double value) got invalid value");
         return LenPercent(static_cast<double>(value));
     }
-    constexpr LenPercent operator""_r(long double value)
+    constexpr LenPercent operator""_rel(unsigned long long value)
+    {
+        if (!(0 <= value && value <= 100))
+            throw std::invalid_argument("constexpr wci::LenPercent wci::literals::operator\"\"_rel(unsigned long long value) got invalid value");
+        return LenPercent(static_cast<double>(value / 100.));
+    }
+    constexpr LenPercent operator""_r(long double value)  // alias for wci::LenPercent wci::literals::operator ""_rel
+    {
+        return operator""_rel(value);
+    }
+    constexpr LenPercent operator""_r(unsigned long long value)  // alias for wci::LenPercent wci::literals::operator ""_rel
     {
         return operator""_rel(value);
     }

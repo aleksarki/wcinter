@@ -17,6 +17,7 @@ namespace wci
         std::variant<Short, double> value;
 
     public:
+        constexpr LenPercent();
         constexpr explicit LenPercent(Short sh);
         constexpr explicit LenPercent(double d);
 
@@ -73,9 +74,10 @@ namespace wci
 
 }
 
+inline constexpr wci::LenPercent::LenPercent() : value(wci::Short(0))
+{}
 inline constexpr wci::LenPercent::LenPercent(wci::Short sh) : value(sh)
 {}
-
 inline constexpr wci::LenPercent::LenPercent(double d) : value(d)
 {}
 
@@ -93,7 +95,6 @@ inline constexpr wci::Short& wci::LenPercent::absolute()
 {
     return std::get<Short>(value);
 }
-
 inline constexpr wci::Short wci::LenPercent::absolute() const
 {
     return std::get<Short>(value);
@@ -103,7 +104,6 @@ inline constexpr double& wci::LenPercent::relative()
 {
     return std::get<double>(value);
 }
-
 inline constexpr double wci::LenPercent::relative() const
 {
     return std::get<double>(value);
