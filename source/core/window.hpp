@@ -51,8 +51,10 @@ namespace wci {
 
         std::size_t place(const LenPercent& x, const LenPercent& y, Widget& widget, Anchor anchor = Anchor::TopLeft);
         std::size_t place(const LenPercent& x, const LenPercent& y, Widget&& widget, Anchor anchor = Anchor::TopLeft);
+        std::size_t place(const LenPercent& x, const LenPercent& y, std::size_t id, Anchor anchor = Anchor::TopLeft);
         std::size_t place(const PositionSpec& position, Widget& widget, Anchor anchor = Anchor::TopLeft);
         std::size_t place(const PositionSpec& position, Widget&& widget, Anchor anchor = Anchor::TopLeft);
+        std::size_t place(const PositionSpec& position, std::size_t id, Anchor anchor = Anchor::TopLeft);
 
         void unplace(std::size_t id);
         void unplace(Widget& widget);
@@ -60,7 +62,8 @@ namespace wci {
         bool placed(std::size_t id) const noexcept;
         bool placed(const Widget& widget) const noexcept;
 
-        // todo implement placed widget by id; get by id
+        Widget& widget(std::size_t id);
+        const Widget& widget(std::size_t id) const;
 
     private:
         class Impl;
