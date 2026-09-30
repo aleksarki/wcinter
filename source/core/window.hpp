@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "../defs.hpp"
 #include "console.hpp"
@@ -49,12 +50,34 @@ namespace wci {
         void put(Short x, Short y, const CharMatrix& matrix);
         void put(const Coord& position, const CharMatrix& matrix);
 
+        // place on window
         std::size_t place(const LenPercent& x, const LenPercent& y, Widget& widget, Anchor anchor = Anchor::TopLeft);
         std::size_t place(const LenPercent& x, const LenPercent& y, Widget&& widget, Anchor anchor = Anchor::TopLeft);
         std::size_t place(const LenPercent& x, const LenPercent& y, std::size_t id, Anchor anchor = Anchor::TopLeft);
         std::size_t place(const PositionSpec& position, Widget& widget, Anchor anchor = Anchor::TopLeft);
         std::size_t place(const PositionSpec& position, Widget&& widget, Anchor anchor = Anchor::TopLeft);
         std::size_t place(const PositionSpec& position, std::size_t id, Anchor anchor = Anchor::TopLeft);
+
+        // place on parent (by id)
+        std::size_t place(const LenPercent& x, const LenPercent& y, std::size_t parentId, Widget& child, Anchor anchor = Anchor::TopLeft);
+        std::size_t place(const LenPercent& x, const LenPercent& y, std::size_t parentId, Widget&& child, Anchor anchor = Anchor::TopLeft);
+        std::size_t place(const LenPercent& x, const LenPercent& y, std::size_t parentId, std::size_t childId, Anchor anchor = Anchor::TopLeft);
+        std::size_t place(const PositionSpec& position, std::size_t parentId, Widget& child, Anchor anchor = Anchor::TopLeft);
+        std::size_t place(const PositionSpec& position, std::size_t parentId, Widget&& child, Anchor anchor = Anchor::TopLeft);
+        std::size_t place(const PositionSpec& position, std::size_t parentId, std::size_t childId, Anchor anchor = Anchor::TopLeft);
+
+        // place on parent (by reference)
+        std::size_t place(const LenPercent& x, const LenPercent& y, Widget& parent, Widget& child, Anchor anchor = Anchor::TopLeft);
+        std::size_t place(const LenPercent& x, const LenPercent& y, Widget& parent, Widget&& child, Anchor anchor = Anchor::TopLeft);
+        std::size_t place(const LenPercent& x, const LenPercent& y, Widget& parent, std::size_t childId, Anchor anchor = Anchor::TopLeft);
+        std::size_t place(const PositionSpec& position, Widget& parent, Widget& child, Anchor anchor = Anchor::TopLeft);
+        std::size_t place(const PositionSpec& position, Widget& parent, Widget&& child, Anchor anchor = Anchor::TopLeft);
+        std::size_t place(const PositionSpec& position, Widget& parent, std::size_t childId, Anchor anchor = Anchor::TopLeft);
+
+        void move(const LenPercent& x, const LenPercent& y, Widget& widget, Anchor anchor = Anchor::TopLeft);
+        void move(const LenPercent& x, const LenPercent& y, std::size_t id, Anchor anchor = Anchor::TopLeft);
+        void move(const PositionSpec& position, Widget& widget, Anchor anchor = Anchor::TopLeft);
+        void move(const PositionSpec& position, std::size_t id, Anchor anchor = Anchor::TopLeft);
 
         void unplace(std::size_t id);
         void unplace(Widget& widget);
@@ -64,6 +87,12 @@ namespace wci {
 
         Widget& widget(std::size_t id);
         const Widget& widget(std::size_t id) const;
+
+        std::size_t id(const Widget& widget) const;
+
+        const std::vector<Widget*>& children() const;
+        const std::vector<Widget*>& children(const Widget& widget) const;
+        const std::vector<Widget*>& children(std::size_t id) const;
 
     private:
         class Impl;
