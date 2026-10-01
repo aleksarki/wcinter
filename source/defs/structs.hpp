@@ -22,8 +22,6 @@ namespace wci
         constexpr bool operator!=(const Coord& other) const noexcept;
     };
 
-    constexpr Coord at(Short x, Short y) noexcept;
-
     /*
      * Structure `SmallRect` defines coordinates of upper-left and lower-right corners of a rectangle.
      */
@@ -233,11 +231,6 @@ inline constexpr bool wci::Coord::operator==(const wci::Coord& other) const noex
 inline constexpr bool wci::Coord::operator!=(const wci::Coord& other) const noexcept
 {
     return !(*this == other);
-}
-
-inline constexpr wci::Coord wci::at(wci::Short x, wci::Short y) noexcept
-{
-    return wci::Coord{ x, y };
 }
 
 inline constexpr bool wci::SmallRect::operator==(const wci::SmallRect& other) const noexcept

@@ -8,7 +8,7 @@
 #include <windows.h>
 
 #include "console.hpp"
-#include "../defs/apicast.hpp"
+#include "../util/apicast.hpp"
 
 class wci::Console::Impl
 {

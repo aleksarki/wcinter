@@ -1,6 +1,6 @@
 #pragma once
-#ifndef WCI_SOURCE_DEFS_APICAST_HPP
-#define WCI_SOURCE_DEFS_APICAST_HPP
+#ifndef WCI_SOURCE_UTIL_APICAST_HPP
+#define WCI_SOURCE_UTIL_APICAST_HPP
 
 #include <windows.h>
 #include "../defs.hpp"
@@ -10,42 +10,42 @@ namespace wci
     #pragma region api
     #pragma region types
 
-    constexpr WCHAR api(Wchar wch)
+    inline constexpr WCHAR api(Wchar wch)
     {
         return static_cast<WCHAR>(wch);
     }
 
-    constexpr SHORT api(Short sh)
+    inline constexpr SHORT api(Short sh)
     {
         return static_cast<SHORT>(sh);
     }
 
-    constexpr WORD api(Word w)
+    inline constexpr WORD api(Word w)
     {
         return static_cast<WORD>(w);
     }
 
-    constexpr DWORD api(Dword dw)
+    inline constexpr DWORD api(Dword dw)
     {
         return static_cast<DWORD>(dw);
     }
 
-    constexpr HANDLE api(Handle h)
+    inline constexpr HANDLE api(Handle h)
     {
         return static_cast<HANDLE>(h);
     }
 
-    constexpr BOOL api(bool b)
+    inline constexpr BOOL api(bool b)
     {
         return static_cast<BOOL>(b);
     }
 
-    constexpr UINT api(unsigned int ui)
+    inline constexpr UINT api(unsigned int ui)
     {
         return static_cast<UINT>(ui);
     }
 
-    constexpr DWORD api(size_t s)
+    inline constexpr DWORD api(size_t s)
     {
         return static_cast<DWORD>(s);
     }
@@ -73,57 +73,57 @@ namespace wci
 
     #pragma region enums
 
-    constexpr DWORD api(StdHandle sh)
+    inline constexpr DWORD api(StdHandle sh)
     {
         return static_cast<DWORD>(sh);
     }
 
-    constexpr int api(InputMode im)
+    inline constexpr int api(InputMode im)
     {
         return static_cast<int>(im);
     }
 
-    constexpr int api(CodePage cp)
+    inline constexpr int api(CodePage cp)
     {
         return static_cast<int>(cp);
     }
 
-    constexpr WORD api(Attribute a)
+    inline constexpr WORD api(Attribute a)
     {
         return static_cast<WORD>(a);
     }
 
-    constexpr DWORD api(GenericRights gr)
+    inline constexpr DWORD api(GenericRights gr)
     {
         return static_cast<DWORD>(gr);
     }
 
-    constexpr DWORD api(FileAccessRights far_)
+    inline constexpr DWORD api(FileAccessRights far_)
     {
         return static_cast<DWORD>(far_);
     }
 
-    constexpr DWORD api(ControlKeyState cks)
+    inline constexpr DWORD api(ControlKeyState cks)
     {
         return static_cast<DWORD>(cks);
     }
 
-    constexpr DWORD api(ButtonState bs)
+    inline constexpr DWORD api(ButtonState bs)
     {
         return static_cast<DWORD>(bs);
     }
 
-    constexpr DWORD api(EventFlag ef)
+    inline constexpr DWORD api(EventFlag ef)
     {
         return static_cast<DWORD>(ef);
     }
 
-    constexpr WORD api(EventType et)
+    inline constexpr WORD api(EventType et)
     {
         return static_cast<WORD>(et);
     }
 
-    constexpr WORD api(VirtualKey vk)
+    inline constexpr WORD api(VirtualKey vk)
     {
         return static_cast<WORD>(vk);
     }
@@ -132,17 +132,17 @@ namespace wci
 
     #pragma region structs
 
-    constexpr COORD api(const Coord& c)
+    inline constexpr COORD api(const Coord& c)
     {
         return COORD{ api(c.x), api(c.y) };
     }
 
-    constexpr SMALL_RECT api(const SmallRect& sr)
+    inline constexpr SMALL_RECT api(const SmallRect& sr)
     {
         return SMALL_RECT{ api(sr.left), api(sr.top), api(sr.right), api(sr.bottom) };
     }
 
-    constexpr CHAR_INFO api(const CharInfo& chi)
+    inline constexpr CHAR_INFO api(const CharInfo& chi)
     {
         CHAR_INFO info;
         info.Char.UnicodeChar = api(chi.character);
@@ -150,12 +150,12 @@ namespace wci
         return info;
     }
 
-    constexpr CONSOLE_CURSOR_INFO api(const CursorInfo& ci)
+    inline constexpr CONSOLE_CURSOR_INFO api(const CursorInfo& ci)
     {
         return CONSOLE_CURSOR_INFO{ api(ci.size), api(ci.visible) };
     }
 
-    constexpr CONSOLE_SCREEN_BUFFER_INFO api(const ScreenBufferInfo& sbi)
+    inline constexpr CONSOLE_SCREEN_BUFFER_INFO api(const ScreenBufferInfo& sbi)
     {
         return CONSOLE_SCREEN_BUFFER_INFO{
             api(sbi.size),
@@ -166,7 +166,7 @@ namespace wci
         };
     }
 
-    constexpr KEY_EVENT_RECORD api(const KeyEventRecord ker)
+    inline constexpr KEY_EVENT_RECORD api(const KeyEventRecord ker)
     {
         KEY_EVENT_RECORD record;
         record.bKeyDown = api(ker.keyDown);
@@ -178,7 +178,7 @@ namespace wci
         return record;
     }
 
-    constexpr MOUSE_EVENT_RECORD api(const MouseEventRecord& mer)
+    inline constexpr MOUSE_EVENT_RECORD api(const MouseEventRecord& mer)
     {
         return MOUSE_EVENT_RECORD{
             api(mer.mousePosition),
@@ -188,22 +188,22 @@ namespace wci
         };
     }
 
-    constexpr WINDOW_BUFFER_SIZE_RECORD api(const WindowBufferSizeRecord& wbsr)
+    inline constexpr WINDOW_BUFFER_SIZE_RECORD api(const WindowBufferSizeRecord& wbsr)
     {
         return WINDOW_BUFFER_SIZE_RECORD{ api(wbsr.size) };
     }
 
-    constexpr MENU_EVENT_RECORD api(const MenuEventRecord& mer)
+    inline constexpr MENU_EVENT_RECORD api(const MenuEventRecord& mer)
     {
         return MENU_EVENT_RECORD{ api(mer.commandId) };
     }
 
-    constexpr FOCUS_EVENT_RECORD api(const FocusEventRecord& fer)
+    inline constexpr FOCUS_EVENT_RECORD api(const FocusEventRecord& fer)
     {
         return FOCUS_EVENT_RECORD{ api(fer.setFocus) };
     }
 
-    constexpr INPUT_RECORD api(const InputRecord& ir)
+    inline constexpr INPUT_RECORD api(const InputRecord& ir)
     {
         INPUT_RECORD record;
         record.EventType = api(ir.eventType);
@@ -234,37 +234,37 @@ namespace wci
     #pragma region wci
     #pragma region types
 
-    constexpr Wchar wci(WCHAR wch)
+    inline constexpr Wchar wci(WCHAR wch)
     {
         return static_cast<Wchar>(wch);
     }
 
-    constexpr Short wci(SHORT sh)
+    inline constexpr Short wci(SHORT sh)
     {
         return static_cast<Short>(sh);
     }
 
-    constexpr Word wci(WORD w)
+    inline constexpr Word wci(WORD w)
     {
         return static_cast<Word>(w);
     }
 
-    constexpr Dword wci(DWORD dw)
+    inline constexpr Dword wci(DWORD dw)
     {
         return static_cast<Dword>(dw);
     }
 
-    constexpr Handle wci(HANDLE h)
+    inline constexpr Handle wci(HANDLE h)
     {
         return static_cast<Handle>(h);
     }
 
-    constexpr bool wci(BOOL b)
+    inline constexpr bool wci(BOOL b)
     {
         return static_cast<bool>(b);
     }
 
-    constexpr unsigned int wci(UINT ui)
+    inline constexpr unsigned int wci(UINT ui)
     {
         return static_cast<unsigned int>(ui);
     }
@@ -292,27 +292,27 @@ namespace wci
 
     #pragma region structs
 
-    constexpr Coord wci(const COORD& c)
+    inline constexpr Coord wci(const COORD& c)
     {
         return Coord{ wci(c.X), wci(c.Y) };
     }
 
-    constexpr SmallRect wci(const SMALL_RECT& sr)
+    inline constexpr SmallRect wci(const SMALL_RECT& sr)
     {
         return SmallRect{ wci(sr.Left), wci(sr.Top), wci(sr.Right), wci(sr.Bottom) };
     }
 
-    constexpr CharInfo wci(const CHAR_INFO& chi)
+    inline constexpr CharInfo wci(const CHAR_INFO& chi)
     {
         return CharInfo{ wci(chi.Char.UnicodeChar), Attribute(chi.Attributes) };
     }
 
-    constexpr CursorInfo wci(const CONSOLE_CURSOR_INFO& cci)
+    inline constexpr CursorInfo wci(const CONSOLE_CURSOR_INFO& cci)
     {
         return CursorInfo{ wci(cci.dwSize), wci(cci.bVisible) };
     }
 
-    constexpr ScreenBufferInfo wci(const CONSOLE_SCREEN_BUFFER_INFO& csbi)
+    inline constexpr ScreenBufferInfo wci(const CONSOLE_SCREEN_BUFFER_INFO& csbi)
     {
         return ScreenBufferInfo{
             wci(csbi.dwSize),
@@ -323,7 +323,7 @@ namespace wci
         };
     }
 
-    constexpr KeyEventRecord wci(const KEY_EVENT_RECORD& ker)
+    inline constexpr KeyEventRecord wci(const KEY_EVENT_RECORD& ker)
     {
         return KeyEventRecord{
             wci(ker.bKeyDown),
@@ -335,7 +335,7 @@ namespace wci
         };
     }
 
-    constexpr MouseEventRecord wci(const MOUSE_EVENT_RECORD& mer)
+    inline constexpr MouseEventRecord wci(const MOUSE_EVENT_RECORD& mer)
     {
         return MouseEventRecord{
             wci(mer.dwMousePosition),
@@ -345,22 +345,22 @@ namespace wci
         };
     }
 
-    constexpr WindowBufferSizeRecord wci(const WINDOW_BUFFER_SIZE_RECORD& wbsr)
+    inline constexpr WindowBufferSizeRecord wci(const WINDOW_BUFFER_SIZE_RECORD& wbsr)
     {
         return WindowBufferSizeRecord{ wci(wbsr.dwSize) };
     }
 
-    constexpr MenuEventRecord wci(const MENU_EVENT_RECORD& mer)
+    inline constexpr MenuEventRecord wci(const MENU_EVENT_RECORD& mer)
     {
         return MenuEventRecord{ wci(mer.dwCommandId) };
     }
 
-    constexpr FocusEventRecord wci(const FOCUS_EVENT_RECORD& fer)
+    inline constexpr FocusEventRecord wci(const FOCUS_EVENT_RECORD& fer)
     {
         return FocusEventRecord{ wci(fer.bSetFocus) };
     }
 
-    constexpr InputRecord wci(const INPUT_RECORD& ir)
+    inline constexpr InputRecord wci(const INPUT_RECORD& ir)
     {
         InputRecord record;
         record.eventType = EventType(ir.EventType);
@@ -389,4 +389,4 @@ namespace wci
     #pragma endregion
 }
 
-#endif  // WCI_SOURCE_DEFS_APICAST_HPP
+#endif  // WCI_SOURCE_UTIL_APICAST_HPP

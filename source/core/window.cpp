@@ -12,7 +12,8 @@
 #include <windows.h>
 
 #include "window.hpp"
-#include "../defs/apicast.hpp"
+#include "../util.hpp"
+#include "../util/apicast.hpp"
 
 class wci::Window::Impl
 {
@@ -87,64 +88,6 @@ public:
     }
 
 private:
-    wci::Coord calculateStackeeStart(
-        const wci::PositionSpec& stackeePosition, wci::Coord baseSize, wci::Coord stackeeSize, wci::Anchor stackeeAnchor
-    ) const noexcept  // todo move to utils file
-    {
-        wci::Coord anchorPoint{ 0, 0 }, startPoint{ 0, 0 };  // ffs just in case
-
-        if (stackeePosition.x.isAbsolute())
-            anchorPoint.x = stackeePosition.x.absolute();
-        else if (stackeePosition.x.isRelative())
-            anchorPoint.x = static_cast<wci::Short>(std::lround(stackeePosition.x.relative() * baseSize.x));
-
-        if (stackeePosition.y.isAbsolute())
-            anchorPoint.y = stackeePosition.y.absolute();
-        else if (stackeePosition.y.isRelative())
-            anchorPoint.y = static_cast<wci::Short>(std::lround(stackeePosition.y.relative() * baseSize.y));
-
-        switch (stackeeAnchor)
-        {
-        case wci::Anchor::TopLeft:
-            startPoint = anchorPoint;
-            break;
-        case wci::Anchor::Top:
-            startPoint.x = anchorPoint.x - stackeeSize.x / 2;
-            startPoint.y = anchorPoint.y;
-            break;
-        case wci::Anchor::TopRight:
-            startPoint.x = anchorPoint.x - stackeeSize.x;
-            startPoint.y = anchorPoint.y;
-            break;
-        case wci::Anchor::Right:
-            startPoint.x = anchorPoint.x - stackeeSize.x;
-            startPoint.y = anchorPoint.y - stackeeSize.y / 2;
-            break;
-        case wci::Anchor::BottomRight:
-            startPoint.x = anchorPoint.x - stackeeSize.x;
-            startPoint.y = anchorPoint.y - stackeeSize.y;
-            break;
-        case wci::Anchor::Bottom:
-            startPoint.x = anchorPoint.x - stackeeSize.x / 2;
-            startPoint.y = anchorPoint.y - stackeeSize.y;
-            break;
-        case wci::Anchor::BottomLeft:
-            startPoint.x = anchorPoint.x;
-            startPoint.y = anchorPoint.y - stackeeSize.y;
-            break;
-        case wci::Anchor::Left:
-            startPoint.x = anchorPoint.x;
-            startPoint.y = anchorPoint.y - stackeeSize.y / 2;
-            break;
-        case wci::Anchor::Center:
-            startPoint.x = anchorPoint.x - stackeeSize.x / 2;
-            startPoint.y = anchorPoint.y - stackeeSize.y / 2;
-            break;
-        }
-
-        return startPoint;
-    }
-
     wci::CharMatrix renderPlacedWidget(const WidgetPlacement& placed) const
     {
         auto matrix = placed.widget->render();

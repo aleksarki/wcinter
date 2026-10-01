@@ -4,6 +4,7 @@
 #include <string>
 #include "../source/core.hpp"
 #include "../source/defs.hpp"
+#include "../source/util.hpp"
 
 int main()
 {
