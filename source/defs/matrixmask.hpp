@@ -49,6 +49,8 @@ namespace wci
 
         explicit operator bool() const noexcept;  // any value
 
+        constexpr MatrixMask operator~() const noexcept;
+
         constexpr bool any() const noexcept;
 
         constexpr bool all() const noexcept;
@@ -169,6 +171,13 @@ inline constexpr void wci::MatrixMask::flip(const wci::Coord& position)
 inline wci::MatrixMask::operator bool() const noexcept
 {
     return any();
+}
+
+inline constexpr wci::MatrixMask wci::MatrixMask::operator~() const noexcept
+{
+    auto mask = *this;
+    mask.flip();
+    return mask;
 }
 
 inline constexpr bool wci::MatrixMask::any() const noexcept
