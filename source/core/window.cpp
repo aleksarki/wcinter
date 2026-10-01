@@ -4,11 +4,11 @@
 
 #include <algorithm>
 #include <cmath>
-#include <ranges>
 #include <list>
 #include <stdexcept>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 #include <windows.h>
 
 #include "window.hpp"
@@ -30,7 +30,6 @@ private:
     wci::Handle oldScreenBuffer;
     wci::CharMatrix framebuf;                                     // framebuf is used to forgo allocating matrices anew each rendering
     std::unordered_map<std::size_t, WidgetPlacement> placements;  // id -> widget placement info
-    std::unordered_map<wci::Widget*, std::size_t> ids;            // widget -> id
     std::vector<wci::Widget*> roots;                              // widgets placed directly on the window
     std::list<wci::Widget> orphans;                               // list because it does not invalidate pointers on relocation and deletion
     std::size_t counter = 0;
@@ -153,7 +152,7 @@ private:
         {
             if (!child->visible())
                 continue;
-            auto& childPlaced = placements.at(ids.at(child));
+            auto& childPlaced = placements.at(child->id());
             wci::Coord startPoint = calculateStackeeStart(
                 child->position(), placed.widget->size(), child->size(), child->anchor()
             );
@@ -176,7 +175,7 @@ public:
 
         for (auto* root : roots)
         {
-            auto& placed = placements.at(ids.at(root));
+            auto& placed = placements.at(root->id());
             auto* widget = placed.widget;
             if (!widget->visible())
                 continue;
@@ -227,7 +226,7 @@ public:
     }
     bool widgetPlaced(const wci::Widget& widget) const noexcept
     {
-        return ids.contains(&const_cast<wci::Widget&>(widget));
+        return widget.placed() && placements.contains(widget.id());
     }
 
     wci::Widget& getWidget(std::size_t id)
@@ -239,11 +238,41 @@ public:
         return *placements.at(id).widget;
     }
 
-    std::size_t getId(const wci::Widget& widget) const
+private:
+    std::size_t newPlacement(wci::Widget& widget)
     {
-        return ids.at(&const_cast<wci::Widget&>(widget));
+        auto id = counter++;
+        placements[id] = WidgetPlacement{ &widget, std::vector<wci::Widget*>() };
+        return id;
     }
 
+    wci::Widget& newOrphan(wci::Widget&& widget)
+    {
+        orphans.push_back(std::move(widget));
+        return orphans.back();
+    }
+
+    void addRoot(wci::Widget& widget)
+    {
+        roots.push_back(&widget);
+    }
+
+    void removeRoot(const wci::Widget& widget)
+    {
+        std::erase(roots, &widget);
+    }
+
+    void addChild(wci::Widget& child, wci::Widget& parent)
+    {
+        placements.at(parent.id()).children.push_back(&child);
+    }
+
+    void removeChild(const wci::Widget& child, const wci::Widget& parent)
+    {
+        std::erase(placements.at(parent.id()).children, &child);
+    }
+
+public:
     // for maybe new widgets; placement on window directly
     std::size_t placeWidget(const wci::PositionSpec& position, wci::Widget& widget, wci::Anchor anchor, wci::Window* window)
     {
@@ -251,35 +280,28 @@ public:
         widget.anchor(anchor);
         widget.absolute(calculateStackeeStart(position, size(), widget.size(), anchor));
 
-        if (ids.contains(&widget))  // this widget has already been placed
-        {
-            if (widget.parentIsWidget())  // widget has been previously placed on another widget
-            {
-                auto& parentPlaced = placements.at(getId(widget.parent()));
-                std::erase(parentPlaced.children, &widget);
-                roots.push_back(&widget);
-                widget.window(window);
-            }
-            return ids.at(&widget);
-        }
+        if (widget.parentIsWindow())  // already placed on the window
+            return widget.id();
+        else if (widget.parentIsWidget())  // widget has been previously placed on another widget
+            removeChild(widget, widget.parent());
+        else  // new widget
+            widget.id(newPlacement(widget));
+        addRoot(widget);
+        widget.windowp(window);
 
-        // new widget
-        auto id = counter++;
-        placements[id] = WidgetPlacement{ &widget, std::vector<wci::Widget*>() };
-        ids[&widget] = id;
-        roots.push_back(&widget);
-        widget.window(window);
-        return id;
+        return widget.id();
     }
     // for new widgets; placement on window directly
     std::size_t placeWidget(const wci::PositionSpec& position, wci::Widget&& widget, wci::Anchor anchor, wci::Window* window)
     {
-        orphans.push_back(std::move(widget));
-        return placeWidget(position, orphans.back(), anchor, window);
+        return placeWidget(position, newOrphan(std::move(widget)), anchor, window);
     }
     // for already placed widgets; placement on window directly
     std::size_t placeWidget(const wci::PositionSpec& position, std::size_t id, wci::Anchor anchor, wci::Window* window)
     {
+        if (!widgetPlaced(id))
+            throw std::invalid_argument("Such widget does not exist");
+    
         auto& widget = getWidget(id);
         widget.position(position);
         widget.anchor(anchor);
@@ -287,86 +309,78 @@ public:
     
         if (widget.parentIsWidget())  // widget has been previously placed on another widget
         {
-            auto& parentPlaced = placements.at(getId(widget.parent()));
-            std::erase(parentPlaced.children, &widget);
-            roots.push_back(&widget);
-            widget.window(window);
+            removeChild(widget, widget.parent());
+            addRoot(widget);
+            widget.windowp(window);
         }
 
         return id;
     }
     // for maybe new widgets; placement on another widget
-    std::size_t placeWidget(const wci::PositionSpec& position, std::size_t parentId, wci::Widget& widget, wci::Anchor anchor)
+    std::size_t placeWidget(const wci::PositionSpec& position, std::size_t parentId, wci::Widget& child, wci::Anchor anchor)
     {
-        if (widgetPlaced(widget) && parentId == getId(widget))
-            throw std::invalid_argument("Widget cannot be its own parent");
+        if (!widgetPlaced(parentId))
+            throw std::invalid_argument("Such parent widget does not exist");
 
-        auto& parentPlaced = placements.at(parentId);
-        auto* parentWidget = parentPlaced.widget;
-        widget.position(position);
-        widget.anchor(anchor);
-        widget.absolute(calculateStackeeStart(position, parentPlaced.widget->size(), widget.size(), anchor));
+        auto& parent = getWidget(parentId);
+        if (child.placed())
+            for (auto* parentp = &parent; parentp; parentp = parentp->parentp())  // do the check all the way up
+                if (parentp->id() == child.id())
+                    throw std::invalid_argument("Widget cannot be its own parent");
 
-        if (ids.contains(&widget))  // this widget has already been placed
+        child.position(position);
+        child.anchor(anchor);
+        child.absolute(calculateStackeeStart(position, parent.size(), child.size(), anchor));
+
+        if (child.parentIsWindow())  // widget has been previously placed on window directly
+            removeRoot(child);
+        else if (child.parentIsWidget())
         {
-            if (widget.parentIsWindow())  // widget has been previously placed on window directly
-            {
-                std::erase(roots, &widget);
-                parentPlaced.children.push_back(&widget);
-                widget.parent(parentPlaced.widget);
-            }
-            else if (getId(widget.parent()) != parentId)  // widget has been placed on a different parent
-            {
-                auto& oldParentPlaced = placements.at(getId(widget.parent()));  // todo implement Widget::id()
-                auto& newParentPlaced = placements.at(parentId);
-                std::erase(oldParentPlaced.children, &widget);
-                newParentPlaced.children.push_back(&widget);
-                widget.parent(newParentPlaced.widget);
-            }
-            return ids.at(&widget);
+            if (child.parent().id() == parentId)  // widget's already on the right parent
+                return child.id();
+            removeChild(child, child.parent());  // widget has been placed on a different parent
         }
+        else  // new widget
+            child.id(newPlacement(child));
+        addChild(child, parent);
+        child.parentp(&parent);
 
-        // new widget
-        auto id = counter++;
-        placements[id] = WidgetPlacement{ &widget, std::vector<wci::Widget*>() };  // nb parentPlaced can get corrupted by a potential rehash of widgets
-        ids[&widget] = id;
-        placements.at(parentId).children.push_back(&widget);
-        widget.parent(parentWidget);
-        return id;
+        return child.id();
     }
     // for new widgets; placement on another widget
     std::size_t placeWidget(const wci::PositionSpec& position, std::size_t parentId, wci::Widget&& widget, wci::Anchor anchor)
     {
-        orphans.push_back(std::move(widget));
-        return placeWidget(position, parentId, orphans.back(), anchor);
+        return placeWidget(position, parentId, newOrphan(std::move(widget)), anchor);
     }
     // for already placed widgets; placement on another widget
-    std::size_t placeWidget(const wci::PositionSpec& position, std::size_t parentId, std::size_t childId, wci::Anchor anchor)
+    std::size_t placeWidget(const wci::PositionSpec& position, std::size_t parentId, std::size_t childId, wci::Anchor anchor)  // review what happens when circular dependecy?
     {
-        if (parentId == childId)
-            throw std::invalid_argument("Widget cannot be its own parent");
+        if (!widgetPlaced(childId))
+            throw std::invalid_argument("Such child widget does not exist");
+        if (!widgetPlaced(parentId))
+            throw std::invalid_argument("Such parent widget does not exist");
 
-        auto& widget = getWidget(childId);
-        widget.position(position);
-        widget.anchor(anchor);
+        auto& child = getWidget(childId);
+        auto& parent = getWidget(parentId);
+        if (child.placed())
+            for (auto* parentp = &parent; parentp; parentp = parentp->parentp())  // do the check all the way up
+                if (parentp->id() == childId)
+                    throw std::invalid_argument("Widget cannot be its own parent");
 
-        if (widget.parentIsWindow())  // widget has been previously placed on window directly
+        child.position(position);
+        child.anchor(anchor);
+        child.absolute(calculateStackeeStart(position, parent.size(), child.size(), anchor));
+
+        if (child.parentIsWindow())  // widget has been previously placed on window directly
+            removeRoot(child);
+        else if (child.parentIsWidget())
         {
-            auto& parentPlaced = placements.at(parentId);
-            std::erase(roots, &widget);
-            parentPlaced.children.push_back(&widget);
-            widget.parent(parentPlaced.widget);
+            if (child.parent().id() == parentId)  // widget's already on the right parent
+                return childId;
+            removeChild(child, child.parent());  // widget has been placed on a different parent
         }
-        else if (getId(widget.parent()) != parentId)  // widget has been placed on a different parent
-        {
-            auto& oldParentPlaced = placements.at(getId(widget.parent()));  // todo implement Widget::id()
-            auto& newParentPlaced = placements.at(parentId);
-            std::erase(oldParentPlaced.children, &widget);
-            newParentPlaced.children.push_back(&widget);
-            widget.parent(newParentPlaced.widget);
-        }
-
-        widget.absolute(calculateStackeeStart(position, widget.parent().size(), widget.size(), anchor));  // now we are sure widget has right parent
+        addChild(child, parent);
+        child.parentp(&parent);
 
         return childId;
     }
@@ -400,7 +414,7 @@ public:
             std::erase(roots, widget);
         else
         {
-            auto& parentPlaced = placements.at(getId(widget->parent()));  // parentPlaced == placed inside unplaceWidget(*child)
+            auto& parentPlaced = placements.at(widget->parent().id());  // parentPlaced == placed inside unplaceWidget(*child)
             std::erase(parentPlaced.children, widget);
         }
 
@@ -408,15 +422,14 @@ public:
             unplaceWidget(*child);
 
         placements.erase(id);
-        ids.erase(widget);
         widget->unplace();
         removeIfOrphan(widget);
     }
     void unplaceWidget(wci::Widget& widget)
     {
-        if (!widgetPlaced(widget))
+        if (!widget.placed())
             throw std::invalid_argument("Such widget does not exist");
-        unplaceWidget(getId(widget));
+        unplaceWidget(widget.id());
     }
 
     const std::vector<wci::Widget*>& getRoots() const
@@ -553,27 +566,27 @@ std::size_t wci::Window::place(const wci::PositionSpec& position, std::size_t pa
 
 std::size_t wci::Window::place(const wci::LenPercent& x, const wci::LenPercent& y, wci::Widget& parent, wci::Widget& child, wci::Anchor anchor)
 {
-    return impl->placeWidget(wci::PositionSpec{ x, y }, impl->getId(parent), child, anchor);
+    return impl->placeWidget(wci::PositionSpec{ x, y }, parent.id(), child, anchor);
 }
 std::size_t wci::Window::place(const wci::LenPercent& x, const wci::LenPercent& y, wci::Widget& parent, wci::Widget&& child, wci::Anchor anchor)
 {
-    return impl->placeWidget(wci::PositionSpec{ x, y }, impl->getId(parent), std::move(child), anchor);
+    return impl->placeWidget(wci::PositionSpec{ x, y }, parent.id(), std::move(child), anchor);
 }
 std::size_t wci::Window::place(const wci::LenPercent& x, const wci::LenPercent& y, wci::Widget& parent, std::size_t childId, wci::Anchor anchor)
 {
-    return impl->placeWidget(wci::PositionSpec{ x, y }, impl->getId(parent), childId, anchor);
+    return impl->placeWidget(wci::PositionSpec{ x, y }, parent.id(), childId, anchor);
 }
 std::size_t wci::Window::place(const wci::PositionSpec& position, wci::Widget& parent, wci::Widget& child, wci::Anchor anchor)
 {
-    return impl->placeWidget(position, impl->getId(parent), child, anchor);
+    return impl->placeWidget(position, parent.id(), child, anchor);
 }
 std::size_t wci::Window::place(const wci::PositionSpec& position, wci::Widget& parent, wci::Widget&& child, wci::Anchor anchor)
 {
-    return impl->placeWidget(position, impl->getId(parent), std::move(child), anchor);
+    return impl->placeWidget(position, parent.id(), std::move(child), anchor);
 }
 std::size_t wci::Window::place(const wci::PositionSpec& position, wci::Widget& parent, std::size_t childId, wci::Anchor anchor)
 {
-    return impl->placeWidget(position, impl->getId(parent), childId, anchor);
+    return impl->placeWidget(position, parent.id(), childId, anchor);
 }
 
 void wci::Window::move(const wci::LenPercent& x, const wci::LenPercent& y, wci::Widget& widget, wci::Anchor anchor)
@@ -622,7 +635,7 @@ const wci::Widget& wci::Window::widget(std::size_t id) const
 
 std::size_t wci::Window::id(const wci::Widget& widget) const
 {
-    return impl->getId(widget);
+    return widget.id();
 }
 
 const std::vector<wci::Widget*>& wci::Window::children() const
@@ -631,7 +644,7 @@ const std::vector<wci::Widget*>& wci::Window::children() const
 }
 const std::vector<wci::Widget*>& wci::Window::children(const wci::Widget& widget) const
 {
-    return impl->getChildren(impl->getId(widget));
+    return impl->getChildren(widget.id());
 }
 const std::vector<wci::Widget*>& wci::Window::children(std::size_t id) const
 {

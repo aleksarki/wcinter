@@ -97,6 +97,9 @@ namespace wci {
     private:
         class Impl;
         std::unique_ptr<Impl> impl;
+
+        // idea implement widgetsAt(position)
+        // todo implement blank(), fill(charInfo)
     };
 }
 

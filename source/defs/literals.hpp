@@ -34,7 +34,7 @@ namespace wci::literals
     }
     constexpr LenPercent operator""_rel(unsigned long long value)
     {
-        if (!(0 <= value && value <= 100))
+        if (value > 100)
             throw std::invalid_argument("constexpr wci::LenPercent wci::literals::operator\"\"_rel(unsigned long long value) got invalid value");
         return LenPercent(static_cast<double>(value / 100.));
     }

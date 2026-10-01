@@ -2,14 +2,16 @@
 #ifndef WCI_SOURCE_DEFS_WIDGET_HPP
 #define WCI_SOURCE_DEFS_WIDGET_HPP
 
+#include <cassert>
+#include <cstddef>
 #include <concepts>
 #include <functional>
-#include <memory>
 #include <string>
 #include <variant>
 
 #include "charmatrix.hpp"
 #include "charstring.hpp"
+#include "consts.hpp"
 #include "enums.hpp"
 #include "lenpercent.hpp"
 #include "structs.hpp"
@@ -38,6 +40,7 @@ namespace wci
             Coord absolute;  // calculated position of the top left point
             bool visible;
             std::variant<std::monostate, Window*, Widget*> parent;
+            std::size_t id;  // wci::npos if widget is not placed
         } inner;
         std::function<CharMatrix()> renderer;
         std::function<Coord()> sizer;
@@ -82,6 +85,11 @@ namespace wci
         void absolute(Coord newAbsolute) noexcept;
 
     public:
+        std::size_t id() const noexcept;
+    private:
+        void id(std::size_t newId) noexcept;
+
+    public:
         bool visible() const noexcept;
         void visible(bool newVisibility) noexcept;
 
@@ -92,24 +100,22 @@ namespace wci
         bool parentIsWidget() const noexcept;
 
         Window& window() const;  // should check prior whether has parent window
-    private:
-        void window(Window* newWindow) noexcept;
 
-    public:
         Window* windowp() const;  // get nullptr if does not have parent window
-
-        Widget& parent() const;  // should check prior whether has parent widget
     private:
-        void parent(Widget* newParent) noexcept;
+        void windowp(Window* newWindowPtr) noexcept;
 
     public:
-        Widget* parentp() const;  // get nullptr if does not have parent widget
+        Widget& parent() const;  // should check prior whether has parent widget
 
+        Widget* parentp() const;  // get nullptr if does not have parent widget
     private:
+        void parentp(Widget* newParentPtr) noexcept;
+
         void unplace() noexcept;
 
+        // todo in widget.cpp:
         // todo make position(), anchor() and unplace() public through Window
-        // todo implement std::size_t id() const
         // todo implement const std::vector<wci::Widget*>& children() const
     };
 }
@@ -120,7 +126,8 @@ inline wci::Widget::Widget(std::function<wci::CharMatrix()> renderer, std::funct
         wci::Anchor::TopLeft,
         wci::Coord{ 0, 0 },
         true,
-        std::monostate{}
+        std::monostate{},
+        wci::npos
     },
     renderer(std::move(renderer)),
     sizer(std::move(sizer))
@@ -209,6 +216,16 @@ inline void wci::Widget::absolute(wci::Coord newAbsolute) noexcept
     inner.absolute = newAbsolute;
 }
 
+inline std::size_t wci::Widget::id() const noexcept
+{
+    return inner.id;
+}
+
+inline void wci::Widget::id(std::size_t newId) noexcept
+{
+    inner.id = newId;
+}
+
 inline bool wci::Widget::visible() const noexcept
 {
     return inner.visible;
@@ -237,10 +254,6 @@ inline wci::Window& wci::Widget::window() const
 {
     return *std::get<wci::Window*>(inner.parent);  // wonderful that this works
 }
-inline void wci::Widget::window(wci::Window* newWindow) noexcept
-{
-    inner.parent = newWindow;
-}
 
 inline wci::Window* wci::Widget::windowp() const
 {
@@ -248,14 +261,15 @@ inline wci::Window* wci::Widget::windowp() const
         return std::get<wci::Window*>(inner.parent);
     return nullptr;
 }
+inline void wci::Widget::windowp(wci::Window* newWindow) noexcept
+{
+    assert(newWindow != nullptr);
+    inner.parent = newWindow;
+}
 
 inline wci::Widget& wci::Widget::parent() const
 {
     return *std::get<wci::Widget*>(inner.parent);
-}
-inline void wci::Widget::parent(wci::Widget* newParent) noexcept
-{
-    inner.parent = newParent;
 }
 
 inline wci::Widget* wci::Widget::parentp() const
@@ -264,10 +278,16 @@ inline wci::Widget* wci::Widget::parentp() const
         return std::get<wci::Widget*>(inner.parent);
     return nullptr;
 }
+inline void wci::Widget::parentp(wci::Widget* newParent) noexcept
+{
+    assert(newParent != nullptr);
+    inner.parent = newParent;
+}
 
 inline void wci::Widget::unplace() noexcept
 {
     inner.parent = std::monostate{};
+    inner.id = wci::npos;
 }
 
 #endif  // WCI_SOURCE_DEFS_WIDGET_HPP
