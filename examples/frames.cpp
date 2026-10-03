@@ -11,8 +11,6 @@ int main()
     wci::Window window;
     wci::FrameLoop loop(window.console());
 
-    window.console().cursorInfo({ 1, false });  // todo make this automatic
-
     wci::Coord point{ 0, 0 };
     wci::CharMatrix plate(100, 8);
     int counter = 0;

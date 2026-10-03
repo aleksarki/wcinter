@@ -29,7 +29,7 @@ namespace wci {
 
         Coord size() const;
 
-        void resize();  // idea rename to fit
+        void refit();
 
         void render();
 

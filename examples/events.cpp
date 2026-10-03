@@ -7,8 +7,6 @@ int main()
     wci::Console& console = window.console();
     wci::EventLoop eventLoop(console);
 
-    console.cursorInfo({ 1, false });
-
     bool proceed = true;
     eventLoop.bindKeyEvent([&](const wci::KeyEventRecord& keyEvent)
     {

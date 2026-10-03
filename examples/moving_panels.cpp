@@ -4,7 +4,6 @@
 int main()
 {
     wci::Window window;
-    window.console().cursorInfo({ 1, false });
 
     wci::CharMatrix panelBottom(20, 10), panelTop(10, 5);
     panelBottom.fill(L' ', wci::Attribute::BgColorBlue);

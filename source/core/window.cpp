@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
 #include <list>
 #include <stdexcept>
 #include <unordered_map>
@@ -30,13 +31,15 @@ private:
     } inner;
     wci::Handle oldScreenBuffer;
     wci::CharMatrix framebuf;                                     // framebuf is used to forgo allocating matrices anew each rendering
+    wci::CharMatrix lastbuf;                                      // contains last rendered frame
     std::unordered_map<std::size_t, WidgetPlacement> placements;  // id -> widget placement info
     std::vector<wci::Widget*> roots;                              // widgets placed directly on the window
     std::list<wci::Widget> orphans;                               // list because it does not invalidate pointers on relocation and deletion
     std::size_t counter = 0;
+    bool forceRedraw;
 
 public:
-    Impl() : inner{ wci::Console(), wci::CharMatrix(0, 0) }, framebuf()
+    Impl() : inner{ wci::Console(), wci::CharMatrix(0, 0) }, framebuf(), lastbuf(), forceRedraw(true)
     {
         inner.matrix.resize(inner.console.screenBufferInfo().size);
         oldScreenBuffer = inner.console.activeScreenBuffer();
@@ -46,8 +49,9 @@ public:
             NULL,
             CONSOLE_TEXTMODE_BUFFER,
             NULL
-        );
+        );  // todo implement static Console::createSceenBuffer()
         inner.console.activeScreenBuffer(wci::wci(handle));
+        inner.console.cursorInfo(wci::CursorInfo{ 1, false });  // hide the cursor
     }
     ~Impl()
     {
@@ -77,7 +81,7 @@ public:
         return matrix().size();
     }
 
-    void resize()  // idea optimize this
+    void refit()
     {
         auto newSize = console().screenBufferInfo().size;
         if (newSize == size())
@@ -108,12 +112,16 @@ private:
 public:
     void render()
     {
-        resize();
+        refit();
         if (matrix().empty())
             return;
 
-        if (framebuf.size() != size())  
+        if (framebuf.size() != size())  // resize happened
+        {
             framebuf.resize(size());
+            lastbuf.resize(size());
+            forceRedraw = true;
+        }
         std::copy(matrix().data(), matrix().data() + size().x * size().y, framebuf.data());
 
         for (auto* root : roots)
@@ -129,16 +137,40 @@ public:
             framebuf.inlay(startPoint, renderPlacedWidget(placed));
         }
 
+        wci::SmallRect bbox;
+        if (forceRedraw)
+        {
+            bbox = wci::SmallRect{ 0, 0, size().x, size().y };
+            forceRedraw = false;
+        }
+        else
+        {
+            auto mask = framebuf.difference(lastbuf);
+            auto bboxResult = mask.boundingBox();
+            if(!bboxResult.has_value())
+                return;        
+            bbox = bboxResult.value();
+        }
+
+        std::size_t length = bbox.right - bbox.left;
+        for (wci::Short i = bbox.top; i < bbox.bottom; ++i)
+        {
+            const auto* source = framebuf.rowData(i) + bbox.left;
+            auto* dest = lastbuf.rowData(i) + bbox.left;
+            std::copy(source, source + length, dest);  // todo implement CharMatrix:: copy(from, to, other), inlay(mask, other)
+        }
+
         SMALL_RECT rect{
-            0, 0,
-            wci::api(size().x) - 1,
-            wci::api(size().y) - 1
+            wci::api(bbox.left),
+            wci::api(bbox.top),
+            wci::api(bbox.right) - 1,
+            wci::api(bbox.bottom) - 1
         };
         WriteConsoleOutputW(
             wci::api(console().stdOutput()),  // same as console().activeScreenBuffer()
             wci::api(framebuf.data()),
             wci::api(framebuf.size()),
-            COORD{ 0, 0 },
+            COORD{ rect.Left, rect.Top },
             &rect
         );
     }
@@ -412,9 +444,9 @@ wci::Coord wci::Window::size() const
     return impl->size();
 }
 
-void wci::Window::resize()
+void wci::Window::refit()
 {
-    impl->resize();
+    impl->refit();
 }
 
 void wci::Window::render()
