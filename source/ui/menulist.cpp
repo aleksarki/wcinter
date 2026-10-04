@@ -107,21 +107,21 @@ const wci::CharMatrix& wci::MenuList::toMatrix() const
 
     if (showTipPrev() && tipCharPrev())  // draw tips
     {
-        bufferCache.buffer.put(center.x, 0, wci::CharInfo{ wci::chars::arrowUp, backgroundCharacter().attributes });
+        bufferCache.buffer.put(center.x, 0, wci::CharInfo{ wci::chars::upwardsArrow, backgroundCharacter().attributes });
         bufferCache.buffer.put(center.x, 1, *tipCharPrev());
     }
     else if (showTipPrev())
-        bufferCache.buffer.put(center.x, 0, wci::CharInfo{ wci::chars::arrowUp, backgroundCharacter().attributes });
+        bufferCache.buffer.put(center.x, 0, wci::CharInfo{ wci::chars::upwardsArrow, backgroundCharacter().attributes });
     else if (tipCharPrev())
         bufferCache.buffer.put(center.x, 0, *tipCharPrev());
 
     if (showTipNext() && tipCharNext())
     {
         bufferCache.buffer.put(center.x, dimensions.y - 2, *tipCharNext());
-        bufferCache.buffer.put(center.x, dimensions.y - 1, wci::CharInfo{ wci::chars::arrowDown, backgroundCharacter().attributes });
+        bufferCache.buffer.put(center.x, dimensions.y - 1, wci::CharInfo{ wci::chars::downwardsArrow, backgroundCharacter().attributes });
     }
     else if (showTipNext())
-        bufferCache.buffer.put(center.x, dimensions.y - 1, wci::CharInfo{ wci::chars::arrowDown, backgroundCharacter().attributes });
+        bufferCache.buffer.put(center.x, dimensions.y - 1, wci::CharInfo{ wci::chars::downwardsArrow, backgroundCharacter().attributes });
     else if (tipCharNext())
         bufferCache.buffer.put(center.x, dimensions.y - 1, *tipCharNext());
 
