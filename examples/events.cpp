@@ -8,11 +8,11 @@ int main()
     wci::EventLoop eventLoop(console);
 
     bool proceed = true;
-    eventLoop.bindKeyEvent([&](const wci::KeyEventRecord& keyEvent)
+    eventLoop.bindKeyEvent([&](const wci::KeyEvent& keyEvent)
     {
-        static wci::Coord position{ 0, 0 };
-        static const wci::CharInfo black{ ' ', wci::Attribute::No };
-        static const wci::CharInfo character{ '#', wci::Attribute::FgColorCyanBright };
+        static wci::Point position{ 0, 0 };
+        static const wci::CharCell black{ ' ', wci::Attribute::No };
+        static const wci::CharCell character{ '#', wci::Attribute::FgColorCyanBright };
 
         window.put(position, black);
         if (!keyEvent.keyDown)

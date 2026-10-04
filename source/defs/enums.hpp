@@ -369,11 +369,11 @@ namespace wci
 
     enum class EventType : Word
     {
-        KeyEvent =              0x0001,  // Event contains key event record
-        MouseEvent =            0x0002,  // Event contains mouse event record
-        WindowBufferSizeEvent = 0x0004,  // Event contains window change event record
-        MenuEvent =             0x0008,  // Event contains menu event record
-        FocusEvent =            0x0010   // Event contains focus change
+        KeyEvent =                0x0001,  // Event contains key event record
+        MouseEvent =              0x0002,  // Event contains mouse event record
+        WindowBufferResizeEvent = 0x0004,  // Event contains window change event record
+        MenuEvent =               0x0008,  // Event contains menu event record
+        FocusEvent =              0x0010   // Event contains focus change
     };
 
     #pragma endregion

@@ -24,7 +24,7 @@ namespace wci {
         void write(char character, Attribute attributes);
         void write(Wchar character);
         void write(Wchar character, Attribute attributes);
-        void write(const CharInfo& charInfo);
+        void write(const CharCell& cell);
         void write(const char* string);
         void write(const char* string, Attribute attributes);
         void write(const std::string& string);
@@ -62,14 +62,14 @@ namespace wci {
         CursorInfo cursorInfo() const;
         void cursorInfo(const CursorInfo& info);
 
-        void cursorPosition(const Coord& position);
+        void cursorPosition(const Point& position);
 
         Handle activeScreenBuffer() const;
         void activeScreenBuffer(Handle handle);
 
         void textAttribute(Attribute attributes);
 
-        void readInput(InputRecord inputBuffer[], Dword inputBufferLength, Dword* eventsRead);
+        void readInput(InputEvent inputBuffer[], Dword inputBufferLength, Dword* eventsRead);
 
         Handle stdInput() const;
 
@@ -77,12 +77,12 @@ namespace wci {
 
         Handle stdError() const;
 
-        Console& operator<<(const Coord& position);
+        Console& operator<<(const Point& position);
         Console& operator<<(Attribute attributes);
         Console& operator<<(Reset);
         Console& operator<<(char character);
         Console& operator<<(Wchar character);
-        Console& operator<<(const CharInfo& charInfo);
+        Console& operator<<(const CharCell& cell);
         Console& operator<<(const std::string& string);
         Console& operator<<(const std::wstring& string);
         Console& operator<<(const CharString& string);

@@ -18,9 +18,9 @@ private:
     wci::Console& console;
     std::forward_list<std::function<void()>> onTickBindings;
     std::forward_list<std::function<void()>> onEventBindings;
-    std::forward_list<std::function<void(const wci::KeyEventRecord&)>> keyEventBindings;
-    std::forward_list<std::function<void(const wci::MouseEventRecord&)>> mouseEventBindings;
-    std::forward_list<std::function<void(const wci::WindowBufferSizeRecord&)>> resizeEventBindings;
+    std::forward_list<std::function<void(const wci::KeyEvent&)>> keyEventBindings;
+    std::forward_list<std::function<void(const wci::MouseEvent&)>> mouseEventBindings;
+    std::forward_list<std::function<void(const wci::WindowBufferResizeEvent&)>> resizeEventBindings;
     bool proceed;  // idea make atomic
     struct {
         std::chrono::milliseconds frameTime;
@@ -64,17 +64,17 @@ public:
         onEventBindings.push_front(std::move(callback));
     }
 
-    void bindOnKeyEvent(std::function<void(const KeyEventRecord&)> callback)
+    void bindOnKeyEvent(std::function<void(const KeyEvent&)> callback)
     {
         keyEventBindings.push_front(std::move(callback));
     }
 
-    void bindOnMouseEvent(std::function<void(const MouseEventRecord&)> callback)
+    void bindOnMouseEvent(std::function<void(const MouseEvent&)> callback)
     {
         mouseEventBindings.push_front(std::move(callback));
     }
 
-    void bindOnResizeEvent(std::function<void(const WindowBufferSizeRecord&)> callback)
+    void bindOnResizeEvent(std::function<void(const WindowBufferResizeEvent&)> callback)
     {
         resizeEventBindings.push_front(std::move(callback));
     }
@@ -84,7 +84,7 @@ public:
         proceed = true;
         auto nextTime = std::chrono::steady_clock::now();
 
-        wci::InputRecord inputBuffer[128];
+        wci::InputEvent inputBuffer[128];
         wci::Dword eventsNum = 0, eventsRead = 0;
         bool handled;
 
@@ -111,7 +111,7 @@ public:
                         handled = true;
                         break;
 
-                    case wci::EventType::WindowBufferSizeEvent:
+                    case wci::EventType::WindowBufferResizeEvent:
                         for (const auto& callback : resizeEventBindings)
                             callback(inputBuffer[i].event.windowBufferSizeEvent);
                         handled = true;
@@ -169,17 +169,17 @@ void wci::FrameLoop::bindOnEvents(std::function<void()> callback)
     impl->bindOnEvents(std::move(callback));
 }
 
-void wci::FrameLoop::bindOnKeyEvent(std::function<void(const wci::KeyEventRecord &)> callback)
+void wci::FrameLoop::bindOnKeyEvent(std::function<void(const wci::KeyEvent &)> callback)
 {
     impl->bindOnKeyEvent(std::move(callback));
 }
 
-void wci::FrameLoop::bindOnMouseEvent(std::function<void(const wci::MouseEventRecord&)> callback)
+void wci::FrameLoop::bindOnMouseEvent(std::function<void(const wci::MouseEvent&)> callback)
 {
     impl->bindOnMouseEvent(std::move(callback));
 }
 
-void wci::FrameLoop::bindOnResizeEvent(std::function<void(const wci::WindowBufferSizeRecord&)> callback)
+void wci::FrameLoop::bindOnResizeEvent(std::function<void(const wci::WindowBufferResizeEvent&)> callback)
 {
     impl->bindOnResizeEvent(std::move(callback));
 }

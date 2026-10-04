@@ -20,8 +20,8 @@ namespace wci
     inline constexpr Wchar tab = L'\t';
     inline constexpr Wchar zero = L'\0';
 
-    inline constexpr CharInfo normalch{ zero, normal };
-    inline constexpr CharInfo nullch{ zero, Attribute::No };
+    inline constexpr CharCell normalch{ zero, normal };
+    inline constexpr CharCell nullch{ zero, Attribute::No };
 
     inline constexpr std::size_t npos(-1);
 

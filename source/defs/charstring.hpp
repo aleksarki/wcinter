@@ -27,14 +27,14 @@ namespace wci
     private:
         struct {
             Short size;
-            std::vector<CharInfo> string;
+            std::vector<CharCell> string;
         } inner;
 
     public:
         CharString();
         CharString(Short size);
         CharString(Short size, Wchar character, Attribute attributes);
-        CharString(Short size, const CharInfo& charInfo);
+        CharString(Short size, const CharCell& cell);
         CharString(const std::wstring& string);
         CharString(const std::wstring& string, Attribute attributes);
         CharString(const Wchar* string);
@@ -42,28 +42,28 @@ namespace wci
         CharString(const Wchar string[], Short length);
         CharString(const Wchar string[], Short length, Attribute attributes);
 
-        CharInfo& at(Short i);
-        const CharInfo& at(Short i) const;
+        CharCell& at(Short i);
+        const CharCell& at(Short i) const;
 
-        constexpr CharInfo& operator[](Short i) noexcept;
-        constexpr const CharInfo& operator[](Short i) const noexcept;
+        constexpr CharCell& operator[](Short i) noexcept;
+        constexpr const CharCell& operator[](Short i) const noexcept;
 
         void put(Short i, Wchar character, Attribute attributes);
-        void put(Short i, const CharInfo& charInfo);
+        void put(Short i, const CharCell& cell);
 
-        constexpr CharInfo* data() noexcept;
-        constexpr const CharInfo* data() const noexcept;
+        constexpr CharCell* data() noexcept;
+        constexpr const CharCell* data() const noexcept;
 
         constexpr bool empty() const noexcept;
 
         constexpr Short size() const noexcept;
 
         void resize(Short size, Wchar character, Attribute attributes);
-        void resize(Short size, const CharInfo& charInfo);
+        void resize(Short size, const CharCell& cell);
         void resize(Short size);
 
         void fill(Wchar character, Attribute attributes) noexcept;
-        void fill(const CharInfo& charInfo) noexcept;
+        void fill(const CharCell& cell) noexcept;
 
         void blank() noexcept;
 
@@ -93,11 +93,11 @@ namespace wci
         CharString slice(Short i1, Short i2) const;
 
         void append(Wchar character, Attribute attributes);
-        void append(const CharInfo& charInfo);
+        void append(const CharCell& cell);
         void append(const CharString& string);
 
         void prepend(Wchar character, Attribute attributes);
-        void prepend(const CharInfo& charInfo);
+        void prepend(const CharCell& cell);
         void prepend(const CharString& string);
 
         CharString operator+(const CharString& other) const;
@@ -110,15 +110,15 @@ namespace wci
 
         CharMatrix toMatrix() const;
 
-        constexpr CharInfo* begin() noexcept;
-        constexpr const CharInfo* begin() const noexcept;
+        constexpr CharCell* begin() noexcept;
+        constexpr const CharCell* begin() const noexcept;
 
-        constexpr const CharInfo* cbegin() const noexcept;
+        constexpr const CharCell* cbegin() const noexcept;
 
-        constexpr CharInfo* end() noexcept;
-        constexpr const CharInfo* end() const noexcept;
+        constexpr CharCell* end() noexcept;
+        constexpr const CharCell* end() const noexcept;
 
-        constexpr const CharInfo* cend() const noexcept;
+        constexpr const CharCell* cend() const noexcept;
 
         // idea write iterators for characters and attributes separately
         // idea write methods for setting text/attributes
@@ -141,11 +141,11 @@ inline wci::CharString::CharString(wci::Short size, wci::Wchar character, wci::A
         throw std::invalid_argument("CharString::CharString() got a negative size.");
     resize(size, character, attributes);
 }
-inline wci::CharString::CharString(wci::Short size, const wci::CharInfo& charInfo)
+inline wci::CharString::CharString(wci::Short size, const wci::CharCell& cell)
 {
     if (size < 0)
         throw std::invalid_argument("CharString::CharString() got a negative size.");
-    resize(size, charInfo);
+    resize(size, cell);
 }
 inline wci::CharString::CharString(const std::wstring& string)
 {
@@ -154,7 +154,7 @@ inline wci::CharString::CharString(const std::wstring& string)
         throw std::length_error("CharString::CharString() got a string too long");
     resize(static_cast<wci::Short>(length));
     for (wci::Short i = 0; i < string.length(); ++i)
-        inner.string[i] = wci::CharInfo{ string[i], wci::normal };
+        inner.string[i] = wci::CharCell{ string[i], wci::normal };
 }
 inline wci::CharString::CharString(const std::wstring& string, wci::Attribute attributes)
 {
@@ -163,7 +163,7 @@ inline wci::CharString::CharString(const std::wstring& string, wci::Attribute at
         throw std::length_error("CharString::CharString() got a string too long");
     resize(static_cast<wci::Short>(length));
     for (wci::Short i = 0; i < string.length(); ++i)
-        inner.string[i] = wci::CharInfo{ string[i], attributes };
+        inner.string[i] = wci::CharCell{ string[i], attributes };
 }
 inline wci::CharString::CharString(const wci::Wchar* string)
 {
@@ -173,7 +173,7 @@ inline wci::CharString::CharString(const wci::Wchar* string)
         throw std::length_error("CharString::CharString() got a string too long");
     resize(static_cast<wci::Short>(length));
     for (wci::Short i = 0; i < length; ++i)
-        inner.string[i] = wci::CharInfo{ string[i], wci::normal };
+        inner.string[i] = wci::CharCell{ string[i], wci::normal };
 }
 inline wci::CharString::CharString(const wci::Wchar* string, wci::Attribute attributes)
 {
@@ -183,7 +183,7 @@ inline wci::CharString::CharString(const wci::Wchar* string, wci::Attribute attr
         throw std::length_error("CharString::CharString() got a string too long");
     resize(static_cast<wci::Short>(length));
     for (wci::Short i = 0; i < length; ++i)
-        inner.string[i] = wci::CharInfo{ string[i], attributes };
+        inner.string[i] = wci::CharCell{ string[i], attributes };
 }
 inline wci::CharString::CharString(const wci::Wchar string[], wci::Short length)
 {
@@ -191,7 +191,7 @@ inline wci::CharString::CharString(const wci::Wchar string[], wci::Short length)
         throw std::invalid_argument("CharString::CharString() got a negative size.");
     resize(length);
     for (wci::Short i = 0; i < length; ++i)
-        inner.string[i] = wci::CharInfo{ string[i], wci::normal };
+        inner.string[i] = wci::CharCell{ string[i], wci::normal };
 }
 inline wci::CharString::CharString(const wci::Wchar string[], wci::Short length, wci::Attribute attributes)
 {
@@ -199,17 +199,17 @@ inline wci::CharString::CharString(const wci::Wchar string[], wci::Short length,
         throw std::invalid_argument("CharString::CharString() got a negative size.");
     resize(length);
     for (wci::Short i = 0; i < length; ++i)
-        inner.string[i] = wci::CharInfo{ string[i], attributes };
+        inner.string[i] = wci::CharCell{ string[i], attributes };
 }
 
-inline wci::CharInfo& wci::CharString::at(wci::Short i)
+inline wci::CharCell& wci::CharString::at(wci::Short i)
 {
     assert(within(i));
     if (!within(i))
         throw std::out_of_range("CharString::at() position out of bounds");
     return inner.string[i];
 }
-inline const wci::CharInfo& wci::CharString::at(wci::Short i) const
+inline const wci::CharCell& wci::CharString::at(wci::Short i) const
 {
     assert(within(i));
     if (!within(i))
@@ -217,32 +217,32 @@ inline const wci::CharInfo& wci::CharString::at(wci::Short i) const
     return inner.string[i];
 }
 
-inline constexpr wci::CharInfo& wci::CharString::operator[](wci::Short i) noexcept
+inline constexpr wci::CharCell& wci::CharString::operator[](wci::Short i) noexcept
 {
     return inner.string[i];
 }
-inline constexpr const wci::CharInfo& wci::CharString::operator[](wci::Short i) const noexcept
+inline constexpr const wci::CharCell& wci::CharString::operator[](wci::Short i) const noexcept
 {
     return inner.string[i];
 }
 
 inline void wci::CharString::put(wci::Short i, wci::Wchar character, wci::Attribute attributes)
 {
-    put(i, wci::CharInfo{ character, attributes });
+    put(i, wci::CharCell{ character, attributes });
 }
-inline void wci::CharString::put(wci::Short i, const wci::CharInfo& charInfo)
+inline void wci::CharString::put(wci::Short i, const wci::CharCell& cell)
 {
     assert(within(i));
     if (!within(i))
         throw std::out_of_range("CharString::put() position out of bounds");
-    inner.string[i] = charInfo;
+    inner.string[i] = cell;
 }
 
-inline constexpr wci::CharInfo* wci::CharString::data() noexcept
+inline constexpr wci::CharCell* wci::CharString::data() noexcept
 {
     return inner.string.data();
 }
-inline constexpr const wci::CharInfo* wci::CharString::data() const noexcept
+inline constexpr const wci::CharCell* wci::CharString::data() const noexcept
 {
     return inner.string.data();
 }
@@ -259,13 +259,13 @@ inline constexpr wci::Short wci::CharString::size() const noexcept
 
 inline void wci::CharString::resize(wci::Short size, wci::Wchar character, wci::Attribute attributes)
 {
-    resize(size, wci::CharInfo{ character, attributes });
+    resize(size, wci::CharCell{ character, attributes });
 }
-inline void wci::CharString::resize(wci::Short size, const wci::CharInfo& charInfo)
+inline void wci::CharString::resize(wci::Short size, const wci::CharCell& cell)
 {
     if (size < 0)
         throw std::invalid_argument("CharString::resize() got a negative size.");
-    inner.string.assign(size, charInfo);
+    inner.string.assign(size, cell);
     inner.size = size;
 }
 inline void wci::CharString::resize(wci::Short size)
@@ -275,11 +275,11 @@ inline void wci::CharString::resize(wci::Short size)
 
 inline void wci::CharString::fill(wci::Wchar character, wci::Attribute attributes) noexcept
 {
-    fill(wci::CharInfo{ character, attributes });
+    fill(wci::CharCell{ character, attributes });
 }
-inline void wci::CharString::fill(const wci::CharInfo& charInfo) noexcept
+inline void wci::CharString::fill(const wci::CharCell& cell) noexcept
 {
-    std::fill(begin(), end(), charInfo);
+    std::fill(begin(), end(), cell);
 }
 
 inline void wci::CharString::blank() noexcept
@@ -377,9 +377,9 @@ inline void wci::CharString::append(wci::Wchar character, wci::Attribute attribu
     inner.string.emplace_back(character, attributes);
     ++inner.size;
 }
-inline void wci::CharString::append(const wci::CharInfo& charInfo)
+inline void wci::CharString::append(const wci::CharCell& cell)
 {
-    inner.string.push_back(charInfo);
+    inner.string.push_back(cell);
     ++inner.size;
 }
 inline void wci::CharString::append(const wci::CharString& string)
@@ -390,12 +390,12 @@ inline void wci::CharString::append(const wci::CharString& string)
 
 inline void wci::CharString::prepend(wci::Wchar character, wci::Attribute attributes)
 {
-    inner.string.insert(inner.string.begin(), wci::CharInfo{ character, attributes });
+    inner.string.insert(inner.string.begin(), wci::CharCell{ character, attributes });
     ++inner.size;
 }
-inline void wci::CharString::prepend(const wci::CharInfo& charInfo)
+inline void wci::CharString::prepend(const wci::CharCell& cell)
 {
-    inner.string.insert(inner.string.begin(), charInfo);
+    inner.string.insert(inner.string.begin(), cell);
     ++inner.size;
 }
 inline void wci::CharString::prepend(const wci::CharString& string)
@@ -437,30 +437,30 @@ inline wci::CharMatrix wci::CharString::toMatrix() const
     return matrix;
 }
 
-inline constexpr wci::CharInfo* wci::CharString::begin() noexcept
+inline constexpr wci::CharCell* wci::CharString::begin() noexcept
 {
     return data();
 }
-inline constexpr const wci::CharInfo* wci::CharString::begin() const noexcept
-{
-    return data();
-}
-
-inline constexpr const wci::CharInfo* wci::CharString::cbegin() const noexcept
+inline constexpr const wci::CharCell* wci::CharString::begin() const noexcept
 {
     return data();
 }
 
-inline constexpr wci::CharInfo* wci::CharString::end() noexcept
+inline constexpr const wci::CharCell* wci::CharString::cbegin() const noexcept
+{
+    return data();
+}
+
+inline constexpr wci::CharCell* wci::CharString::end() noexcept
 {
     return data() + size();
 }
-inline constexpr const wci::CharInfo* wci::CharString::end() const noexcept
+inline constexpr const wci::CharCell* wci::CharString::end() const noexcept
 {
     return data() + size();
 }
 
-inline constexpr const wci::CharInfo* wci::CharString::cend() const noexcept
+inline constexpr const wci::CharCell* wci::CharString::cend() const noexcept
 {
     return data() + size();
 }

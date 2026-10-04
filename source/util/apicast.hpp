@@ -50,7 +50,7 @@ namespace wci
         return static_cast<DWORD>(s);
     }
 
-    inline CONST CHAR_INFO* api(const CharInfo* cchip)
+    inline CONST CHAR_INFO* api(const CharCell* cchip)
     {
         return reinterpret_cast<CONST CHAR_INFO*>(cchip);  /* fixme this is not good */
     }
@@ -132,17 +132,17 @@ namespace wci
 
     #pragma region structs
 
-    inline constexpr COORD api(const Coord& c)
+    inline constexpr COORD api(const Point& c)
     {
         return COORD{ api(c.x), api(c.y) };
     }
 
-    inline constexpr SMALL_RECT api(const SmallRect& sr)
+    inline constexpr SMALL_RECT api(const Rect& sr)
     {
         return SMALL_RECT{ api(sr.left), api(sr.top), api(sr.right), api(sr.bottom) };
     }
 
-    inline constexpr CHAR_INFO api(const CharInfo& chi)
+    inline constexpr CHAR_INFO api(const CharCell& chi)
     {
         CHAR_INFO info;
         info.Char.UnicodeChar = api(chi.character);
@@ -166,7 +166,7 @@ namespace wci
         };
     }
 
-    inline constexpr KEY_EVENT_RECORD api(const KeyEventRecord ker)
+    inline constexpr KEY_EVENT_RECORD api(const KeyEvent ker)
     {
         KEY_EVENT_RECORD record;
         record.bKeyDown = api(ker.keyDown);
@@ -178,7 +178,7 @@ namespace wci
         return record;
     }
 
-    inline constexpr MOUSE_EVENT_RECORD api(const MouseEventRecord& mer)
+    inline constexpr MOUSE_EVENT_RECORD api(const MouseEvent& mer)
     {
         return MOUSE_EVENT_RECORD{
             api(mer.mousePosition),
@@ -188,22 +188,22 @@ namespace wci
         };
     }
 
-    inline constexpr WINDOW_BUFFER_SIZE_RECORD api(const WindowBufferSizeRecord& wbsr)
+    inline constexpr WINDOW_BUFFER_SIZE_RECORD api(const WindowBufferResizeEvent& wbsr)
     {
         return WINDOW_BUFFER_SIZE_RECORD{ api(wbsr.size) };
     }
 
-    inline constexpr MENU_EVENT_RECORD api(const MenuEventRecord& mer)
+    inline constexpr MENU_EVENT_RECORD api(const MenuEvent& mer)
     {
         return MENU_EVENT_RECORD{ api(mer.commandId) };
     }
 
-    inline constexpr FOCUS_EVENT_RECORD api(const FocusEventRecord& fer)
+    inline constexpr FOCUS_EVENT_RECORD api(const FocusEvent& fer)
     {
         return FOCUS_EVENT_RECORD{ api(fer.setFocus) };
     }
 
-    inline constexpr INPUT_RECORD api(const InputRecord& ir)
+    inline constexpr INPUT_RECORD api(const InputEvent& ir)
     {
         INPUT_RECORD record;
         record.EventType = api(ir.eventType);
@@ -215,7 +215,7 @@ namespace wci
         case EventType::MouseEvent:
             record.Event.MouseEvent = api(ir.event.mouseEvent);
             break;
-        case EventType::WindowBufferSizeEvent:
+        case EventType::WindowBufferResizeEvent:
             record.Event.WindowBufferSizeEvent = api(ir.event.windowBufferSizeEvent);
             break;
         case EventType::MenuEvent:
@@ -269,9 +269,9 @@ namespace wci
         return static_cast<unsigned int>(ui);
     }
 
-    inline const CharInfo* wci(CONST CHAR_INFO* cchip)
+    inline const CharCell* wci(CONST CHAR_INFO* cchip)
     {
-        return reinterpret_cast<const CharInfo*>(cchip);   /* fixme this is not good */
+        return reinterpret_cast<const CharCell*>(cchip);   /* fixme this is not good */
     }
 
     inline const Wchar* wci(CONST WCHAR* cwchp)
@@ -292,19 +292,19 @@ namespace wci
 
     #pragma region structs
 
-    inline constexpr Coord wci(const COORD& c)
+    inline constexpr Point wci(const COORD& c)
     {
-        return Coord{ wci(c.X), wci(c.Y) };
+        return Point{ wci(c.X), wci(c.Y) };
     }
 
-    inline constexpr SmallRect wci(const SMALL_RECT& sr)
+    inline constexpr Rect wci(const SMALL_RECT& sr)
     {
-        return SmallRect{ wci(sr.Left), wci(sr.Top), wci(sr.Right), wci(sr.Bottom) };
+        return Rect{ wci(sr.Left), wci(sr.Top), wci(sr.Right), wci(sr.Bottom) };
     }
 
-    inline constexpr CharInfo wci(const CHAR_INFO& chi)
+    inline constexpr CharCell wci(const CHAR_INFO& chi)
     {
-        return CharInfo{ wci(chi.Char.UnicodeChar), Attribute(chi.Attributes) };
+        return CharCell{ wci(chi.Char.UnicodeChar), Attribute(chi.Attributes) };
     }
 
     inline constexpr CursorInfo wci(const CONSOLE_CURSOR_INFO& cci)
@@ -323,9 +323,9 @@ namespace wci
         };
     }
 
-    inline constexpr KeyEventRecord wci(const KEY_EVENT_RECORD& ker)
+    inline constexpr KeyEvent wci(const KEY_EVENT_RECORD& ker)
     {
-        return KeyEventRecord{
+        return KeyEvent{
             wci(ker.bKeyDown),
             wci(ker.wRepeatCount),
             VirtualKey(ker.wVirtualKeyCode),
@@ -335,9 +335,9 @@ namespace wci
         };
     }
 
-    inline constexpr MouseEventRecord wci(const MOUSE_EVENT_RECORD& mer)
+    inline constexpr MouseEvent wci(const MOUSE_EVENT_RECORD& mer)
     {
-        return MouseEventRecord{
+        return MouseEvent{
             wci(mer.dwMousePosition),
             ButtonState(mer.dwButtonState),
             ControlKeyState(mer.dwControlKeyState),
@@ -345,24 +345,24 @@ namespace wci
         };
     }
 
-    inline constexpr WindowBufferSizeRecord wci(const WINDOW_BUFFER_SIZE_RECORD& wbsr)
+    inline constexpr WindowBufferResizeEvent wci(const WINDOW_BUFFER_SIZE_RECORD& wbsr)
     {
-        return WindowBufferSizeRecord{ wci(wbsr.dwSize) };
+        return WindowBufferResizeEvent{ wci(wbsr.dwSize) };
     }
 
-    inline constexpr MenuEventRecord wci(const MENU_EVENT_RECORD& mer)
+    inline constexpr MenuEvent wci(const MENU_EVENT_RECORD& mer)
     {
-        return MenuEventRecord{ wci(mer.dwCommandId) };
+        return MenuEvent{ wci(mer.dwCommandId) };
     }
 
-    inline constexpr FocusEventRecord wci(const FOCUS_EVENT_RECORD& fer)
+    inline constexpr FocusEvent wci(const FOCUS_EVENT_RECORD& fer)
     {
-        return FocusEventRecord{ wci(fer.bSetFocus) };
+        return FocusEvent{ wci(fer.bSetFocus) };
     }
 
-    inline constexpr InputRecord wci(const INPUT_RECORD& ir)
+    inline constexpr InputEvent wci(const INPUT_RECORD& ir)
     {
-        InputRecord record;
+        InputEvent record;
         record.eventType = EventType(ir.EventType);
         switch (record.eventType)
         {
@@ -372,7 +372,7 @@ namespace wci
         case EventType::MouseEvent:
             record.event.mouseEvent = wci(ir.Event.MouseEvent);
             break;
-        case EventType::WindowBufferSizeEvent:
+        case EventType::WindowBufferResizeEvent:
             record.event.windowBufferSizeEvent = wci(ir.Event.WindowBufferSizeEvent);
             break;
         case EventType::MenuEvent:

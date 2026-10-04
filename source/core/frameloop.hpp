@@ -27,11 +27,11 @@ namespace wci
 
         void bindOnEvents(std::function<void()> callback);
 
-        void bindOnKeyEvent(std::function<void(const KeyEventRecord&)> callback);
+        void bindOnKeyEvent(std::function<void(const KeyEvent&)> callback);
 
-        void bindOnMouseEvent(std::function<void(const MouseEventRecord&)> callback);
+        void bindOnMouseEvent(std::function<void(const MouseEvent&)> callback);
 
-        void bindOnResizeEvent(std::function<void(const WindowBufferSizeRecord&)> callback);
+        void bindOnResizeEvent(std::function<void(const WindowBufferResizeEvent&)> callback);
 
         void run();
 

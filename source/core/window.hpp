@@ -27,7 +27,7 @@ namespace wci {
         CharMatrix& matrix() noexcept;
         const CharMatrix& matrix() const noexcept;
 
-        Coord size() const;
+        Point size() const;
 
         void refit();
 
@@ -36,19 +36,19 @@ namespace wci {
         // character
         void put(Short x, Short y, Wchar character);
         void put(Short x, Short y, Wchar character, Attribute attributes);
-        void put(Short x, Short y, const CharInfo& charInfo);  // todo implement
-        void put(const Coord& position, const CharInfo& charInfo);
+        void put(Short x, Short y, const CharCell& cell);  // todo implement
+        void put(const Point& position, const CharCell& cell);
 
         // string
         void put(Short x, Short y, const Wchar* string);
         void put(Short x, Short y, const Wchar* string, Attribute attributes);
         void put(Short x, Short y, const std::wstring& string);  // todo implement
-        void put(const Coord& position, const CharInfo charInfos[], size_t length);
-        void put(const Coord& position, const std::wstring& string);  // todo implement
+        void put(const Point& position, const CharCell cells[], size_t length);
+        void put(const Point& position, const std::wstring& string);  // todo implement
 
         // matrix
         void put(Short x, Short y, const CharMatrix& matrix);
-        void put(const Coord& position, const CharMatrix& matrix);
+        void put(const Point& position, const CharMatrix& matrix);
 
         // place on window
         std::size_t place(const LenPercent& x, const LenPercent& y, Widget& widget, Anchor anchor = Anchor::TopLeft);
@@ -99,7 +99,7 @@ namespace wci {
         std::unique_ptr<Impl> impl;
 
         // idea implement widgetsAt(position)
-        // todo implement blank(), fill(charInfo)
+        // todo implement blank(), fill(CharCell)
     };
 }
 

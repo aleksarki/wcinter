@@ -11,7 +11,7 @@ int main()
     wci::Window window;
     wci::FrameLoop loop(window.console());
 
-    wci::Coord point{ 0, 0 };
+    wci::Point point{ 0, 0 };
     wci::CharMatrix plate(100, 8);
     int counter = 0;
 
@@ -22,7 +22,7 @@ int main()
     auto msg5 = wci::CharString(L"Current frames per second: ");
     auto msg6 = wci::CharString(L"Current frame time: ");
 
-    loop.bindOnKeyEvent([&](const wci::KeyEventRecord& event)
+    loop.bindOnKeyEvent([&](const wci::KeyEvent& event)
     {
         if (!event.keyDown)
             return;

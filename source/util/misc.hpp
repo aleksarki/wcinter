@@ -9,24 +9,24 @@ namespace wci
     /*
      * Define a point.
      */
-    inline constexpr Coord at(Short x, Short y) noexcept;
+    inline constexpr Point at(Short x, Short y) noexcept;
 
     /*
      * Calculate absolute position of the top left corner of a rectangle stacked upon another one.
      */
-    inline constexpr Coord calculateStackeeStart(const PositionSpec& stackeePosition, Coord baseSize, Coord stackeeSize, Anchor stackeeAnchor) noexcept;
+    inline constexpr Point calculateStackeeStart(const PositionSpec& stackeePosition, Point baseSize, Point stackeeSize, Anchor stackeeAnchor) noexcept;
 }
 
-inline constexpr wci::Coord wci::at(wci::Short x, wci::Short y) noexcept
+inline constexpr wci::Point wci::at(wci::Short x, wci::Short y) noexcept
 {
-    return wci::Coord{ x, y };
+    return wci::Point{ x, y };
 }
 
-inline constexpr wci::Coord wci::calculateStackeeStart(
-    const wci::PositionSpec &stackeePosition, wci::Coord baseSize, wci::Coord stackeeSize, wci::Anchor stackeeAnchor
+inline constexpr wci::Point wci::calculateStackeeStart(
+    const wci::PositionSpec &stackeePosition, wci::Point baseSize, wci::Point stackeeSize, wci::Anchor stackeeAnchor
 ) noexcept
 {
-    wci::Coord anchorPoint{ 0, 0 }, startPoint{ 0, 0 };  // init just in case?
+    wci::Point anchorPoint{ 0, 0 }, startPoint{ 0, 0 };  // init just in case?
 
     if (stackeePosition.x.isAbsolute())
         anchorPoint.x = stackeePosition.x.absolute();

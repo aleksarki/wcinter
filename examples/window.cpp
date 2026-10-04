@@ -5,7 +5,7 @@ int main()
 {
     wci::Window window;
 
-    window.matrix()[{ 20, 10 }] = wci::CharInfo{ L'A', wci::Attribute::FgColorGreen };
+    window.matrix()[{ 20, 10 }] = wci::CharCell{ L'A', wci::Attribute::FgColorGreen };
     window.put(21, 10, L"bcdefg", wci::Attribute::FgColorBlue);
 
     window.render();

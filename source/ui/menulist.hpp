@@ -17,19 +17,19 @@ namespace wci
             bool cyclic;                                                    // do cyclic rotation through options
             Short index;
             Attribute selectionAttribute;
-            CharInfo backgroundCharacter;
+            CharCell backgroundCharacter;
             Justify optionJustify;
             unsigned optionPaddingLeft, optionPaddingRight;
-            std::optional<CharInfo> selectionCharLeft, selectionCharRight;  // these embrace current selection
+            std::optional<CharCell> selectionCharLeft, selectionCharRight;  // these embrace current selection
             bool showTipPrev, showTipNext;
-            std::optional<CharInfo> tipCharPrev, tipCharNext;               // these are visual tips for switching options
+            std::optional<CharCell> tipCharPrev, tipCharNext;               // these are visual tips for switching options
         } inner;
         mutable struct {
             CharMatrix buffer;
             bool dirty;
         } bufferCache;
         mutable struct {
-            Coord size;
+            Point size;
             bool dirty;
         } sizeCache;
 
@@ -38,20 +38,20 @@ namespace wci
             std::vector<CharString> options = std::vector<CharString>(),
             bool cyclic = true,
             Attribute selectionAttribute = rnormal,
-            CharInfo backgroundCharacter = normalch,
+            CharCell backgroundCharacter = normalch,
             Justify optionJustify = Justify::Left,
             unsigned optionPaddingLeft = 1,
             unsigned optionPaddingRight = 1,
-            std::optional<CharInfo> selectionCharLeft = std::nullopt,
-            std::optional<CharInfo> selectionCharRight = std::nullopt,
+            std::optional<CharCell> selectionCharLeft = std::nullopt,
+            std::optional<CharCell> selectionCharRight = std::nullopt,
             bool showTipPrev = false, bool showTipNext = false,
-            std::optional<CharInfo> tipCharPrev = std::nullopt,
-            std::optional<CharInfo> tipCharNext = std::nullopt
+            std::optional<CharCell> tipCharPrev = std::nullopt,
+            std::optional<CharCell> tipCharNext = std::nullopt
         );
 
         const CharMatrix& toMatrix() const;
 
-        Coord size() const;
+        Point size() const;
 
         const std::vector<CharString>& options() const noexcept;
 
@@ -73,8 +73,8 @@ namespace wci
         Attribute selectionAttribute() const noexcept;
         void selectionAttribute(Attribute newSelectionAttribute) noexcept;
 
-        CharInfo backgroundCharacter() const noexcept;
-        void backgroundCharacter(CharInfo newBackgroundCharacter) noexcept;
+        CharCell backgroundCharacter() const noexcept;
+        void backgroundCharacter(CharCell newBackgroundCharacter) noexcept;
 
         Justify optionJustify() const noexcept;
         void optionJustify(Justify newOptionJustify) noexcept;
@@ -85,11 +85,11 @@ namespace wci
         unsigned optionPaddingRight() const noexcept;
         void optionPaddingRight(unsigned newOptionPaddingRight) noexcept;
 
-        const std::optional<CharInfo>& selectionCharLeft() const noexcept;
-        void selectionCharLeft(const std::optional<CharInfo>& newSelectionCharLeft);
+        const std::optional<CharCell>& selectionCharLeft() const noexcept;
+        void selectionCharLeft(const std::optional<CharCell>& newSelectionCharLeft);
 
-        const std::optional<CharInfo>& selectionCharRight() const noexcept;
-        void selectionCharRight(const std::optional<CharInfo>& newSelectionCharRight);
+        const std::optional<CharCell>& selectionCharRight() const noexcept;
+        void selectionCharRight(const std::optional<CharCell>& newSelectionCharRight);
 
         bool showTipPrev() const noexcept;
         void showTipPrev(bool newShowTipPrev) noexcept;
@@ -97,11 +97,11 @@ namespace wci
         bool showTipNext() const noexcept;
         void showTipNext(bool newShowTipNext) noexcept;
 
-        const std::optional<CharInfo>& tipCharPrev() const noexcept;
-        void tipCharPrev(const std::optional<CharInfo>& newTipCharPrev);
+        const std::optional<CharCell>& tipCharPrev() const noexcept;
+        void tipCharPrev(const std::optional<CharCell>& newTipCharPrev);
 
-        const std::optional<CharInfo>& tipCharNext() const noexcept;
-        void tipCharNext(const std::optional<CharInfo>& newTipCharNext);
+        const std::optional<CharCell>& tipCharNext() const noexcept;
+        void tipCharNext(const std::optional<CharCell>& newTipCharNext);
 
         bool selected() const noexcept;
 

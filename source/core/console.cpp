@@ -108,7 +108,7 @@ public:
         SetConsoleCursorInfo(stdOut, &winInfo);
     }
 
-    void setCursorPosition(const wci::Coord& position)
+    void setCursorPosition(const wci::Point& position)
     {
         COORD winCoord = wci::api(position);
         SetConsoleCursorPosition(stdOut, winCoord);
@@ -130,7 +130,7 @@ public:
         SetConsoleTextAttribute(stdOut, wci::api(attributes));
     }
 
-    void readInput(wci::InputRecord inputBuffer[], wci::Dword inputBufferLength, wci::Dword* eventsRead)
+    void readInput(wci::InputEvent inputBuffer[], wci::Dword inputBufferLength, wci::Dword* eventsRead)
     {
         rawInputBuffer.resize(inputBufferLength);
         auto success = ReadConsoleInputW(
@@ -187,11 +187,11 @@ void wci::Console::write(wci::Wchar character, wci::Attribute attributes)
     impl->write(character);
     impl->setTextAttribute(info.attributes);
 }
-void wci::Console::write(const wci::CharInfo& charInfo)
+void wci::Console::write(const wci::CharCell& cell)
 {
     auto info = impl->getScreenBufferInfo();
-    impl->setTextAttribute(charInfo.attributes);
-    impl->write(charInfo.character);
+    impl->setTextAttribute(cell.attributes);
+    impl->write(cell.character);
     impl->setTextAttribute(info.attributes);
 }
 void wci::Console::write(const char* string)
@@ -241,10 +241,10 @@ void wci::Console::write(const std::wstring& wstring, wci::Attribute attributes)
 void wci::Console::write(const wci::CharString& string)
 {
     auto info = impl->getScreenBufferInfo();
-    for (const auto& charInfo : string)  // todo optimize
+    for (const auto& cell : string)  // todo optimize
     {
-        impl->setTextAttribute(charInfo.attributes);
-        impl->write(charInfo.character);
+        impl->setTextAttribute(cell.attributes);
+        impl->write(cell.character);
     }
     impl->setTextAttribute(info.attributes);
 }
@@ -272,7 +272,7 @@ void wci::Console::cursorInfo(const wci::CursorInfo& info)
     impl->setCursorInfo(info);
 }
 
-void wci::Console::cursorPosition(const wci::Coord& position)
+void wci::Console::cursorPosition(const wci::Point& position)
 {
     impl->setCursorPosition(position);
 }
@@ -291,7 +291,7 @@ void wci::Console::textAttribute(wci::Attribute attributes)
     impl->setTextAttribute(attributes);
 }
 
-void wci::Console::readInput(wci::InputRecord inputBuffer[], wci::Dword inputBufferLength, wci::Dword* eventsRead)
+void wci::Console::readInput(wci::InputEvent inputBuffer[], wci::Dword inputBufferLength, wci::Dword* eventsRead)
 {
     impl->readInput(inputBuffer, inputBufferLength, eventsRead);
 }
@@ -311,7 +311,7 @@ wci::Handle wci::Console::stdError() const
     return impl->getStdError();
 }
 
-wci::Console& wci::Console::operator<<(const wci::Coord& position)
+wci::Console& wci::Console::operator<<(const wci::Point& position)
 {
     cursorPosition(position);
     return *this;
@@ -336,9 +336,9 @@ wci::Console& wci::Console::operator<<(wci::Wchar character)
     write(character);
     return *this;
 }
-wci::Console& wci::Console::operator<<(const wci::CharInfo& charInfo)
+wci::Console& wci::Console::operator<<(const wci::CharCell& cell)
 {
-    write(charInfo);
+    write(cell);
     return *this;
 }
 wci::Console& wci::Console::operator<<(const std::string& string)

@@ -6,16 +6,16 @@ wci::MenuList::MenuList(
     std::vector<CharString> options,
     bool cyclic,
     wci::Attribute selectionAttribute,
-    wci::CharInfo backgroundCharacter,
+    wci::CharCell backgroundCharacter,
     wci::Justify optionJustify,
     unsigned optionPaddingLeft,
     unsigned optionPaddingRight,
-    std::optional<wci::CharInfo> selectionCharLeft,
-    std::optional<wci::CharInfo> selectionCharRight,
+    std::optional<wci::CharCell> selectionCharLeft,
+    std::optional<wci::CharCell> selectionCharRight,
     bool showTipPrev,
     bool showTipNext,
-    std::optional<wci::CharInfo> tipCharPrev,
-    std::optional<wci::CharInfo> tipCharNext
+    std::optional<wci::CharCell> tipCharPrev,
+    std::optional<wci::CharCell> tipCharNext
 ) :
     inner{
         std::move(options), cyclic, wci::noindex,
@@ -26,7 +26,7 @@ wci::MenuList::MenuList(
         tipCharPrev, tipCharNext
     },
     bufferCache{ wci::CharMatrix(), true },
-    sizeCache{ wci::Coord{}, true }
+    sizeCache{ wci::Point{}, true }
 {}
 
 const wci::CharMatrix& wci::MenuList::toMatrix() const
@@ -35,7 +35,7 @@ const wci::CharMatrix& wci::MenuList::toMatrix() const
         return bufferCache.buffer;
 
     auto dimensions = size();
-    wci::Coord center{ dimensions.x / 2, dimensions.y / 2 };
+    wci::Point center{ dimensions.x / 2, dimensions.y / 2 };
 
     if (bufferCache.buffer.size() != dimensions)
         bufferCache.buffer.resize(dimensions, backgroundCharacter());
@@ -48,7 +48,7 @@ const wci::CharMatrix& wci::MenuList::toMatrix() const
         return bufferCache.buffer;
     }
 
-    wci::Coord listStart{ 0, 0 };
+    wci::Point listStart{ 0, 0 };
     if (selectionCharLeft())
         listStart.x += 2;
     if (showTipPrev())
@@ -90,8 +90,8 @@ const wci::CharMatrix& wci::MenuList::toMatrix() const
             // todo implement CharString::attribute(Attribute)
             for (auto& character : currentOption)
                 character.attributes = selectionAttribute();
-            // todo implement CharInfo ::operator+(Attribute), ::operator+=(Attribute)
-            line = wci::CharString(listWidth, wci::CharInfo{ backgroundCharacter().character, selectionAttribute() });
+            // todo implement CharCell ::operator+(Attribute), ::operator+=(Attribute)
+            line = wci::CharString(listWidth, wci::CharCell{ backgroundCharacter().character, selectionAttribute() });
             line.inlay(optionStart, currentOption);
 
             if (selectionCharLeft())
@@ -102,26 +102,26 @@ const wci::CharMatrix& wci::MenuList::toMatrix() const
         else
             line.inlay(optionStart, option);
         // todo implement Matrix::put(CharString)
-        bufferCache.buffer.inlay(wci::Coord{ listStart.x, wci::Short(listStart.y + i) }, line.toMatrix());
+        bufferCache.buffer.inlay(wci::Point{ listStart.x, wci::Short(listStart.y + i) }, line.toMatrix());
     }
 
     if (showTipPrev() && tipCharPrev())  // draw tips
     {
-        bufferCache.buffer.put(center.x, 0, wci::CharInfo{ wci::chars::upwardsArrow, backgroundCharacter().attributes });
+        bufferCache.buffer.put(center.x, 0, wci::CharCell{ wci::chars::upwardsArrow, backgroundCharacter().attributes });
         bufferCache.buffer.put(center.x, 1, *tipCharPrev());
     }
     else if (showTipPrev())
-        bufferCache.buffer.put(center.x, 0, wci::CharInfo{ wci::chars::upwardsArrow, backgroundCharacter().attributes });
+        bufferCache.buffer.put(center.x, 0, wci::CharCell{ wci::chars::upwardsArrow, backgroundCharacter().attributes });
     else if (tipCharPrev())
         bufferCache.buffer.put(center.x, 0, *tipCharPrev());
 
     if (showTipNext() && tipCharNext())
     {
         bufferCache.buffer.put(center.x, dimensions.y - 2, *tipCharNext());
-        bufferCache.buffer.put(center.x, dimensions.y - 1, wci::CharInfo{ wci::chars::downwardsArrow, backgroundCharacter().attributes });
+        bufferCache.buffer.put(center.x, dimensions.y - 1, wci::CharCell{ wci::chars::downwardsArrow, backgroundCharacter().attributes });
     }
     else if (showTipNext())
-        bufferCache.buffer.put(center.x, dimensions.y - 1, wci::CharInfo{ wci::chars::downwardsArrow, backgroundCharacter().attributes });
+        bufferCache.buffer.put(center.x, dimensions.y - 1, wci::CharCell{ wci::chars::downwardsArrow, backgroundCharacter().attributes });
     else if (tipCharNext())
         bufferCache.buffer.put(center.x, dimensions.y - 1, *tipCharNext());
 
@@ -129,12 +129,12 @@ const wci::CharMatrix& wci::MenuList::toMatrix() const
     return bufferCache.buffer;
 }
 
-wci::Coord wci::MenuList::size() const
+wci::Point wci::MenuList::size() const
 {
     if (!sizeCache.dirty)
         return sizeCache.size;
 
-    sizeCache.size = wci::Coord{ 0, 0 };
+    sizeCache.size = wci::Point{ 0, 0 };
     for (const auto& option : options())
     {
         sizeCache.size.x = std::max(sizeCache.size.x, option.size());  // find the longest option
@@ -262,12 +262,12 @@ void wci::MenuList::selectionAttribute(wci::Attribute newSelectionAttribute) noe
     bufferCache.dirty = true;
 }
 
-wci::CharInfo wci::MenuList::backgroundCharacter() const noexcept
+wci::CharCell wci::MenuList::backgroundCharacter() const noexcept
 {
     return inner.backgroundCharacter;
 }
 
-void wci::MenuList::backgroundCharacter(wci::CharInfo newBackgroundCharacter) noexcept
+void wci::MenuList::backgroundCharacter(wci::CharCell newBackgroundCharacter) noexcept
 {
     inner.backgroundCharacter = newBackgroundCharacter;
     bufferCache.dirty = true;
@@ -308,24 +308,24 @@ void wci::MenuList::optionPaddingRight(unsigned newOptionPaddingRight) noexcept
     bufferCache.dirty = true;
 }
 
-const std::optional<wci::CharInfo>& wci::MenuList::selectionCharLeft() const noexcept
+const std::optional<wci::CharCell>& wci::MenuList::selectionCharLeft() const noexcept
 {
     return inner.selectionCharLeft;
 }
 
-void wci::MenuList::selectionCharLeft(const std::optional<wci::CharInfo>& newSelectionCharLeft)
+void wci::MenuList::selectionCharLeft(const std::optional<wci::CharCell>& newSelectionCharLeft)
 {
     inner.selectionCharLeft = newSelectionCharLeft;
     sizeCache.dirty = true;
     bufferCache.dirty = true;
 }
 
-const std::optional<wci::CharInfo>& wci::MenuList::selectionCharRight() const noexcept
+const std::optional<wci::CharCell>& wci::MenuList::selectionCharRight() const noexcept
 {
     return inner.selectionCharRight;
 }
 
-void wci::MenuList::selectionCharRight(const std::optional<wci::CharInfo>& newSelectionCharRight)
+void wci::MenuList::selectionCharRight(const std::optional<wci::CharCell>& newSelectionCharRight)
 {
     inner.selectionCharRight = newSelectionCharRight;
     sizeCache.dirty = true;
@@ -356,24 +356,24 @@ void wci::MenuList::showTipNext(bool newShowTipNext) noexcept
     bufferCache.dirty = true;
 }
 
-const std::optional<wci::CharInfo>& wci::MenuList::tipCharPrev() const noexcept
+const std::optional<wci::CharCell>& wci::MenuList::tipCharPrev() const noexcept
 {
     return inner.tipCharPrev;
 }
 
-void wci::MenuList::tipCharPrev(const std::optional<wci::CharInfo>& newTipCharPrev)
+void wci::MenuList::tipCharPrev(const std::optional<wci::CharCell>& newTipCharPrev)
 {
     inner.tipCharPrev = newTipCharPrev;
     sizeCache.dirty = true;
     bufferCache.dirty = true;
 }
 
-const std::optional<wci::CharInfo>& wci::MenuList::tipCharNext() const noexcept
+const std::optional<wci::CharCell>& wci::MenuList::tipCharNext() const noexcept
 {
     return inner.tipCharNext;
 }
 
-void wci::MenuList::tipCharNext(const std::optional<wci::CharInfo>& newTipCharNext)
+void wci::MenuList::tipCharNext(const std::optional<wci::CharCell>& newTipCharNext)
 {
     inner.tipCharNext = newTipCharNext;
     sizeCache.dirty = true;

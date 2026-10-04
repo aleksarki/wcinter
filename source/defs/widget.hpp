@@ -25,7 +25,7 @@ namespace wci
     concept renderable = requires(const T& t)
     {
         { t.toMatrix() } -> std::convertible_to<CharMatrix>;
-        { t.size() } -> std::convertible_to<Coord>;
+        { t.size() } -> std::convertible_to<Point>;
     };
 
     // NB: if widget constructs from an lvalue-object, the object must outlive the widget!
@@ -37,23 +37,23 @@ namespace wci
         struct {
             PositionSpec position;
             Anchor anchor;
-            Coord absolute;  // calculated position of the top left point
+            Point absolute;  // calculated position of the top left point
             bool visible;
             std::variant<std::monostate, Window*, Widget*> parent;
             std::size_t id;  // wci::npos if widget is not placed
         } inner;
         std::function<CharMatrix()> renderer;
-        std::function<Coord()> sizer;
+        std::function<Point()> sizer;
 
         // ctor for delegating and filling inner struct with default values
-        Widget(std::function<CharMatrix()> renderer, std::function<Coord()> sizer);
+        Widget(std::function<CharMatrix()> renderer, std::function<Point()> sizer);
 
     public:
         template<renderable R>
         Widget(R& object);
         Widget(Wchar character);
-        Widget(const CharInfo& charInfo);
-        Widget(CharInfo&& charInfo);
+        Widget(const CharCell& cell);
+        Widget(CharCell&& cell);
         Widget(const std::wstring& string);
         Widget(std::wstring&& string);
         Widget(const CharString& charString);
@@ -66,7 +66,7 @@ namespace wci
         Widget(Widget&&) = default;
         Widget& operator=(Widget&&) = default;
 
-        Coord size() const noexcept;
+        Point size() const noexcept;
 
         CharMatrix render() const;  // this does not render its children
 
@@ -80,9 +80,9 @@ namespace wci
         void anchor(Anchor newAnchor) noexcept;
 
     public:
-        Coord absolute() const noexcept;  // calculated absolute coords of top left corner
+        Point absolute() const noexcept;  // calculated absolute coords of top left corner
     private:
-        void absolute(Coord newAbsolute) noexcept;
+        void absolute(Point newAbsolute) noexcept;
 
     public:
         std::size_t id() const noexcept;
@@ -120,11 +120,11 @@ namespace wci
     };
 }
 
-inline wci::Widget::Widget(std::function<wci::CharMatrix()> renderer, std::function<wci::Coord()> sizer) :
+inline wci::Widget::Widget(std::function<wci::CharMatrix()> renderer, std::function<wci::Point()> sizer) :
     inner{
         wci::PositionSpec{ wci::LenPercent(wci::Short(0)), wci::LenPercent(wci::Short(0)) },
         wci::Anchor::TopLeft,
-        wci::Coord{ 0, 0 },
+        wci::Point{ 0, 0 },
         true,
         std::monostate{},
         wci::npos
@@ -135,51 +135,51 @@ inline wci::Widget::Widget(std::function<wci::CharMatrix()> renderer, std::funct
 template<wci::renderable R>
 inline wci::Widget::Widget(R& object) : wci::Widget(
     [&object]() -> wci::CharMatrix { return object.toMatrix(); },
-    [&object]() -> wci::Coord { return object.size(); }
+    [&object]() -> wci::Point { return object.size(); }
 )
 {}
 inline wci::Widget::Widget(wci::Wchar character) : wci::Widget(
-    [matrix = wci::CharMatrix(wci::Coord{ 1, 1 }, wci::CharInfo{ character, wci::normal })]() -> wci::CharMatrix { return matrix; },
-    [size = wci::Coord{ 1, 1 }]() -> wci::Coord { return size; }
+    [matrix = wci::CharMatrix(wci::Point{ 1, 1 }, wci::CharCell{ character, wci::normal })]() -> wci::CharMatrix { return matrix; },
+    [size = wci::Point{ 1, 1 }]() -> wci::Point { return size; }
 )
 {}
-inline wci::Widget::Widget(const CharInfo& charInfo) : wci::Widget(
-    [&charInfo]() -> wci::CharMatrix { return wci::CharMatrix(wci::Coord{ 1, 1 }, charInfo); },
-    [size = wci::Coord{ 1, 1 }]() -> wci::Coord { return size; }
+inline wci::Widget::Widget(const CharCell& cell) : wci::Widget(
+    [&cell]() -> wci::CharMatrix { return wci::CharMatrix(wci::Point{ 1, 1 }, cell); },
+    [size = wci::Point{ 1, 1 }]() -> wci::Point { return size; }
 )
 {}
-inline wci::Widget::Widget(wci::CharInfo&& charInfo) : wci::Widget(
-    [matrix = wci::CharMatrix(wci::Coord{ 1, 1 }, charInfo)]() -> wci::CharMatrix { return matrix; },
-    [size = wci::Coord{ 1, 1 }]() -> wci::Coord { return size; }
+inline wci::Widget::Widget(wci::CharCell&& cell) : wci::Widget(
+    [matrix = wci::CharMatrix(wci::Point{ 1, 1 }, cell)]() -> wci::CharMatrix { return matrix; },
+    [size = wci::Point{ 1, 1 }]() -> wci::Point { return size; }
 )
 {}
 inline wci::Widget::Widget(const std::wstring& string) : wci::Widget(
     [&string]() -> wci::CharMatrix { return wci::CharString(string).toMatrix(); },
-    [&string]() -> wci::Coord { return wci::Coord{ wci::CharString(string).size(), 1 }; }
+    [&string]() -> wci::Point { return wci::Point{ wci::CharString(string).size(), 1 }; }
 )
 {}
 inline wci::Widget::Widget(std::wstring&& string) : wci::Widget(
     [matrix = wci::CharString(string).toMatrix()]() -> wci::CharMatrix { return matrix; },
-    [size = wci::Coord{ wci::CharString(string).size(), 1 }]() -> wci::Coord { return size; }
+    [size = wci::Point{ wci::CharString(string).size(), 1 }]() -> wci::Point { return size; }
 )
 {}
 inline wci::Widget::Widget(const CharString& charString) : wci::Widget (
     [&charString]() -> wci::CharMatrix { return charString.toMatrix(); },
-    [&charString]() -> wci::Coord { return wci::Coord{ charString.size(), 1 }; }
+    [&charString]() -> wci::Point { return wci::Point{ charString.size(), 1 }; }
 )
 {}
 inline wci::Widget::Widget(CharString&& charString) : wci::Widget(
     [matrix = charString.toMatrix()]() -> wci::CharMatrix { return matrix; },
-    [size = wci::Coord{ charString.size(), 1 }]() -> wci::Coord { return size; }
+    [size = wci::Point{ charString.size(), 1 }]() -> wci::Point { return size; }
 )
 {}
 inline wci::Widget::Widget(CharMatrix&& charMatrix) : wci::Widget(
     [charMatrix]() -> wci::CharMatrix { return charMatrix; },
-    [size = charMatrix.size()]() -> wci::Coord { return size; }
+    [size = charMatrix.size()]() -> wci::Point { return size; }
 )
 {}
 
-inline wci::Coord wci::Widget::size() const noexcept
+inline wci::Point wci::Widget::size() const noexcept
 {
     return sizer();
 }
@@ -207,11 +207,11 @@ inline void wci::Widget::anchor(wci::Anchor newAnchor) noexcept
     inner.anchor = newAnchor;
 }
 
-inline wci::Coord wci::Widget::absolute() const noexcept
+inline wci::Point wci::Widget::absolute() const noexcept
 {
     return inner.absolute;
 }
-inline void wci::Widget::absolute(wci::Coord newAbsolute) noexcept
+inline void wci::Widget::absolute(wci::Point newAbsolute) noexcept
 {
     inner.absolute = newAbsolute;
 }

@@ -9,7 +9,7 @@ int main()
     panelBottom.fill(L' ', wci::Attribute::BgColorBlue);
     panelTop.fill(L' ', wci::Attribute::BgColorYellow);
 
-    wci::Coord positionTop{ 0, 0 }, positionBottom{ 0, 0 };
+    wci::Point positionTop{ 0, 0 }, positionBottom{ 0, 0 };
 
     auto draw = [&]()
     {
@@ -22,7 +22,7 @@ int main()
     wci::EventLoop loop(window.console());
 
     bool proceed = true;
-    loop.bindKeyEvent([&](const wci::KeyEventRecord& event)
+    loop.bindKeyEvent([&](const wci::KeyEvent& event)
     {
         if (!event.keyDown)
             return;

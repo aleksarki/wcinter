@@ -9,46 +9,46 @@
 namespace wci
 {
     /*
-     * Structure `Coord` defines the coordinates of a character cell in  the console screen buffer.
+     * Structure `Point` defines the coordinates of a character cell in  the console screen buffer.
      * The origin of the coordinate system (0; 0) is the upper-left cell of the buffer.
      */
-    struct Coord
+    struct Point
     {
         Short x;
         Short y;
 
-        constexpr bool operator==(const Coord& other) const noexcept;
+        constexpr bool operator==(const Point& other) const noexcept;
 
-        constexpr bool operator!=(const Coord& other) const noexcept;
+        constexpr bool operator!=(const Point& other) const noexcept;
     };
 
     /*
-     * Structure `SmallRect` defines coordinates of upper-left and lower-right corners of a rectangle.
+     * Structure `Rect` defines coordinates of upper-left and lower-right corners of a rectangle.
      */
-    struct SmallRect
+    struct Rect
     {
         Short left;    // X of top left corner.
         Short top;     // Y of top left corner.
         Short right;   // X of bottom right corner.
         Short bottom;  // Y of bottom right corner.
 
-        constexpr bool operator==(const SmallRect& other) const noexcept;
+        constexpr bool operator==(const Rect& other) const noexcept;
 
-        constexpr bool operator!=(const SmallRect& other) const noexcept;
+        constexpr bool operator!=(const Rect& other) const noexcept;
     };
 
     /*
-     * Structure `CharInfo` specifies a Unicode character and its attributes.
+     * Structure `CharCell` specifies a Unicode character and its attributes.
      * This structure is used by the console functions for reading from and writing to the console screen buffer.
      */
-    struct CharInfo
+    struct CharCell
     {
         Wchar character;
         Attribute attributes;
 
-        constexpr bool operator==(const CharInfo& other) const noexcept;
+        constexpr bool operator==(const CharCell& other) const noexcept;
 
-        constexpr bool operator!=(const CharInfo& other) const noexcept;
+        constexpr bool operator!=(const CharCell& other) const noexcept;
     };
 
     #pragma region Console info structures
@@ -71,24 +71,25 @@ namespace wci
      */
     struct ScreenBufferInfo
     {
-        Coord size;
-        Coord cursorPosition;
+        Point size;
+        Point cursorPosition;
         Attribute attributes;
-        SmallRect window;
-        Coord maxWindowSize;
+        Rect window;
+        Point maxWindowSize;
 
         constexpr bool operator==(const ScreenBufferInfo& other) const noexcept;
+
         constexpr bool operator!=(const ScreenBufferInfo& other) const noexcept;
     };
 
     #pragma endregion
 
-    #pragma region Event records
+    #pragma region Events
 
     /*
-     * Structure `KeyEventRecord` is used for recording keyboard input events for structure `InputRecord`.
+     * Structure `KeyEvent` is used for recording keyboard input events for structure `InputEvent`.
      */
-    struct KeyEventRecord
+    struct KeyEvent
     {
         bool keyDown;
         Word repeatCount;
@@ -99,39 +100,39 @@ namespace wci
     };
 
     /*
-     * Structure `MouseEventRecord` is used for recording mouse input events for structure `InputRecord`.
+     * Structure `MouseEvent` is used for recording mouse input events for structure `InputEvent`.
      */
-    struct MouseEventRecord
+    struct MouseEvent
     {
-        Coord mousePosition;
+        Point mousePosition;
         ButtonState buttonState;
         ControlKeyState controlKeyState;
         EventFlag eventFlags;
     };
 
     /*
-     * Structure `WindowBufferSizeRecord` is used for recording events of
-     * changing the size of window buffer for structure `InputRecord`.
+     * Structure `WindowBufferResizeEvent` is used for recording events of
+     * changing the size of window buffer for structure `InputEvent`.
      */
-    struct WindowBufferSizeRecord
+    struct WindowBufferResizeEvent
     {
-        Coord size;
+        Point size;
     };
 
     /*
-     * Structure `MenuEventRecord` is used for recording menu events for structure `InputRecord`.
+     * Structure `MenuEvent` is used for recording menu events for structure `InputEvent`.
      * Such events are for internal use and should be ignored.
      */
-    struct MenuEventRecord
+    struct MenuEvent
     {
         unsigned int commandId;
     };
 
     /*
-     * Structure `FocusEventRecord` is used for recording focus events for structure `InputRecord`.
+     * Structure `FocusEvent` is used for recording focus events for structure `InputEvent`.
      * Such events are for internal use and should be ignored.
      */
-    struct FocusEventRecord
+    struct FocusEvent
     {
         bool setFocus;
     };
@@ -139,17 +140,17 @@ namespace wci
     #pragma endregion
 
     /*
-     * Structure `InputRecord` is used for recording data input events for console input buffer.
+     * Structure `InputEvent` is used for recording data input events for console input buffer.
      */
-    struct InputRecord  // idea make variant
+    struct InputEvent  // idea make variant
     {
         EventType eventType;
         union {
-            KeyEventRecord keyEvent;
-            MouseEventRecord mouseEvent;
-            WindowBufferSizeRecord windowBufferSizeEvent;
-            MenuEventRecord menuEvent;
-            FocusEventRecord focusEvent;
+            KeyEvent keyEvent;
+            MouseEvent mouseEvent;
+            WindowBufferResizeEvent windowBufferSizeEvent;
+            MenuEvent menuEvent;
+            FocusEvent focusEvent;
         } event;
     };
 
@@ -208,12 +209,6 @@ namespace wci
         constexpr bool operator!=(const Geometry& other) const noexcept;
     };
 
-    struct FixedGeometry  // fixme reimplement
-    {
-        bool width;
-        bool height;
-    };
-
     struct Borders
     {
         BorderWidth left;
@@ -223,17 +218,17 @@ namespace wci
     };
 }
 
-inline constexpr bool wci::Coord::operator==(const wci::Coord& other) const noexcept
+inline constexpr bool wci::Point::operator==(const wci::Point& other) const noexcept
 {
     return x == other.x && y == other.y;
 }
 
-inline constexpr bool wci::Coord::operator!=(const wci::Coord& other) const noexcept
+inline constexpr bool wci::Point::operator!=(const wci::Point& other) const noexcept
 {
     return !(*this == other);
 }
 
-inline constexpr bool wci::SmallRect::operator==(const wci::SmallRect& other) const noexcept
+inline constexpr bool wci::Rect::operator==(const wci::Rect& other) const noexcept
 {
     return
     (
@@ -244,17 +239,17 @@ inline constexpr bool wci::SmallRect::operator==(const wci::SmallRect& other) co
     );
 }
 
-inline constexpr bool wci::SmallRect::operator!=(const wci::SmallRect& other) const noexcept
+inline constexpr bool wci::Rect::operator!=(const wci::Rect& other) const noexcept
 {
     return !(*this == other);
 }
 
-inline constexpr bool wci::CharInfo::operator==(const wci::CharInfo& other) const noexcept
+inline constexpr bool wci::CharCell::operator==(const wci::CharCell& other) const noexcept
 {
     return character == other.character && attributes == other.attributes;
 }
 
-inline constexpr bool wci::CharInfo::operator!=(const wci::CharInfo& other) const noexcept
+inline constexpr bool wci::CharCell::operator!=(const wci::CharCell& other) const noexcept
 {
     return !(*this == other);
 }

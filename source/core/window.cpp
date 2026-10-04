@@ -76,7 +76,7 @@ public:
         return inner.matrix;
     }
 
-    wci::Coord size() const
+    wci::Point size() const
     {
         return matrix().size();
     }
@@ -100,7 +100,7 @@ private:
             if (!child->visible())
                 continue;
             auto& childPlaced = placements.at(child->id());
-            wci::Coord startPoint = calculateStackeeStart(
+            wci::Point startPoint = calculateStackeeStart(
                 child->position(), placed.widget->size(), child->size(), child->anchor()
             );
             child->absolute(startPoint);
@@ -130,17 +130,17 @@ public:
             auto* widget = placed.widget;
             if (!widget->visible())
                 continue;
-            wci::Coord startPoint = calculateStackeeStart(
+            wci::Point startPoint = calculateStackeeStart(
                 widget->position(), size(), widget->size(), widget->anchor()
             );
             widget->absolute(startPoint);
             framebuf.inlay(startPoint, renderPlacedWidget(placed));
         }
 
-        wci::SmallRect bbox;
+        wci::Rect bbox;
         if (forceRedraw)
         {
-            bbox = wci::SmallRect{ 0, 0, size().x, size().y };
+            bbox = wci::Rect{ 0, 0, size().x, size().y };
             forceRedraw = false;
         }
         else
@@ -184,10 +184,10 @@ public:
             ++i;
         }
     }
-    void putString(wci::Short x, wci::Short y, const wci::CharInfo charInfos[], size_t length)
+    void putString(wci::Short x, wci::Short y, const wci::CharCell cells[], size_t length)
     {
         for (size_t i = 0; i < length; ++i)
-            matrix().put(x + static_cast<wci::Short>(i), y, charInfos[i]);
+            matrix().put(x + static_cast<wci::Short>(i), y, cells[i]);
     }
 
     void putMatrix(wci::Short x, wci::Short y, const wci::CharMatrix& matrix)
@@ -439,7 +439,7 @@ const wci::CharMatrix& wci::Window::matrix() const noexcept
     return impl->matrix();
 }
 
-wci::Coord wci::Window::size() const
+wci::Point wci::Window::size() const
 {
     return impl->size();
 }
@@ -463,9 +463,9 @@ void wci::Window::put(wci::Short x, wci::Short y, wci::Wchar character, wci::Att
 {
     impl->matrix().put(x, y, character, attributes);
 }
-void wci::Window::put(const wci::Coord& position, const wci::CharInfo& charInfo)
+void wci::Window::put(const wci::Point& position, const wci::CharCell& cell)
 {
-    impl->matrix().put(position, charInfo);
+    impl->matrix().put(position, cell);
 }
 void wci::Window::put(wci::Short x, wci::Short y, const wci::Wchar* string)
 {
@@ -476,15 +476,15 @@ void wci::Window::put(wci::Short x, wci::Short y, const wci::Wchar* string, wci:
 {
     impl->putString(x, y, string, attributes);
 }
-void wci::Window::put(const wci::Coord& position, const wci::CharInfo charInfos[], size_t length)
+void wci::Window::put(const wci::Point& position, const wci::CharCell cells[], size_t length)
 {
-    impl->putString(position.x, position.y, charInfos, length);
+    impl->putString(position.x, position.y, cells, length);
 }
 void wci::Window::put(wci::Short x, wci::Short y, const wci::CharMatrix& matrix)
 {
     impl->putMatrix(x, y, matrix);
 }
-void wci::Window::put(const wci::Coord& position, const wci::CharMatrix& matrix)
+void wci::Window::put(const wci::Point& position, const wci::CharMatrix& matrix)
 {
     impl->putMatrix(position.x, position.y, matrix);
 }
