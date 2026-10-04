@@ -1,6 +1,8 @@
 #pragma once
-#ifndef CINTER_INCLUDE_DEfINITIONS_ENUMS_HPP
-#define CINTER_INCLUDE_DEfINITIONS_ENUMS_HPP
+#ifndef WCI_SOURCE_DEFS_ENUMS_HPP
+#define WCI_SOURCE_DEFS_ENUMS_HPP
+
+#include <type_traits>
 
 #include "types.hpp"
 
@@ -10,9 +12,9 @@ namespace wci
 
     enum class StdHandle : Dword
     {
-        Input =  static_cast<Dword>(-10),
-        Output = static_cast<Dword>(-11),
-        Error =  static_cast<Dword>(-12)
+        Input =  Dword(-10),
+        Output = Dword(-11),
+        Error =  Dword(-12)
     };
 
     #pragma endregion
@@ -34,32 +36,19 @@ namespace wci
         EnableVirtualTerminalInput = 0x0200
     };
 
-    constexpr InputMode operator|(InputMode a, InputMode b) noexcept
-    {
-        return static_cast<InputMode>
-        (
-            static_cast<std::underlying_type_t<InputMode>>(a) |
-            static_cast<std::underlying_type_t<InputMode>>(b)
-        );
-    }
+    constexpr InputMode operator~(InputMode a) noexcept;
 
-    constexpr InputMode operator&(InputMode a, InputMode b) noexcept
-    {
-        return static_cast<InputMode>
-        (
-            static_cast<std::underlying_type_t<InputMode>>(a) &
-            static_cast<std::underlying_type_t<InputMode>>(b)
-        );
-    }
+    constexpr InputMode operator|(InputMode a, InputMode b) noexcept;
 
-    constexpr InputMode operator^(InputMode a, InputMode b) noexcept
-    {
-        return static_cast<InputMode>
-        (
-            static_cast<std::underlying_type_t<InputMode>>(a) ^
-            static_cast<std::underlying_type_t<InputMode>>(b)
-        );
-    }
+    constexpr InputMode& operator|=(InputMode& a, InputMode b) noexcept;
+
+    constexpr InputMode operator&(InputMode a, InputMode b) noexcept;
+
+    constexpr InputMode& operator&=(InputMode& a, InputMode b) noexcept;
+
+    constexpr InputMode operator^(InputMode a, InputMode b) noexcept;
+
+    constexpr InputMode& operator^=(InputMode& a, InputMode b) noexcept;
 
     #pragma endregion
 
@@ -143,32 +132,19 @@ namespace wci
         BgColorWhiteBright =   BgColorWhite   | BackgroundIntensity   // Background color is bright white.
     };
 
-    constexpr Attribute operator|(Attribute a, Attribute b) noexcept
-    {
-        return static_cast<Attribute>
-        (
-            static_cast<std::underlying_type_t<Attribute>>(a) |
-            static_cast<std::underlying_type_t<Attribute>>(b)
-        );
-    }
+    constexpr Attribute operator~(Attribute a) noexcept;
 
-    constexpr Attribute operator&(Attribute a, Attribute b) noexcept
-    {
-        return static_cast<Attribute>
-        (
-            static_cast<std::underlying_type_t<Attribute>>(a) &
-            static_cast<std::underlying_type_t<Attribute>>(b)
-        );
-    }
+    constexpr Attribute operator|(Attribute a, Attribute b) noexcept;
 
-    constexpr Attribute operator^(Attribute a, Attribute b) noexcept
-    {
-        return static_cast<Attribute>
-        (
-            static_cast<std::underlying_type_t<Attribute>>(a) ^
-            static_cast<std::underlying_type_t<Attribute>>(b)
-        );
-    }
+    constexpr Attribute& operator|=(Attribute& a, Attribute b) noexcept;
+
+    constexpr Attribute operator&(Attribute a, Attribute b) noexcept;
+
+    constexpr Attribute& operator&=(Attribute& a, Attribute b) noexcept;
+
+    constexpr Attribute operator^(Attribute a, Attribute b) noexcept;
+
+    constexpr Attribute& operator^=(Attribute& a, Attribute b) noexcept;
 
     #pragma endregion
 
@@ -182,29 +158,19 @@ namespace wci
         All =     0x10000000L
     };
 
-    constexpr GenericRights operator|(GenericRights a, GenericRights b) noexcept
-    {
-        return static_cast<GenericRights>(
-            static_cast<std::underlying_type_t<GenericRights>>(a) |
-            static_cast<std::underlying_type_t<GenericRights>>(b)
-        );
-    }
+    constexpr GenericRights operator~(GenericRights a) noexcept;
 
-    constexpr GenericRights operator&(GenericRights a, GenericRights b) noexcept
-    {
-        return static_cast<GenericRights>(
-            static_cast<std::underlying_type_t<GenericRights>>(a) &
-            static_cast<std::underlying_type_t<GenericRights>>(b)
-        );
-    }
+    constexpr GenericRights operator|(GenericRights a, GenericRights b) noexcept;
 
-    constexpr GenericRights operator^(GenericRights a, GenericRights b) noexcept
-    {
-        return static_cast<GenericRights>(
-            static_cast<std::underlying_type_t<GenericRights>>(a) ^
-            static_cast<std::underlying_type_t<GenericRights>>(b)
-        );
-    }
+    constexpr GenericRights& operator|=(GenericRights& a, GenericRights b) noexcept;
+
+    constexpr GenericRights operator&(GenericRights a, GenericRights b) noexcept;
+
+    constexpr GenericRights& operator&=(GenericRights& a, GenericRights b) noexcept;
+
+    constexpr GenericRights operator^(GenericRights a, GenericRights b) noexcept;
+
+    constexpr GenericRights& operator^=(GenericRights& a, GenericRights b) noexcept;
 
     #pragma endregion
 
@@ -217,29 +183,19 @@ namespace wci
         ShareDelete = 0x00000004
     };
 
-    constexpr FileAccessRights operator|(FileAccessRights a, FileAccessRights b) noexcept
-    {
-        return static_cast<FileAccessRights>(
-            static_cast<std::underlying_type_t<FileAccessRights>>(a) |
-            static_cast<std::underlying_type_t<FileAccessRights>>(b)
-        );
-    }
+    constexpr FileAccessRights operator~(FileAccessRights a) noexcept;
 
-    constexpr FileAccessRights operator&(FileAccessRights a, FileAccessRights b) noexcept
-    {
-        return static_cast<FileAccessRights>(
-            static_cast<std::underlying_type_t<FileAccessRights>>(a) &
-            static_cast<std::underlying_type_t<FileAccessRights>>(b)
-        );
-    }
+    constexpr FileAccessRights operator|(FileAccessRights a, FileAccessRights b) noexcept;
 
-    constexpr FileAccessRights operator^(FileAccessRights a, FileAccessRights b) noexcept
-    {
-        return static_cast<FileAccessRights>(
-            static_cast<std::underlying_type_t<FileAccessRights>>(a) ^
-            static_cast<std::underlying_type_t<FileAccessRights>>(b)
-        );
-    }
+    constexpr FileAccessRights& operator|=(FileAccessRights& a, FileAccessRights b) noexcept;
+
+    constexpr FileAccessRights operator&(FileAccessRights a, FileAccessRights b) noexcept;
+
+    constexpr FileAccessRights& operator&=(FileAccessRights& a, FileAccessRights b) noexcept;
+
+    constexpr FileAccessRights operator^(FileAccessRights a, FileAccessRights b) noexcept;
+
+    constexpr FileAccessRights& operator^=(FileAccessRights& a, FileAccessRights b) noexcept;
 
     #pragma endregion
 
@@ -266,29 +222,19 @@ namespace wci
         NlsImeDisable =    0x20000000   // DBCS for JPN: IME enable/disable.
     };
 
-    constexpr ControlKeyState operator|(ControlKeyState a, ControlKeyState b) noexcept
-    {
-        return static_cast<ControlKeyState>(
-            static_cast<std::underlying_type_t<ControlKeyState>>(a) |
-            static_cast<std::underlying_type_t<ControlKeyState>>(b)
-        );
-    }
+    constexpr ControlKeyState operator~(ControlKeyState a) noexcept;
 
-    constexpr ControlKeyState operator&(ControlKeyState a, ControlKeyState b) noexcept
-    {
-        return static_cast<ControlKeyState>(
-            static_cast<std::underlying_type_t<ControlKeyState>>(a) &
-            static_cast<std::underlying_type_t<ControlKeyState>>(b)
-        );
-    }
+    constexpr ControlKeyState operator|(ControlKeyState a, ControlKeyState b) noexcept;
 
-    constexpr ControlKeyState operator^(ControlKeyState a, ControlKeyState b) noexcept
-    {
-        return static_cast<ControlKeyState>(
-            static_cast<std::underlying_type_t<ControlKeyState>>(a) ^
-            static_cast<std::underlying_type_t<ControlKeyState>>(b)
-        );
-    }
+    constexpr ControlKeyState& operator|=(ControlKeyState& a, ControlKeyState b) noexcept;
+
+    constexpr ControlKeyState operator&(ControlKeyState a, ControlKeyState b) noexcept;
+
+    constexpr ControlKeyState& operator&=(ControlKeyState& a, ControlKeyState b) noexcept;
+
+    constexpr ControlKeyState operator^(ControlKeyState a, ControlKeyState b) noexcept;
+
+    constexpr ControlKeyState& operator^=(ControlKeyState& a, ControlKeyState b) noexcept;
 
     #pragma endregion
 
@@ -303,29 +249,19 @@ namespace wci
         FromLeft4thButtonPressed = 0x0010
     };
 
-    constexpr ButtonState operator|(ButtonState a, ButtonState b) noexcept
-    {
-        return static_cast<ButtonState>(
-            static_cast<std::underlying_type_t<ButtonState>>(a) |
-            static_cast<std::underlying_type_t<ButtonState>>(b)
-        );
-    }
+    constexpr ButtonState operator~(ButtonState a) noexcept;
 
-    constexpr ButtonState operator&(ButtonState a, ButtonState b) noexcept
-    {
-        return static_cast<ButtonState>(
-            static_cast<std::underlying_type_t<ButtonState>>(a) &
-            static_cast<std::underlying_type_t<ButtonState>>(b)
-        );
-    }
+    constexpr ButtonState operator|(ButtonState a, ButtonState b) noexcept;
 
-    constexpr ButtonState operator^(ButtonState a, ButtonState b) noexcept
-    {
-        return static_cast<ButtonState>(
-            static_cast<std::underlying_type_t<ButtonState>>(a) ^
-            static_cast<std::underlying_type_t<ButtonState>>(b)
-        );
-    }
+    constexpr ButtonState& operator|=(ButtonState& a, ButtonState b) noexcept;
+
+    constexpr ButtonState operator&(ButtonState a, ButtonState b) noexcept;
+
+    constexpr ButtonState& operator&=(ButtonState& a, ButtonState b) noexcept;
+
+    constexpr ButtonState operator^(ButtonState a, ButtonState b) noexcept;
+
+    constexpr ButtonState& operator^=(ButtonState& a, ButtonState b) noexcept;
 
     #pragma endregion
 
@@ -339,29 +275,19 @@ namespace wci
         MouseHWheeled = 0x0008
     };
     
-    constexpr EventFlag operator|(EventFlag a, EventFlag b) noexcept
-    {
-        return static_cast<EventFlag>(
-            static_cast<std::underlying_type_t<EventFlag>>(a) |
-            static_cast<std::underlying_type_t<EventFlag>>(b)
-        );
-    }
+    constexpr EventFlag operator~(EventFlag a) noexcept;
 
-    constexpr EventFlag operator&(EventFlag a, EventFlag b) noexcept
-    {
-        return static_cast<EventFlag>(
-            static_cast<std::underlying_type_t<EventFlag>>(a) &
-            static_cast<std::underlying_type_t<EventFlag>>(b)
-        );
-    }
+    constexpr EventFlag operator|(EventFlag a, EventFlag b) noexcept;
 
-    constexpr EventFlag operator^(EventFlag a, EventFlag b) noexcept
-    {
-        return static_cast<EventFlag>(
-            static_cast<std::underlying_type_t<EventFlag>>(a) ^
-            static_cast<std::underlying_type_t<EventFlag>>(b)
-        );
-    }
+    constexpr EventFlag& operator|=(EventFlag& a, EventFlag b) noexcept;
+
+    constexpr EventFlag operator&(EventFlag a, EventFlag b) noexcept;
+
+    constexpr EventFlag& operator&=(EventFlag& a, EventFlag b) noexcept;
+
+    constexpr EventFlag operator^(EventFlag a, EventFlag b) noexcept;
+
+    constexpr EventFlag& operator^=(EventFlag& a, EventFlag b) noexcept;
 
     #pragma endregion
 
@@ -624,4 +550,333 @@ namespace wci
     #pragma endregion
 }
 
-#endif  // CINTER_INCLUDE_DEfINITIONS_ENUMS_HPP
+inline constexpr wci::InputMode wci::operator~(wci::InputMode a) noexcept
+{
+    return static_cast<wci::InputMode>(~static_cast<std::underlying_type_t<wci::InputMode>>(a));
+}
+
+inline constexpr wci::InputMode wci::operator|(wci::InputMode a, wci::InputMode b) noexcept
+{
+    return static_cast<wci::InputMode>
+    (
+        static_cast<std::underlying_type_t<wci::InputMode>>(a) |
+        static_cast<std::underlying_type_t<wci::InputMode>>(b)
+    );
+}
+
+inline constexpr wci::InputMode& wci::operator|=(wci::InputMode& a, wci::InputMode b) noexcept
+{
+    return a = a | b;
+}
+
+inline constexpr wci::InputMode wci::operator&(wci::InputMode a, wci::InputMode b) noexcept
+{
+    return static_cast<wci::InputMode>
+    (
+        static_cast<std::underlying_type_t<wci::InputMode>>(a) &
+        static_cast<std::underlying_type_t<wci::InputMode>>(b)
+    );
+}
+
+inline constexpr wci::InputMode& wci::operator&=(wci::InputMode& a, wci::InputMode b) noexcept
+{
+    return a = a & b;
+}
+
+inline constexpr wci::InputMode wci::operator^(wci::InputMode a, wci::InputMode b) noexcept
+{
+    return static_cast<wci::InputMode>
+    (
+        static_cast<std::underlying_type_t<wci::InputMode>>(a) ^
+        static_cast<std::underlying_type_t<wci::InputMode>>(b)
+    );
+}
+
+inline constexpr wci::InputMode& wci::operator^=(wci::InputMode& a, wci::InputMode b) noexcept
+{
+    return a = a ^ b;
+}
+
+inline constexpr wci::Attribute wci::operator~(wci::Attribute a) noexcept
+{
+    return static_cast<wci::Attribute>(~static_cast<std::underlying_type_t<wci::Attribute>>(a));
+}
+
+inline constexpr wci::Attribute wci::operator|(wci::Attribute a, wci::Attribute b) noexcept
+{
+    return static_cast<wci::Attribute>
+    (
+        static_cast<std::underlying_type_t<wci::Attribute>>(a) |
+        static_cast<std::underlying_type_t<wci::Attribute>>(b)
+    );
+}
+
+inline constexpr wci::Attribute& wci::operator|=(wci::Attribute& a, wci::Attribute b) noexcept
+{
+    return a = a | b;
+}
+
+inline constexpr wci::Attribute wci::operator&(wci::Attribute a, wci::Attribute b) noexcept
+{
+    return static_cast<wci::Attribute>
+    (
+        static_cast<std::underlying_type_t<wci::Attribute>>(a) &
+        static_cast<std::underlying_type_t<wci::Attribute>>(b)
+    );
+}
+
+inline constexpr wci::Attribute& wci::operator&=(wci::Attribute& a, wci::Attribute b) noexcept
+{
+    return a = a & b;
+}
+
+inline constexpr wci::Attribute wci::operator^(wci::Attribute a, wci::Attribute b) noexcept
+{
+    return static_cast<wci::Attribute>
+    (
+        static_cast<std::underlying_type_t<wci::Attribute>>(a) ^
+        static_cast<std::underlying_type_t<wci::Attribute>>(b)
+    );
+}
+
+inline constexpr wci::Attribute& wci::operator^=(wci::Attribute& a, wci::Attribute b) noexcept
+{
+    return a = a ^ b;
+}
+
+inline constexpr wci::GenericRights wci::operator~(wci::GenericRights a) noexcept
+{
+    return static_cast<wci::GenericRights>(~static_cast<std::underlying_type_t<wci::GenericRights>>(a));
+}
+
+inline constexpr wci::GenericRights wci::operator|(wci::GenericRights a, wci::GenericRights b) noexcept
+{
+    return static_cast<wci::GenericRights>
+    (
+        static_cast<std::underlying_type_t<wci::GenericRights>>(a) |
+        static_cast<std::underlying_type_t<wci::GenericRights>>(b)
+    );
+}
+
+inline constexpr wci::GenericRights& wci::operator|=(wci::GenericRights& a, wci::GenericRights b) noexcept
+{
+    return a = a | b;
+}
+
+inline constexpr wci::GenericRights wci::operator&(wci::GenericRights a, wci::GenericRights b) noexcept
+{
+    return static_cast<wci::GenericRights>
+    (
+        static_cast<std::underlying_type_t<wci::GenericRights>>(a) &
+        static_cast<std::underlying_type_t<wci::GenericRights>>(b)
+    );
+}
+
+inline constexpr wci::GenericRights& wci::operator&=(wci::GenericRights& a, wci::GenericRights b) noexcept
+{
+    return a = a & b;
+}
+
+inline constexpr wci::GenericRights wci::operator^(wci::GenericRights a, wci::GenericRights b) noexcept
+{
+    return static_cast<wci::GenericRights>
+    (
+        static_cast<std::underlying_type_t<wci::GenericRights>>(a) ^
+        static_cast<std::underlying_type_t<wci::GenericRights>>(b)
+    );
+}
+
+inline constexpr wci::GenericRights& wci::operator^=(wci::GenericRights& a, wci::GenericRights b) noexcept
+{
+    return a = a ^ b;
+}
+
+inline constexpr wci::FileAccessRights wci::operator~(wci::FileAccessRights a) noexcept
+{
+    return static_cast<wci::FileAccessRights>(~static_cast<std::underlying_type_t<wci::FileAccessRights>>(a));
+}
+
+inline constexpr wci::FileAccessRights wci::operator|(wci::FileAccessRights a, wci::FileAccessRights b) noexcept
+{
+    return static_cast<wci::FileAccessRights>
+    (
+        static_cast<std::underlying_type_t<wci::FileAccessRights>>(a) |
+        static_cast<std::underlying_type_t<wci::FileAccessRights>>(b)
+    );
+}
+
+inline constexpr wci::FileAccessRights& wci::operator|=(wci::FileAccessRights& a, wci::FileAccessRights b) noexcept
+{
+    return a = a | b;
+}
+
+inline constexpr wci::FileAccessRights wci::operator&(wci::FileAccessRights a, wci::FileAccessRights b) noexcept
+{
+    return static_cast<wci::FileAccessRights>
+    (
+        static_cast<std::underlying_type_t<wci::FileAccessRights>>(a) &
+        static_cast<std::underlying_type_t<wci::FileAccessRights>>(b)
+    );
+}
+
+inline constexpr wci::FileAccessRights& wci::operator&=(wci::FileAccessRights& a, wci::FileAccessRights b) noexcept
+{
+    return a = a & b;
+}
+
+inline constexpr wci::FileAccessRights wci::operator^(wci::FileAccessRights a, wci::FileAccessRights b) noexcept
+{
+    return static_cast<wci::FileAccessRights>
+    (
+        static_cast<std::underlying_type_t<wci::FileAccessRights>>(a) ^
+        static_cast<std::underlying_type_t<wci::FileAccessRights>>(b)
+    );
+}
+
+inline constexpr wci::FileAccessRights& wci::operator^=(wci::FileAccessRights& a, wci::FileAccessRights b) noexcept
+{
+    return a = a ^ b;
+}
+
+inline constexpr wci::ControlKeyState wci::operator~(wci::ControlKeyState a) noexcept
+{
+    return static_cast<wci::ControlKeyState>(~static_cast<std::underlying_type_t<wci::ControlKeyState>>(a));
+}
+
+inline constexpr wci::ControlKeyState wci::operator|(wci::ControlKeyState a, wci::ControlKeyState b) noexcept
+{
+    return static_cast<wci::ControlKeyState>
+    (
+        static_cast<std::underlying_type_t<wci::ControlKeyState>>(a) |
+        static_cast<std::underlying_type_t<wci::ControlKeyState>>(b)
+    );
+}
+
+inline constexpr wci::ControlKeyState& wci::operator|=(wci::ControlKeyState& a, wci::ControlKeyState b) noexcept
+{
+    return a = a | b;
+}
+
+inline constexpr wci::ControlKeyState wci::operator&(wci::ControlKeyState a, wci::ControlKeyState b) noexcept
+{
+    return static_cast<wci::ControlKeyState>
+    (
+        static_cast<std::underlying_type_t<wci::ControlKeyState>>(a) &
+        static_cast<std::underlying_type_t<wci::ControlKeyState>>(b)
+    );
+}
+
+inline constexpr wci::ControlKeyState& wci::operator&=(wci::ControlKeyState& a, wci::ControlKeyState b) noexcept
+{
+    return a = a & b;
+}
+
+inline constexpr wci::ControlKeyState wci::operator^(wci::ControlKeyState a, wci::ControlKeyState b) noexcept
+{
+    return static_cast<wci::ControlKeyState>
+    (
+        static_cast<std::underlying_type_t<wci::ControlKeyState>>(a) ^
+        static_cast<std::underlying_type_t<wci::ControlKeyState>>(b)
+    );
+}
+
+inline constexpr wci::ControlKeyState& wci::operator^=(wci::ControlKeyState& a, wci::ControlKeyState b) noexcept
+{
+    return a = a ^ b;
+}
+
+inline constexpr wci::ButtonState wci::operator~(wci::ButtonState a) noexcept
+{
+    return static_cast<wci::ButtonState>(~static_cast<std::underlying_type_t<wci::ButtonState>>(a));
+}
+
+inline constexpr wci::ButtonState wci::operator|(wci::ButtonState a, wci::ButtonState b) noexcept
+{
+    return static_cast<wci::ButtonState>
+    (
+        static_cast<std::underlying_type_t<wci::ButtonState>>(a) |
+        static_cast<std::underlying_type_t<wci::ButtonState>>(b)
+    );
+}
+
+inline constexpr wci::ButtonState& wci::operator|=(wci::ButtonState& a, wci::ButtonState b) noexcept
+{
+    return a = a | b;
+}
+
+inline constexpr wci::ButtonState wci::operator&(wci::ButtonState a, wci::ButtonState b) noexcept
+{
+    return static_cast<wci::ButtonState>
+    (
+        static_cast<std::underlying_type_t<wci::ButtonState>>(a) &
+        static_cast<std::underlying_type_t<wci::ButtonState>>(b)
+    );
+}
+
+inline constexpr wci::ButtonState& wci::operator&=(wci::ButtonState& a, wci::ButtonState b) noexcept
+{
+    return a = a & b;
+}
+
+inline constexpr wci::ButtonState wci::operator^(wci::ButtonState a, wci::ButtonState b) noexcept
+{
+    return static_cast<wci::ButtonState>
+    (
+        static_cast<std::underlying_type_t<wci::ButtonState>>(a) ^
+        static_cast<std::underlying_type_t<wci::ButtonState>>(b)
+    );
+}
+
+inline constexpr wci::ButtonState& wci::operator^=(wci::ButtonState& a, wci::ButtonState b) noexcept
+{
+    return a = a ^ b;
+}
+
+inline constexpr wci::EventFlag wci::operator~(wci::EventFlag a) noexcept
+{
+    return static_cast<wci::EventFlag>(~static_cast<std::underlying_type_t<wci::EventFlag>>(a));
+}
+
+inline constexpr wci::EventFlag wci::operator|(wci::EventFlag a, wci::EventFlag b) noexcept
+{
+    return static_cast<wci::EventFlag>
+    (
+        static_cast<std::underlying_type_t<wci::EventFlag>>(a) |
+        static_cast<std::underlying_type_t<wci::EventFlag>>(b)
+    );
+}
+
+inline constexpr wci::EventFlag& wci::operator|=(wci::EventFlag& a, wci::EventFlag b) noexcept
+{
+    return a = a | b;
+}
+
+inline constexpr wci::EventFlag wci::operator&(wci::EventFlag a, wci::EventFlag b) noexcept
+{
+    return static_cast<wci::EventFlag>
+    (
+        static_cast<std::underlying_type_t<wci::EventFlag>>(a) &
+        static_cast<std::underlying_type_t<wci::EventFlag>>(b)
+    );
+}
+
+inline constexpr wci::EventFlag& wci::operator&=(wci::EventFlag& a, wci::EventFlag b) noexcept
+{
+    return a = a & b;
+}
+
+inline constexpr wci::EventFlag wci::operator^(wci::EventFlag a, wci::EventFlag b) noexcept
+{
+    return static_cast<wci::EventFlag>
+    (
+        static_cast<std::underlying_type_t<wci::EventFlag>>(a) ^
+        static_cast<std::underlying_type_t<wci::EventFlag>>(b)
+    );
+}
+
+inline constexpr wci::EventFlag& wci::operator^=(wci::EventFlag& a, wci::EventFlag b) noexcept
+{
+    return a = a ^ b;
+}
+
+#endif  // WCI_SOURCE_DEFS_ENUMS_HPP
