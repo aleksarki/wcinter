@@ -14,6 +14,7 @@ namespace wci
     inline constexpr struct Reset {} reset;
 
     inline constexpr Attribute normal = Attribute::BgColorBlack | Attribute::FgColorWhite;
+    inline constexpr Attribute rnormal = Attribute::BgColorWhite | Attribute::FgColorBlack;
 
     inline constexpr Wchar nline = L'\n';
     inline constexpr Wchar tab = L'\t';
@@ -24,8 +25,19 @@ namespace wci
 
     inline constexpr std::size_t npos(-1);
 
+    inline constexpr Short noindex = -1;
+
     inline constexpr std::uint8_t true8 = true;
     inline constexpr std::uint8_t false8 = false;
+
+    namespace chars
+    {
+        inline constexpr wchar_t
+            arrowLeft = L'←',
+            arrowUp = L'↑',
+            arrowRight = L'→',
+            arrowDown = L'↓';
+    }
 }
 
 #endif  // WCI_SOURCE_DEFS_CONSTS_HPP

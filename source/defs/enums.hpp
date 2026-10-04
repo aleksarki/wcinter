@@ -611,6 +611,17 @@ namespace wci
     };
 
     #pragma endregion
+
+    #pragma region Justify
+
+    enum class Justify
+    {
+        Left,
+        Center,
+        Right
+    };
+
+    #pragma endregion
 }
 
 #endif  // CINTER_INCLUDE_DEfINITIONS_ENUMS_HPP
