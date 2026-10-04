@@ -10,10 +10,11 @@
 #include <utility>
 #include <vector>
 
+#include "charcell.hpp"
 #include "consts.hpp"
 #include "enums.hpp"
 #include "matrixmask.hpp"
-#include "structs.hpp"
+#include "point.hpp"
 #include "types.hpp"
 
 namespace wci
@@ -96,6 +97,7 @@ namespace wci
             Short stackeeStartY, stackeeEndY;
         };
 
+        // todo turn this into Rect::intersection(Rect) method
         constexpr Intersection calculateIntersection(int baseX, int baseY, int stackeeX, int stackeeY, int offsetX, int offsetY) const noexcept;
 
     public:

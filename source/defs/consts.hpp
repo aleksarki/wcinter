@@ -5,8 +5,8 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "charcell.hpp"
 #include "enums.hpp"
-#include "structs.hpp"
 #include "types.hpp"
 
 namespace wci

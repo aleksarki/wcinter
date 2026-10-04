@@ -7,7 +7,6 @@
 
 #include "charcell.hpp"
 #include "geometry.hpp"
-#include "lenpercent.hpp"
 #include "point.hpp"
 #include "positionspec.hpp"
 #include "rect.hpp"

@@ -18,8 +18,8 @@ namespace wci
 
     public:
         constexpr LenPercent();
-        constexpr explicit LenPercent(Short sh);
-        constexpr explicit LenPercent(double d);
+        constexpr explicit LenPercent(Short absolute);
+        constexpr explicit LenPercent(double relative);
 
         constexpr bool isAbsolute() const noexcept;
 
@@ -64,11 +64,9 @@ namespace wci
         constexpr bool operator!=(const LenPercent& other) const noexcept;
 
         constexpr LenPercent& operator++();  // prefix
-
-        constexpr LenPercent& operator--();  // prefix
-
         constexpr LenPercent operator++(int);  // postfix
 
+        constexpr LenPercent& operator--();  // prefix
         constexpr LenPercent operator--(int);  // postfix
     };
 
@@ -76,9 +74,9 @@ namespace wci
 
 inline constexpr wci::LenPercent::LenPercent() : value(wci::Short(0))
 {}
-inline constexpr wci::LenPercent::LenPercent(wci::Short sh) : value(sh)
+inline constexpr wci::LenPercent::LenPercent(wci::Short absolute) : value(absolute)
 {}
-inline constexpr wci::LenPercent::LenPercent(double d) : value(d)
+inline constexpr wci::LenPercent::LenPercent(double relative) : value(relative)
 {}
 
 inline constexpr bool wci::LenPercent::isAbsolute() const noexcept
@@ -273,17 +271,6 @@ inline constexpr wci::LenPercent& wci::LenPercent::operator++()
     }
     throw std::invalid_argument("constexpr wci::LenPercent& wci::operator++(wci::LenPercent&) got invalid value");
 }
-
-inline constexpr wci::LenPercent& wci::LenPercent::operator--()
-{
-    if (isAbsolute())
-    {
-        --absolute();
-        return *this;
-    }
-    throw std::invalid_argument("constexpr wci::LenPercent& wci::operator--(wci::LenPercent&) got invalid value");
-}
-
 inline constexpr wci::LenPercent wci::LenPercent::operator++(int)
 {
     if (isAbsolute())
@@ -295,6 +282,15 @@ inline constexpr wci::LenPercent wci::LenPercent::operator++(int)
     throw std::invalid_argument("constexpr wci::LenPercent& wci::operator++(wci::LenPercent&, int) got invalid value");
 }
 
+inline constexpr wci::LenPercent& wci::LenPercent::operator--()
+{
+    if (isAbsolute())
+    {
+        --absolute();
+        return *this;
+    }
+    throw std::invalid_argument("constexpr wci::LenPercent& wci::operator--(wci::LenPercent&) got invalid value");
+}
 inline constexpr wci::LenPercent wci::LenPercent::operator--(int)
 {
     if (isAbsolute())

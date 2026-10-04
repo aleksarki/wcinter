@@ -9,7 +9,9 @@
 #include <stdexcept>
 #include <vector>
 
-#include "structs.hpp"
+#include "consts.hpp"
+#include "point.hpp"
+#include "rect.hpp"
 #include "types.hpp"
 
 namespace wci
