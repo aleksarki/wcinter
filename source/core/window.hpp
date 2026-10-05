@@ -43,7 +43,7 @@ namespace wci {
         void put(Short x, Short y, const Wchar* string);
         void put(Short x, Short y, const Wchar* string, Attribute attributes);
         void put(Short x, Short y, const std::wstring& string);  // todo implement
-        void put(const Point& position, const CharCell cells[], size_t length);
+        void put(const Point& position, const CharCell cells[], Short length);
         void put(const Point& position, const std::wstring& string);  // todo implement
 
         // matrix

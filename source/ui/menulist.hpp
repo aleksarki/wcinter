@@ -17,7 +17,7 @@ namespace wci
             bool cyclic;                                                    // do cyclic rotation through options
             Short index;
             Attribute selectionAttribute;
-            CharCell backgroundCharacter;
+            CharCell backgroundCell;
             Justify optionJustify;
             unsigned optionPaddingLeft, optionPaddingRight;
             std::optional<CharCell> selectionCharLeft, selectionCharRight;  // these embrace current selection
@@ -38,7 +38,7 @@ namespace wci
             std::vector<CharString> options = std::vector<CharString>(),
             bool cyclic = true,
             Attribute selectionAttribute = rnormal,
-            CharCell backgroundCharacter = normalch,
+            CharCell backgroundCell = normalch,
             Justify optionJustify = Justify::Left,
             unsigned optionPaddingLeft = 1,
             unsigned optionPaddingRight = 1,
@@ -73,8 +73,8 @@ namespace wci
         Attribute selectionAttribute() const noexcept;
         void selectionAttribute(Attribute newSelectionAttribute) noexcept;
 
-        CharCell backgroundCharacter() const noexcept;
-        void backgroundCharacter(CharCell newBackgroundCharacter) noexcept;
+        CharCell backgroundCell() const noexcept;
+        void backgroundCell(CharCell newBackgroundCharacter) noexcept;
 
         Justify optionJustify() const noexcept;
         void optionJustify(Justify newOptionJustify) noexcept;

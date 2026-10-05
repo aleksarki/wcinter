@@ -150,25 +150,22 @@ public:
                 return;        
         }
 
-        std::size_t length = bbox.right - bbox.left;
         for (wci::Short i = bbox.top; i < bbox.bottom; ++i)
         {
             const auto* source = framebuf.rowData(i) + bbox.left;
             auto* dest = lastbuf.rowData(i) + bbox.left;
-            std::copy(source, source + length, dest);  // todo implement CharMatrix:: copy(from, to, other), inlay(mask, other)
+            // todo implement CharMatrix:: copy(from, to, other), inlay(mask, other)
+            std::copy(source, source + bbox.size().width, dest);
         }
 
-        SMALL_RECT rect{
-            wci::api(bbox.left),
-            wci::api(bbox.top),
-            wci::api(bbox.right) - 1,
-            wci::api(bbox.bottom) - 1
-        };
+        SMALL_RECT rect = wci::api(bbox);
+        --rect.Right;  // SMALL_RECT is inclusive
+        --rect.Bottom;
         WriteConsoleOutputW(
             wci::api(console().stdOutput()),  // same as console().activeScreenBuffer()
             wci::api(framebuf.data()),
             wci::api(framebuf.size()),
-            COORD{ rect.Left, rect.Top },
+            wci::api(bbox.topLeft()),
             &rect
         );
     }
@@ -182,10 +179,10 @@ public:
             ++i;
         }
     }
-    void putString(wci::Short x, wci::Short y, const wci::CharCell cells[], size_t length)
+    void putString(wci::Short x, wci::Short y, const wci::CharCell cells[], wci::Short length)
     {
-        for (size_t i = 0; i < length; ++i)
-            matrix().put(x + static_cast<wci::Short>(i), y, cells[i]);
+        for (wci::Short i = 0; i < length; ++i)
+            matrix().put(x + i, y, cells[i]);
     }
 
     void putMatrix(wci::Short x, wci::Short y, const wci::CharMatrix& matrix)
@@ -474,7 +471,7 @@ void wci::Window::put(wci::Short x, wci::Short y, const wci::Wchar* string, wci:
 {
     impl->putString(x, y, string, attributes);
 }
-void wci::Window::put(const wci::Point& position, const wci::CharCell cells[], size_t length)
+void wci::Window::put(const wci::Point& position, const wci::CharCell cells[], wci::Short length)
 {
     impl->putString(position.x, position.y, cells, length);
 }
@@ -489,15 +486,15 @@ void wci::Window::put(const wci::Point& position, const wci::CharMatrix& matrix)
 
 std::size_t wci::Window::place(const wci::LenPercent& x, const wci::LenPercent& y, wci::Widget& widget, wci::Anchor anchor)
 {
-    return impl->placeWidget(wci::PositionSpec{ x, y }, widget, anchor, this);
+    return impl->placeWidget(wci::position(x, y), widget, anchor, this);
 }
 std::size_t wci::Window::place(const wci::LenPercent& x, const wci::LenPercent& y, wci::Widget&& widget, wci::Anchor anchor)
 {
-    return impl->placeWidget(wci::PositionSpec{ x, y }, std::move(widget), anchor, this);
+    return impl->placeWidget(wci::position(x, y), std::move(widget), anchor, this);
 }
 std::size_t wci::Window::place(const wci::LenPercent& x, const wci::LenPercent& y, std::size_t id, wci::Anchor anchor)
 {
-    return impl->placeWidget(wci::PositionSpec{ x, y }, id, anchor, this);
+    return impl->placeWidget(wci::position(x, y), id, anchor, this);
 }
 std::size_t wci::Window::place(const wci::PositionSpec& position, wci::Widget& widget, wci::Anchor anchor)
 {
@@ -514,15 +511,15 @@ std::size_t wci::Window::place(const wci::PositionSpec& position, std::size_t id
 
 std::size_t wci::Window::place(const wci::LenPercent& x, const wci::LenPercent& y, std::size_t parentId, wci::Widget& child, wci::Anchor anchor)
 {
-    return impl->placeWidget(wci::PositionSpec{ x, y }, parentId, child, anchor);
+    return impl->placeWidget(wci::position(x, y), parentId, child, anchor);
 }
 std::size_t wci::Window::place(const wci::LenPercent& x, const wci::LenPercent& y, std::size_t parentId, wci::Widget&& child, wci::Anchor anchor)
 {
-    return impl->placeWidget(wci::PositionSpec{ x, y }, parentId, std::move(child), anchor);
+    return impl->placeWidget(wci::position(x, y), parentId, std::move(child), anchor);
 }
 std::size_t wci::Window::place(const wci::LenPercent& x, const wci::LenPercent& y, std::size_t parentId, std::size_t childId, wci::Anchor anchor)
 {
-    return impl->placeWidget(wci::PositionSpec{ x, y }, parentId, childId, anchor);
+    return impl->placeWidget(wci::position(x, y), parentId, childId, anchor);
 }
 std::size_t wci::Window::place(const wci::PositionSpec& position, std::size_t parentId, wci::Widget& child, wci::Anchor anchor)
 {
@@ -539,15 +536,15 @@ std::size_t wci::Window::place(const wci::PositionSpec& position, std::size_t pa
 
 std::size_t wci::Window::place(const wci::LenPercent& x, const wci::LenPercent& y, wci::Widget& parent, wci::Widget& child, wci::Anchor anchor)
 {
-    return impl->placeWidget(wci::PositionSpec{ x, y }, parent.id(), child, anchor);
+    return impl->placeWidget(wci::position(x, y), parent.id(), child, anchor);
 }
 std::size_t wci::Window::place(const wci::LenPercent& x, const wci::LenPercent& y, wci::Widget& parent, wci::Widget&& child, wci::Anchor anchor)
 {
-    return impl->placeWidget(wci::PositionSpec{ x, y }, parent.id(), std::move(child), anchor);
+    return impl->placeWidget(wci::position(x, y), parent.id(), std::move(child), anchor);
 }
 std::size_t wci::Window::place(const wci::LenPercent& x, const wci::LenPercent& y, wci::Widget& parent, std::size_t childId, wci::Anchor anchor)
 {
-    return impl->placeWidget(wci::PositionSpec{ x, y }, parent.id(), childId, anchor);
+    return impl->placeWidget(wci::position(x, y), parent.id(), childId, anchor);
 }
 std::size_t wci::Window::place(const wci::PositionSpec& position, wci::Widget& parent, wci::Widget& child, wci::Anchor anchor)
 {
@@ -564,11 +561,11 @@ std::size_t wci::Window::place(const wci::PositionSpec& position, wci::Widget& p
 
 void wci::Window::move(const wci::LenPercent& x, const wci::LenPercent& y, wci::Widget& widget, wci::Anchor anchor)
 {
-    impl->moveWidget(wci::PositionSpec{ x, y }, widget, anchor);
+    impl->moveWidget(wci::position(x, y), widget, anchor);
 }
 void wci::Window::move(const wci::LenPercent& x, const wci::LenPercent& y, std::size_t id, wci::Anchor anchor)
 {
-    impl->moveWidget(wci::PositionSpec{ x, y }, impl->getWidget(id), anchor);
+    impl->moveWidget(wci::position(x, y), impl->getWidget(id), anchor);
 }
 void wci::Window::move(const wci::PositionSpec& position, wci::Widget& widget, wci::Anchor anchor)
 {

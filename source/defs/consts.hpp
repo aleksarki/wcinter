@@ -32,7 +32,7 @@ namespace wci
 
     namespace chars
     {
-        inline constexpr wchar_t
+        inline constexpr Wchar
             invertedExclamation = L'¡',
             cent = L'¢',
             pound = L'£',

@@ -3,6 +3,7 @@
 #define WCI_SOURCE_UTIL_MISC_HPP
 
 #include <cmath>
+#include <stdexcept>
 #include <type_traits>
 
 #include "../defs.hpp"
@@ -73,7 +74,7 @@ namespace wci
      */
     constexpr Point calculateStackeeStart(
         const PositionSpec& stackeePosition, const Geometry& baseSize, const Geometry& stackeeSize, Anchor stackeeAnchor
-    ) noexcept;
+    );
 }
 
 inline constexpr wci::Point wci::at(wci::Short x, wci::Short y) noexcept
@@ -138,63 +139,38 @@ inline constexpr wci::Attribute wci::inversed(wci::Attribute attribute) noexcept
     return attribute & ~wci::Attribute::FgColorWhiteBright & ~wci::Attribute::BgColorWhiteBright | newFg | newBg;
 }
 
-// todo do sth with it
 inline constexpr wci::Point wci::calculateStackeeStart(
     const wci::PositionSpec &stackeePosition, const wci::Geometry& baseSize, const wci::Geometry& stackeeSize, wci::Anchor stackeeAnchor
-) noexcept
+)
 {
-    wci::Point anchorPoint{ 0, 0 }, startPoint{ 0, 0 };  // init just in case?
+    wci::Point anchor{ 0, 0 };  // init just in case?
+    wci::Point half = stackeeSize.toPoint() / 2.;
+    wci::Point size = stackeeSize.toPoint();
 
     if (stackeePosition.x.isAbsolute())
-        anchorPoint.x = stackeePosition.x.absolute();
+        anchor.x = stackeePosition.x.absolute();
     else if (stackeePosition.x.isRelative())
-        anchorPoint.x = static_cast<wci::Short>(std::lround(stackeePosition.x.relative() * baseSize.width));
+        anchor.x = static_cast<wci::Short>(std::lround(stackeePosition.x.relative() * baseSize.width));
 
     if (stackeePosition.y.isAbsolute())
-        anchorPoint.y = stackeePosition.y.absolute();
+        anchor.y = stackeePosition.y.absolute();
     else if (stackeePosition.y.isRelative())
-        anchorPoint.y = static_cast<wci::Short>(std::lround(stackeePosition.y.relative() * baseSize.height));
+        anchor.y = static_cast<wci::Short>(std::lround(stackeePosition.y.relative() * baseSize.height));
 
     switch (stackeeAnchor)
     {
-    case wci::Anchor::TopLeft:
-        startPoint = anchorPoint;
-        break;
-    case wci::Anchor::Top:
-        startPoint.x = anchorPoint.x - stackeeSize.width / 2;
-        startPoint.y = anchorPoint.y;
-        break;
-    case wci::Anchor::TopRight:
-        startPoint.x = anchorPoint.x - stackeeSize.width;
-        startPoint.y = anchorPoint.y;
-        break;
-    case wci::Anchor::Right:
-        startPoint.x = anchorPoint.x - stackeeSize.width;
-        startPoint.y = anchorPoint.y - stackeeSize.height / 2;
-        break;
-    case wci::Anchor::BottomRight:
-        startPoint.x = anchorPoint.x - stackeeSize.width;
-        startPoint.y = anchorPoint.y - stackeeSize.height;
-        break;
-    case wci::Anchor::Bottom:
-        startPoint.x = anchorPoint.x - stackeeSize.width / 2;
-        startPoint.y = anchorPoint.y - stackeeSize.height;
-        break;
-    case wci::Anchor::BottomLeft:
-        startPoint.x = anchorPoint.x;
-        startPoint.y = anchorPoint.y - stackeeSize.height;
-        break;
-    case wci::Anchor::Left:
-        startPoint.x = anchorPoint.x;
-        startPoint.y = anchorPoint.y - stackeeSize.height / 2;
-        break;
-    case wci::Anchor::Center:
-        startPoint.x = anchorPoint.x - stackeeSize.width / 2;
-        startPoint.y = anchorPoint.y - stackeeSize.height / 2;
-        break;
+    case wci::Anchor::TopLeft:     return anchor;
+    case wci::Anchor::Top:         return anchor - wci::at(half.x, 0);
+    case wci::Anchor::TopRight:    return anchor - wci::at(size.x, 0);
+    case wci::Anchor::Right:       return anchor - wci::at(size.x, half.y);
+    case wci::Anchor::BottomRight: return anchor - size;
+    case wci::Anchor::Bottom:      return anchor - wci::at(half.x, size.y);
+    case wci::Anchor::BottomLeft:  return anchor - wci::at(0, size.y);
+    case wci::Anchor::Left:        return anchor - wci::at(0, half.y);
+    case wci::Anchor::Center:      return anchor - half;
     }
 
-    return startPoint;
+    throw std::invalid_argument("wci::calculateStackeeStart() got invalid Anchor value");
 }
 
 #endif  // WCI_SOURCE_UTIL_MISC_HPP

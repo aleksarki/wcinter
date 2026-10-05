@@ -31,6 +31,8 @@ namespace wci
 
         constexpr bool within(const Point& point) const noexcept;
 
+        constexpr bool within(const Rect& rect) const noexcept;
+
         constexpr bool intersects(const Rect& other) const noexcept;
 
         constexpr Rect intersect(const Rect& other) const noexcept;  // returns wci::norect when no intersection
@@ -79,6 +81,11 @@ inline constexpr wci::Geometry wci::Rect::size() const noexcept
 inline constexpr bool wci::Rect::within(const wci::Point& point) const noexcept
 {
     return left <= point.x && point.x < right && top <= point.y && point.y < bottom;
+}
+
+inline constexpr bool wci::Rect::within(const wci::Rect& rect) const noexcept
+{
+    return within(rect.topLeft()) && within(rect.bottomRight());
 }
 
 inline constexpr bool wci::Rect::intersects(const wci::Rect& other) const noexcept
@@ -177,6 +184,16 @@ inline constexpr bool wci::Rect::operator!=(const wci::Rect& other) const noexce
 inline constexpr wci::Point wci::Point::clamp(const wci::Rect& rect) const noexcept
 {
     return clamp(rect.topLeft(), rect.bottomRight());
+}
+
+inline constexpr bool wci::Geometry::within(const wci::Rect& rect) const noexcept
+{
+    return toRect().within(rect);
+}
+
+inline constexpr wci::Rect wci::Geometry::toRect() const noexcept
+{
+    return wci::Rect{ 0, 0, width, height };
 }
 
 #endif  // WCI_SOURCE_DEFS_RECT_HPP
