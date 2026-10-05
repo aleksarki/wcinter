@@ -33,18 +33,23 @@ namespace wci {
 
         void render();
 
+        void fill(Wchar character, Attribute attributes);
+        void fill(const CharCell& cell);
+
+        void blank();
+
         // character
         void put(Short x, Short y, Wchar character);
         void put(Short x, Short y, Wchar character, Attribute attributes);
-        void put(Short x, Short y, const CharCell& cell);  // todo implement
+        void put(Short x, Short y, const CharCell& cell);
         void put(const Point& position, const CharCell& cell);
 
         // string
         void put(Short x, Short y, const Wchar* string);
         void put(Short x, Short y, const Wchar* string, Attribute attributes);
-        void put(Short x, Short y, const std::wstring& string);  // todo implement
+        void put(Short x, Short y, const std::wstring& string);
         void put(const Point& position, const CharCell cells[], Short length);
-        void put(const Point& position, const std::wstring& string);  // todo implement
+        void put(const Point& position, const std::wstring& string);
 
         // matrix
         void put(Short x, Short y, const CharMatrix& matrix);

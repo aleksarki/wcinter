@@ -42,14 +42,7 @@ public:
     {
         inner.matrix.resize(inner.console.screenBufferInfo().size);
         oldScreenBuffer = inner.console.activeScreenBuffer();
-        HANDLE handle = CreateConsoleScreenBuffer(
-            wci::api(GenericRights::Read | GenericRights::Write),
-            wci::api(FileAccessRights::ShareRead | FileAccessRights::ShareWrite),
-            NULL,
-            CONSOLE_TEXTMODE_BUFFER,
-            NULL
-        );  // todo implement static Console::createSceenBuffer()
-        inner.console.activeScreenBuffer(wci::wci(handle));
+        inner.console.activeScreenBuffer(wci::Console::createScreenBuffer());
         inner.console.cursorInfo(wci::CursorInfo{ 1, false });  // hide the cursor
     }
     ~Impl()
@@ -449,6 +442,20 @@ void wci::Window::render()
     impl->render();
 }
 
+void wci::Window::fill(wci::Wchar character, wci::Attribute attributes)
+{
+    impl->matrix().fill(character, attributes);
+}
+void wci::Window::fill(const wci::CharCell& cell)
+{
+    impl->matrix().fill(cell);
+}
+
+void wci::Window::blank()
+{
+    impl->matrix().blank();
+}
+
 void wci::Window::put(wci::Short x, wci::Short y, wci::Wchar character)
 {
     auto attributes = impl->console().screenBufferInfo().attributes;
@@ -457,6 +464,10 @@ void wci::Window::put(wci::Short x, wci::Short y, wci::Wchar character)
 void wci::Window::put(wci::Short x, wci::Short y, wci::Wchar character, wci::Attribute attributes)
 {
     impl->matrix().put(x, y, character, attributes);
+}
+void wci::Window::put(wci::Short x, wci::Short y, const wci::CharCell& cell)
+{
+    impl->matrix().put(x, y, cell);
 }
 void wci::Window::put(const wci::Point& position, const wci::CharCell& cell)
 {
@@ -471,9 +482,19 @@ void wci::Window::put(wci::Short x, wci::Short y, const wci::Wchar* string, wci:
 {
     impl->putString(x, y, string, attributes);
 }
+void wci::Window::put(wci::Short x, wci::Short y, const std::wstring& string)
+{
+    auto attributes = impl->console().screenBufferInfo().attributes;
+    impl->putString(x, y, string.data(), attributes);
+}
 void wci::Window::put(const wci::Point& position, const wci::CharCell cells[], wci::Short length)
 {
     impl->putString(position.x, position.y, cells, length);
+}
+void wci::Window::put(const wci::Point& position, const std::wstring& string)
+{
+    auto attributes = impl->console().screenBufferInfo().attributes;
+    impl->putString(position.x, position.y, string.data(), attributes);
 }
 void wci::Window::put(wci::Short x, wci::Short y, const wci::CharMatrix& matrix)
 {

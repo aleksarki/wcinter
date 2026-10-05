@@ -6,6 +6,7 @@
 #include <cassert>
 #include <climits>
 #include <cstddef>
+#include <cwchar>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -66,6 +67,8 @@ namespace wci
         void fill(const CharCell& cell) noexcept;
 
         void blank() noexcept;
+
+        void attribute(Attribute attributes) noexcept;
 
         constexpr bool within(Short i) const noexcept;
 
@@ -166,9 +169,8 @@ inline wci::CharString::CharString(const std::wstring& string, wci::Attribute at
         inner.string[i] = wci::CharCell{ string[i], attributes };
 }
 inline wci::CharString::CharString(const wci::Wchar* string)
-{
-    std::size_t length = 0;
-    for (; string[length]; ++length);  // get the length
+{    
+    std::size_t length = std::wcslen(string);
     if (length > SHRT_MAX)
         throw std::length_error("CharString::CharString() got a string too long");
     resize(static_cast<wci::Short>(length));
@@ -177,8 +179,7 @@ inline wci::CharString::CharString(const wci::Wchar* string)
 }
 inline wci::CharString::CharString(const wci::Wchar* string, wci::Attribute attributes)
 {
-    std::size_t length = 0;
-    for (; string[length]; ++length);
+    std::size_t length = std::wcslen(string);
     if (length > SHRT_MAX)
         throw std::length_error("CharString::CharString() got a string too long");
     resize(static_cast<wci::Short>(length));
@@ -285,6 +286,12 @@ inline void wci::CharString::fill(const wci::CharCell& cell) noexcept
 inline void wci::CharString::blank() noexcept
 {
     fill(wci::normalch);
+}
+
+inline void wci::CharString::attribute(wci::Attribute attributes) noexcept
+{
+    for (auto& cell : inner.string)
+        cell <<= attributes;
 }
 
 inline constexpr bool wci::CharString::within(wci::Short i) const noexcept

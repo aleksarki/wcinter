@@ -88,9 +88,7 @@ const wci::CharMatrix& wci::MenuList::toMatrix() const
         if (i == index())  // selected option, distinct highlight  // todo OPTIMIZE THIS
         {
             wci::CharString currentOption = option;
-            // todo implement CharString::attribute(Attribute)
-            for (auto& cell : currentOption)
-                cell <<= selectionAttribute();
+            currentOption.attribute(selectionAttribute());
             line = wci::CharString(listWidth, backgroundCell() << selectionAttribute());
             line.inlay(optionStart, currentOption);
 
@@ -101,7 +99,7 @@ const wci::CharMatrix& wci::MenuList::toMatrix() const
         }
         else
             line.inlay(optionStart, option);
-        // todo implement Matrix::put(CharString)
+        // todo implement Matrix::put(CharString)?
         bufferCache.buffer.inlay(listStart + wci::at(0, i), line.toMatrix());
     }
 

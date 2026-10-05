@@ -51,6 +51,8 @@ namespace wci
     public:
         template<renderable R>
         Widget(R& object);
+        template<renderable R>
+        Widget(R&& object);
         Widget(Wchar character);
         Widget(const CharCell& cell);
         Widget(CharCell&& cell);
@@ -138,6 +140,12 @@ inline wci::Widget::Widget(R& object) : wci::Widget(
     [&object]() -> wci::Geometry { return object.size(); }
 )
 {}
+template<wci::renderable R>
+inline wci::Widget::Widget(R&& object) : wci::Widget(
+    [matrix = object.toMatrix()]() -> wci::CharMatrix { return matrix; },
+    [size = object.size()]() -> wci::Geometry { return size; }
+)
+{}
 inline wci::Widget::Widget(wci::Wchar character) : wci::Widget(
     [matrix = wci::CharMatrix(wci::Geometry{ 1, 1 }, wci::CharCell{ character, wci::normal })]() -> wci::CharMatrix { return matrix; },
     [size = wci::Geometry{ 1, 1 }]() -> wci::Geometry { return size; }
@@ -155,7 +163,7 @@ inline wci::Widget::Widget(wci::CharCell&& cell) : wci::Widget(
 {}
 inline wci::Widget::Widget(const std::wstring& string) : wci::Widget(
     [&string]() -> wci::CharMatrix { return wci::CharString(string).toMatrix(); },
-    [&string]() -> wci::Geometry { return wci::Geometry{ wci::CharString(string).size(), 1 }; }
+    [&string]() -> wci::Geometry { return wci::Geometry{ static_cast<wci::Short>(string.size()), 1 }; }
 )
 {}
 inline wci::Widget::Widget(std::wstring&& string) : wci::Widget(

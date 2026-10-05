@@ -258,6 +258,17 @@ void wci::Console::title(const std::wstring& newTitle)
     impl->setTitle(newTitle);
 }
 
+wci::Handle wci::Console::createScreenBuffer(wci::GenericRights generic, wci::FileAccessRights fileAccess)
+{
+    return wci::wci(CreateConsoleScreenBuffer(
+        wci::api(generic),
+        wci::api(fileAccess),
+        NULL,
+        CONSOLE_TEXTMODE_BUFFER,
+        NULL
+    ));
+}
+
 wci::ScreenBufferInfo wci::Console::screenBufferInfo() const
 {
     return impl->getScreenBufferInfo();

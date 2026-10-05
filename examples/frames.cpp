@@ -54,7 +54,7 @@ int main()
 
     loop.bindOnTick([&]()
     {
-        window.matrix().blank();  // todo make Window:: method
+        window.blank();
 
         plate.blank();
         plate.inlay(0, 0, (msg1 + std::to_wstring(counter++)).toMatrix());
