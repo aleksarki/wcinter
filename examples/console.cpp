@@ -38,13 +38,13 @@ int main()
 
     {
         wci::ScreenBufferInfo info = console.screenBufferInfo();
-        print("Console width is", std::to_wstring(info.size.x));
-        print("Console height is", std::to_wstring(info.size.y));
+        print("Console width is", std::to_wstring(info.size.width));
+        print("Console height is", std::to_wstring(info.size.height));
         print("Cursor is at", std::to_wstring(info.cursorPosition.x) + L"x" + std::to_wstring(info.cursorPosition.y));
         print("Window top left corner is", std::to_wstring(info.window.left) + L"x" + std::to_wstring(info.window.top));
         print("Window bottom right corner is", std::to_wstring(info.window.right) + L"x" + std::to_wstring(info.window.bottom));
-        print("Maximum window width is", std::to_wstring(info.maxWindowSize.x));
-        print("Maximum window height is", std::to_wstring(info.maxWindowSize.y));
+        print("Maximum window width is", std::to_wstring(info.maxWindowSize.width));
+        print("Maximum window height is", std::to_wstring(info.maxWindowSize.height));
     }
 
     std::getchar();

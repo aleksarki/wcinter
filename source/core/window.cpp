@@ -3,7 +3,6 @@
 #define NOMINMAX
 
 #include <algorithm>
-#include <cmath>
 #include <cstddef>
 #include <list>
 #include <stdexcept>
@@ -76,7 +75,7 @@ public:
         return inner.matrix;
     }
 
-    wci::Point size() const
+    wci::Geometry size() const
     {
         return matrix().size();
     }
@@ -122,7 +121,7 @@ public:
             lastbuf.resize(size());
             forceRedraw = true;
         }
-        std::copy(matrix().data(), matrix().data() + size().x * size().y, framebuf.data());
+        std::copy(matrix().data(), matrix().data() + size().area(), framebuf.data());
 
         for (auto* root : roots)
         {
@@ -140,16 +139,15 @@ public:
         wci::Rect bbox;
         if (forceRedraw)
         {
-            bbox = wci::Rect{ 0, 0, size().x, size().y };
+            bbox = wci::Rect{ 0, 0, size().width, size().height };
             forceRedraw = false;
         }
         else
         {
             auto mask = framebuf.difference(lastbuf);
-            auto bboxResult = mask.boundingBox();
-            if(!bboxResult.has_value())
+            bbox = mask.boundingBox();
+            if (bbox == wci::norect)
                 return;        
-            bbox = bboxResult.value();
         }
 
         std::size_t length = bbox.right - bbox.left;
@@ -439,7 +437,7 @@ const wci::CharMatrix& wci::Window::matrix() const noexcept
     return impl->matrix();
 }
 
-wci::Point wci::Window::size() const
+wci::Geometry wci::Window::size() const
 {
     return impl->size();
 }

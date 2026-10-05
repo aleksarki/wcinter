@@ -33,11 +33,11 @@ namespace wci
      */
     struct ScreenBufferInfo
     {
-        Point size;
+        Geometry size;
         Point cursorPosition;
         Attribute attributes;
         Rect window;
-        Point maxWindowSize;
+        Geometry maxWindowSize;
 
         constexpr bool operator==(const ScreenBufferInfo& other) const noexcept;
 
@@ -78,7 +78,7 @@ namespace wci
      */
     struct WindowBufferResizeEvent
     {
-        Point size;
+        Geometry size;
     };
 
     /*

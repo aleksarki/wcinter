@@ -71,7 +71,9 @@ namespace wci
     /*
      * Calculate absolute position of the top left corner of a rectangle stacked upon another one.
      */
-    constexpr Point calculateStackeeStart(const PositionSpec& stackeePosition, Point baseSize, Point stackeeSize, Anchor stackeeAnchor) noexcept;
+    constexpr Point calculateStackeeStart(
+        const PositionSpec& stackeePosition, const Geometry& baseSize, const Geometry& stackeeSize, Anchor stackeeAnchor
+    ) noexcept;
 }
 
 inline constexpr wci::Point wci::at(wci::Short x, wci::Short y) noexcept
@@ -136,8 +138,9 @@ inline constexpr wci::Attribute wci::inversed(wci::Attribute attribute) noexcept
     return attribute & ~wci::Attribute::FgColorWhiteBright & ~wci::Attribute::BgColorWhiteBright | newFg | newBg;
 }
 
+// todo do sth with it
 inline constexpr wci::Point wci::calculateStackeeStart(
-    const wci::PositionSpec &stackeePosition, wci::Point baseSize, wci::Point stackeeSize, wci::Anchor stackeeAnchor
+    const wci::PositionSpec &stackeePosition, const wci::Geometry& baseSize, const wci::Geometry& stackeeSize, wci::Anchor stackeeAnchor
 ) noexcept
 {
     wci::Point anchorPoint{ 0, 0 }, startPoint{ 0, 0 };  // init just in case?
@@ -145,12 +148,12 @@ inline constexpr wci::Point wci::calculateStackeeStart(
     if (stackeePosition.x.isAbsolute())
         anchorPoint.x = stackeePosition.x.absolute();
     else if (stackeePosition.x.isRelative())
-        anchorPoint.x = static_cast<wci::Short>(std::lround(stackeePosition.x.relative() * baseSize.x));
+        anchorPoint.x = static_cast<wci::Short>(std::lround(stackeePosition.x.relative() * baseSize.width));
 
     if (stackeePosition.y.isAbsolute())
         anchorPoint.y = stackeePosition.y.absolute();
     else if (stackeePosition.y.isRelative())
-        anchorPoint.y = static_cast<wci::Short>(std::lround(stackeePosition.y.relative() * baseSize.y));
+        anchorPoint.y = static_cast<wci::Short>(std::lround(stackeePosition.y.relative() * baseSize.height));
 
     switch (stackeeAnchor)
     {
@@ -158,36 +161,36 @@ inline constexpr wci::Point wci::calculateStackeeStart(
         startPoint = anchorPoint;
         break;
     case wci::Anchor::Top:
-        startPoint.x = anchorPoint.x - stackeeSize.x / 2;
+        startPoint.x = anchorPoint.x - stackeeSize.width / 2;
         startPoint.y = anchorPoint.y;
         break;
     case wci::Anchor::TopRight:
-        startPoint.x = anchorPoint.x - stackeeSize.x;
+        startPoint.x = anchorPoint.x - stackeeSize.width;
         startPoint.y = anchorPoint.y;
         break;
     case wci::Anchor::Right:
-        startPoint.x = anchorPoint.x - stackeeSize.x;
-        startPoint.y = anchorPoint.y - stackeeSize.y / 2;
+        startPoint.x = anchorPoint.x - stackeeSize.width;
+        startPoint.y = anchorPoint.y - stackeeSize.height / 2;
         break;
     case wci::Anchor::BottomRight:
-        startPoint.x = anchorPoint.x - stackeeSize.x;
-        startPoint.y = anchorPoint.y - stackeeSize.y;
+        startPoint.x = anchorPoint.x - stackeeSize.width;
+        startPoint.y = anchorPoint.y - stackeeSize.height;
         break;
     case wci::Anchor::Bottom:
-        startPoint.x = anchorPoint.x - stackeeSize.x / 2;
-        startPoint.y = anchorPoint.y - stackeeSize.y;
+        startPoint.x = anchorPoint.x - stackeeSize.width / 2;
+        startPoint.y = anchorPoint.y - stackeeSize.height;
         break;
     case wci::Anchor::BottomLeft:
         startPoint.x = anchorPoint.x;
-        startPoint.y = anchorPoint.y - stackeeSize.y;
+        startPoint.y = anchorPoint.y - stackeeSize.height;
         break;
     case wci::Anchor::Left:
         startPoint.x = anchorPoint.x;
-        startPoint.y = anchorPoint.y - stackeeSize.y / 2;
+        startPoint.y = anchorPoint.y - stackeeSize.height / 2;
         break;
     case wci::Anchor::Center:
-        startPoint.x = anchorPoint.x - stackeeSize.x / 2;
-        startPoint.y = anchorPoint.y - stackeeSize.y / 2;
+        startPoint.x = anchorPoint.x - stackeeSize.width / 2;
+        startPoint.y = anchorPoint.y - stackeeSize.height / 2;
         break;
     }
 

@@ -26,7 +26,7 @@ wci::MenuList::MenuList(
         tipCharPrev, tipCharNext
     },
     bufferCache{ wci::CharMatrix(), true },
-    sizeCache{ wci::Point{}, true }
+    sizeCache{ wci::Geometry{}, true }
 {}
 
 const wci::CharMatrix& wci::MenuList::toMatrix() const
@@ -35,14 +35,14 @@ const wci::CharMatrix& wci::MenuList::toMatrix() const
         return bufferCache.buffer;
 
     auto dimensions = size();
-    wci::Point center{ dimensions.x / 2, dimensions.y / 2 };
+    wci::Point center{ dimensions.width / 2, dimensions.height / 2 };
 
     if (bufferCache.buffer.size() != dimensions)
         bufferCache.buffer.resize(dimensions, backgroundCharacter());
     else
         bufferCache.buffer.fill(backgroundCharacter());
 
-    if (dimensions.x == 0 || dimensions.y == 0)
+    if (dimensions.width == 0 || dimensions.height == 0)
     {
         bufferCache.dirty = false;
         return bufferCache.buffer;
@@ -58,7 +58,7 @@ const wci::CharMatrix& wci::MenuList::toMatrix() const
     if (showTipPrev() && tipCharPrev())
         --listStart.y;
 
-    wci::Short listWidth = dimensions.x - listStart.x;
+    wci::Short listWidth = dimensions.width - listStart.x;
     if (selectionCharRight())
         listWidth -= 2;
 
@@ -117,46 +117,46 @@ const wci::CharMatrix& wci::MenuList::toMatrix() const
 
     if (showTipNext() && tipCharNext())
     {
-        bufferCache.buffer.put(center.x, dimensions.y - 2, *tipCharNext());
-        bufferCache.buffer.put(center.x, dimensions.y - 1, wci::CharCell{ wci::chars::downwardsArrow, backgroundCharacter().attributes });
+        bufferCache.buffer.put(center.x, dimensions.height - 2, *tipCharNext());
+        bufferCache.buffer.put(center.x, dimensions.height - 1, wci::CharCell{ wci::chars::downwardsArrow, backgroundCharacter().attributes });
     }
     else if (showTipNext())
-        bufferCache.buffer.put(center.x, dimensions.y - 1, wci::CharCell{ wci::chars::downwardsArrow, backgroundCharacter().attributes });
+        bufferCache.buffer.put(center.x, dimensions.height - 1, wci::CharCell{ wci::chars::downwardsArrow, backgroundCharacter().attributes });
     else if (tipCharNext())
-        bufferCache.buffer.put(center.x, dimensions.y - 1, *tipCharNext());
+        bufferCache.buffer.put(center.x, dimensions.height - 1, *tipCharNext());
 
     bufferCache.dirty = false;
     return bufferCache.buffer;
 }
 
-wci::Point wci::MenuList::size() const
+wci::Geometry wci::MenuList::size() const
 {
     if (!sizeCache.dirty)
         return sizeCache.size;
 
-    sizeCache.size = wci::Point{ 0, 0 };
+    sizeCache.size = wci::Geometry{ 0, 0 };
     for (const auto& option : options())
     {
-        sizeCache.size.x = std::max(sizeCache.size.x, option.size());  // find the longest option
-        ++sizeCache.size.y;
+        sizeCache.size.width = std::max(sizeCache.size.width, option.size());  // find the longest option
+        ++sizeCache.size.height;
     }
-    sizeCache.size.x += optionPaddingLeft() + optionPaddingRight();
+    sizeCache.size.width += optionPaddingLeft() + optionPaddingRight();
     if (selectionCharLeft())
-        sizeCache.size.x += 2;
+        sizeCache.size.width += 2;
     if (selectionCharRight())
-        sizeCache.size.x += 2;
+        sizeCache.size.width += 2;
     if (showTipPrev())
-        sizeCache.size.y += 2;
+        sizeCache.size.height += 2;
     if (tipCharPrev())
-        sizeCache.size.y += 2;
+        sizeCache.size.height += 2;
     if (showTipPrev() && tipCharPrev())
-        --sizeCache.size.y;
+        --sizeCache.size.height;
     if (showTipNext())
-        sizeCache.size.y += 2;
+        sizeCache.size.height += 2;
     if (tipCharNext())
-        sizeCache.size.y += 2;
+        sizeCache.size.height += 2;
     if (showTipNext() && tipCharNext())
-        --sizeCache.size.y;
+        --sizeCache.size.height;
 
     sizeCache.dirty = false;
     return sizeCache.size;

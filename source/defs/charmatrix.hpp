@@ -13,8 +13,10 @@
 #include "charcell.hpp"
 #include "consts.hpp"
 #include "enums.hpp"
+#include "geometry.hpp"
 #include "matrixmask.hpp"
 #include "point.hpp"
+#include "rect.hpp"
 #include "types.hpp"
 
 namespace wci
@@ -29,7 +31,7 @@ namespace wci
     {
     private:
         struct {
-            Point size;
+            Geometry size;
             std::vector<CharCell> matrix;
         } inner;
 
@@ -40,10 +42,10 @@ namespace wci
         using ConstRow = BasicRow<const CharCell>;
 
         constexpr CharMatrix();
-        constexpr CharMatrix(Short x, Short y);
-        constexpr CharMatrix(Short x, Short y, Wchar character, Attribute attributes);
-        constexpr CharMatrix(const Point& size);
-        constexpr CharMatrix(const Point& size, const CharCell& cell);
+        constexpr CharMatrix(Short width, Short height);
+        constexpr CharMatrix(Short width, Short height, Wchar character, Attribute attributes);
+        constexpr CharMatrix(const Geometry& size);
+        constexpr CharMatrix(const Geometry& size, const CharCell& cell);
 
         constexpr CharCell& at(Short x, Short y);
         constexpr const CharCell& at(Short x, Short y) const;
@@ -70,12 +72,12 @@ namespace wci
 
         constexpr bool empty() const noexcept;
 
-        constexpr Point size() const noexcept;
+        constexpr Geometry size() const noexcept;
 
-        constexpr void resize(Short x, Short y, Wchar character, Attribute attributes);
-        constexpr void resize(const Point& size, const CharCell& cell);
-        constexpr void resize(Short x, Short y);
-        constexpr void resize(const Point& size);
+        constexpr void resize(Short width, Short height, Wchar character, Attribute attributes);
+        constexpr void resize(const Geometry& size, const CharCell& cell);
+        constexpr void resize(Short width, Short height);
+        constexpr void resize(const Geometry& size);
 
         constexpr void fill(Wchar character, Attribute attributes) noexcept;
         constexpr void fill(const CharCell& cell) noexcept;
@@ -89,6 +91,7 @@ namespace wci
         friend constexpr void swap(CharMatrix& a, CharMatrix& b) noexcept;
 
     private:
+        // todo investigate what to do with this
         struct Intersection
         {
             Short baseStartX, baseEndX;
@@ -114,6 +117,8 @@ namespace wci
         constexpr CharMatrix slice(Short x1, Short y1, Short x2, Short y2) const;
         // bottom right point is exclusive
         constexpr CharMatrix slice(const Point& topLeft, const Point& bottomRight) const;
+        // bottom right point is exclusive
+        constexpr CharMatrix slice(const Rect& rect) const;
 
         constexpr MatrixMask difference(const CharMatrix& other) const;
 
@@ -153,27 +158,27 @@ inline constexpr wci::CharMatrix::CharMatrix()
     inner.matrix.clear();
     resize(0, 0);
 }
-inline constexpr wci::CharMatrix::CharMatrix(wci::Short x, wci::Short y)
+inline constexpr wci::CharMatrix::CharMatrix(wci::Short width, wci::Short height)
 {
-    if (x < 0 || y < 0)
+    if (width < 0 || height < 0)
         throw std::invalid_argument("CharMatrix::CharMatrix() got a negative dimension.");
-    resize(x, y);
+    resize(width, height);
 }
-inline constexpr wci::CharMatrix::CharMatrix(wci::Short x, wci::Short y, wci::Wchar character, wci::Attribute attributes)
+inline constexpr wci::CharMatrix::CharMatrix(wci::Short width, wci::Short height, wci::Wchar character, wci::Attribute attributes)
 {
-    if (x < 0 || y < 0)
+    if (width < 0 || height < 0)
         throw std::invalid_argument("CharMatrix::CharMatrix() got a negative dimension.");
-    resize(x, y, character, attributes);
+    resize(width, height, character, attributes);
 }
-inline constexpr wci::CharMatrix::CharMatrix(const wci::Point& size)
+inline constexpr wci::CharMatrix::CharMatrix(const wci::Geometry& size)
 {
-    if (size.x < 0 || size.y < 0)
+    if (size.width < 0 || size.height < 0)
         throw std::invalid_argument("CharMatrix::CharMatrix() got a negative dimension.");
     resize(size);
 }
-inline constexpr wci::CharMatrix::CharMatrix(const wci::Point& size, const wci::CharCell& cell)
+inline constexpr wci::CharMatrix::CharMatrix(const wci::Geometry& size, const wci::CharCell& cell)
 {
-    if (size.x < 0 || size.y < 0)
+    if (size.width < 0 || size.height < 0)
         throw std::invalid_argument("CharMatrix::CharMatrix() got a negative dimension.");
     resize(size, cell);
 }
@@ -182,13 +187,13 @@ inline constexpr wci::CharCell& wci::CharMatrix::at(wci::Short x, wci::Short y)
 {
     if (!within(x, y))
         throw std::out_of_range("CharMatrix::at() position out of bounds");
-    return inner.matrix[y * inner.size.x + x];
+    return inner.matrix[y * size().width + x];
 }
 inline constexpr const wci::CharCell& wci::CharMatrix::at(wci::Short x, wci::Short y) const
 {
     if (!within(x, y))
         throw std::out_of_range("CharMatrix::at() position out of bounds");
-    return inner.matrix[y * inner.size.x + x];
+    return inner.matrix[y * size().width + x];
 }
 inline constexpr wci::CharCell& wci::CharMatrix::at(const wci::Point& position)
 {
@@ -201,21 +206,21 @@ inline constexpr const wci::CharCell& wci::CharMatrix::at(const wci::Point& posi
 
 inline constexpr wci::CharCell& wci::CharMatrix::operator[](const wci::Point& position) noexcept
 {
-    return inner.matrix[position.y * inner.size.x + position.x];
+    return inner.matrix[position.y * size().width + position.x];
 }
 inline constexpr const wci::CharCell& wci::CharMatrix::operator[](const wci::Point& position) const noexcept
 {
-    return inner.matrix[position.y * inner.size.x + position.x];
+    return inner.matrix[position.y * size().width + position.x];
 }
 
 inline constexpr wci::CharMatrix::Row wci::CharMatrix::operator[](wci::Short i) noexcept
 {
-    return wci::CharMatrix::Row(data() + i * size().x, size().x);
+    return wci::CharMatrix::Row(data() + i * size().width, size().width);
 }
 
 inline constexpr wci::CharMatrix::ConstRow wci::CharMatrix::operator[](wci::Short i) const noexcept
 {
-    return wci::CharMatrix::ConstRow(data() + i * size().x, size().x);
+    return wci::CharMatrix::ConstRow(data() + i * size().width, size().width);
 }
 
 inline constexpr void wci::CharMatrix::put(wci::Short x, wci::Short y, wci::Wchar character, wci::Attribute attributes)
@@ -226,7 +231,7 @@ inline constexpr void wci::CharMatrix::put(wci::Short x, wci::Short y, const wci
 {
     if (!within(x, y))
         throw std::out_of_range("CharMatrix::put() position out of bounds");
-    inner.matrix[y * inner.size.x + x] = cell;
+    inner.matrix[y * size().width + x] = cell;
 }
 inline constexpr void wci::CharMatrix::put(const wci::Point& position, wci::Wchar character, wci::Attribute attributes)
 {
@@ -248,39 +253,39 @@ inline constexpr const wci::CharCell* wci::CharMatrix::data() const noexcept
 
 inline constexpr wci::CharCell* wci::CharMatrix::rowData(wci::Short i) noexcept
 {
-    return data() + i * size().x;
+    return data() + i * size().width;
 }
 inline constexpr const wci::CharCell* wci::CharMatrix::rowData(wci::Short i) const noexcept
 {
-    return data() + i * size().x;
+    return data() + i * size().width;
 }
 
 inline constexpr bool wci::CharMatrix::empty() const noexcept
 {
-    return size().x == 0 || size().y == 0;
+    return size().width == 0 || size().height == 0;
 }
 
-inline constexpr wci::Point wci::CharMatrix::size() const noexcept
+inline constexpr wci::Geometry wci::CharMatrix::size() const noexcept
 {
     return inner.size;
 }
 
-inline constexpr void wci::CharMatrix::resize(wci::Short x, wci::Short y, wci::Wchar character, wci::Attribute attributes)
+inline constexpr void wci::CharMatrix::resize(wci::Short width, wci::Short height, wci::Wchar character, wci::Attribute attributes)
 {
-    resize(wci::Point{ x, y }, wci::CharCell{ character, attributes });
+    resize(wci::Geometry{ width, height }, wci::CharCell{ character, attributes });
 }
-inline constexpr void wci::CharMatrix::resize(const wci::Point& size, const wci::CharCell& cell)
+inline constexpr void wci::CharMatrix::resize(const wci::Geometry& size, const wci::CharCell& cell)
 {
-    if (size.x < 0 || size.y < 0)
+    if (size.width < 0 || size.height < 0)
         throw std::invalid_argument("CharMatrix::resize() got a negative dimension.");
-    inner.matrix.assign(size.x * size.y, cell);
+    inner.matrix.assign(size.width * size.height, cell);
     inner.size = size;
 }
-inline constexpr void wci::CharMatrix::resize(wci::Short x, wci::Short y)
+inline constexpr void wci::CharMatrix::resize(wci::Short width, wci::Short height)
 {
-    resize(wci::Point{ x, y }, wci::nullch);
+    resize(wci::Geometry{ width, height }, wci::nullch);
 }
-inline constexpr void wci::CharMatrix::resize(const wci::Point& size)
+inline constexpr void wci::CharMatrix::resize(const wci::Geometry& size)
 {
     resize(size, wci::nullch);
 }
@@ -302,7 +307,7 @@ inline constexpr void wci::CharMatrix::blank() noexcept
 
 inline constexpr bool wci::CharMatrix::within(wci::Short x, wci::Short y) const noexcept
 {
-    return x >= 0 && x < inner.size.x && y >= 0 && y < inner.size.y;
+    return x >= 0 && x < size().width && y >= 0 && y < size().height;
 }
 inline constexpr bool wci::CharMatrix::within(const wci::Point& position) const noexcept
 {
@@ -345,8 +350,8 @@ inline constexpr wci::CharMatrix::Intersection wci::CharMatrix::calculateInterse
 
 inline constexpr wci::CharMatrix wci::CharMatrix::overlay(wci::Short x, wci::Short y, const wci::CharMatrix& charMatrix) const
 {
-    wci::Short baseX = size().x, baseY = size().y;
-    wci::Short stackeeX = charMatrix.size().x, stackeeY = charMatrix.size().y;
+    wci::Short baseX = size().width, baseY = size().height;
+    wci::Short stackeeX = charMatrix.size().width, stackeeY = charMatrix.size().height;
 
     auto isct = calculateIntersection(baseX, baseY, stackeeX, stackeeY, x, y);
 
@@ -371,8 +376,8 @@ inline constexpr wci::CharMatrix wci::CharMatrix::overlay(const wci::CharMatrix&
 
 inline constexpr void wci::CharMatrix::inlay(wci::Short x, wci::Short y, const wci::CharMatrix& charMatrix)
 {
-    wci::Short baseX = size().x, baseY = size().y;
-    wci::Short stackeeX = charMatrix.size().x, stackeeY = charMatrix.size().y;
+    wci::Short baseX = size().width, baseY = size().height;
+    wci::Short stackeeX = charMatrix.size().width, stackeeY = charMatrix.size().height;
 
     auto isct = calculateIntersection(baseX, baseY, stackeeX, stackeeY, x, y);
 
@@ -395,8 +400,8 @@ inline constexpr void wci::CharMatrix::inlay(const wci::CharMatrix& charMatrix)
 inline constexpr wci::CharMatrix wci::CharMatrix::slice(wci::Short x1, wci::Short y1, wci::Short x2, wci::Short y2) const
 {
     if (
-        x1 < 0 || x1 > size().x || y1 < 0 || y1 > size().y ||
-        x2 < 0 || x2 > size().x || y2 < 0 || y2 > size().y
+        x1 < 0 || x1 > size().width || y1 < 0 || y1 > size().height ||
+        x2 < 0 || x2 > size().width || y2 < 0 || y2 > size().height
     )
         throw std::invalid_argument("CharMatrix::slice() got invalid coordinates");
 
@@ -410,13 +415,17 @@ inline constexpr wci::CharMatrix wci::CharMatrix::slice(wci::Short x1, wci::Shor
 
     for (wci::Short j = 0; j < height; ++j)
         for (wci::Short i = 0; i < width; ++i)
-            dest[j * width + i] = source[(j + y1) * size().x + i + x1];
+            dest[j * width + i] = source[(j + y1) * size().width + i + x1];
 
     return matrix;
 }
 inline constexpr wci::CharMatrix wci::CharMatrix::slice(const wci::Point& topLeft, const wci::Point& bottomRight) const
 {
     return slice(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y);
+}
+inline constexpr wci::CharMatrix wci::CharMatrix::slice(const wci::Rect& rect) const
+{
+    return slice(rect.left, rect.top, rect.right, rect.bottom);
 }
 
 inline constexpr wci::MatrixMask wci::CharMatrix::difference(const wci::CharMatrix& other) const
@@ -431,12 +440,12 @@ inline constexpr wci::MatrixMask wci::CharMatrix::difference(const wci::CharMatr
     if (&other == this)
         return mask;
 
-    for (wci::Short i = 0; i < size().y; ++i)
+    for (wci::Short i = 0; i < size().height; ++i)
     {
-        if (std::equal(rowData(i), rowData(i) + size().x, other.rowData(i)))  // whole row has no difference
+        if (std::equal(rowData(i), rowData(i) + size().width, other.rowData(i)))  // whole row has no difference
             continue;
 
-        for (wci::Short j = 0; j < size().x; ++j)
+        for (wci::Short j = 0; j < size().width; ++j)
             if (rowData(i)[j] != other.rowData(i)[j])
                 mask.set(j, i);
     }

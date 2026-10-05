@@ -27,7 +27,7 @@ namespace wci {
         CharMatrix& matrix() noexcept;
         const CharMatrix& matrix() const noexcept;
 
-        Point size() const;
+        Geometry size() const;
 
         void refit();
 

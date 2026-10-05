@@ -29,7 +29,7 @@ namespace wci
             bool dirty;
         } bufferCache;
         mutable struct {
-            Point size;
+            Geometry size;
             bool dirty;
         } sizeCache;
 
@@ -51,7 +51,7 @@ namespace wci
 
         const CharMatrix& toMatrix() const;
 
-        Point size() const;
+        Geometry size() const;
 
         const std::vector<CharString>& options() const noexcept;
 

@@ -5,11 +5,11 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
-#include <optional>
 #include <stdexcept>
 #include <vector>
 
 #include "consts.hpp"
+#include "geometry.hpp"
 #include "point.hpp"
 #include "rect.hpp"
 #include "types.hpp"
@@ -20,14 +20,14 @@ namespace wci
     {
     private:
         struct {
-            Point size;
+            Geometry size;
             std::vector<std::uint8_t> matrix;
         } inner;
 
     public:
         constexpr MatrixMask(std::uint8_t value = false8);
-        constexpr MatrixMask(Short x, Short y, std::uint8_t value = false8);
-        constexpr MatrixMask(const Point& size, std::uint8_t value = false8);
+        constexpr MatrixMask(Short width, Short height, std::uint8_t value = false8);
+        constexpr MatrixMask(const Geometry& size, std::uint8_t value = false8);
 
         constexpr std::uint8_t& at(Short x, Short y);
         constexpr const std::uint8_t& at(Short x, Short y) const;
@@ -67,27 +67,27 @@ namespace wci
 
         constexpr bool empty() const noexcept;  // whether size is 0
 
-        constexpr Point size() const noexcept;
+        constexpr Geometry size() const noexcept;
 
         // smallest rectangle containing all true values.
         // bottom-right point is exclusive.
-        // returns std::nullopt if has no true values.
-        constexpr std::optional<Rect> boundingBox() const;
+        // returns std::norect if has no true values.
+        constexpr Rect boundingBox() const;
     };
 }
 
 inline constexpr wci::MatrixMask::MatrixMask(std::uint8_t value) : MatrixMask(0, 0, value)
 {}
-inline constexpr wci::MatrixMask::MatrixMask(wci::Short x, wci::Short y, std::uint8_t value) :
-    inner{ wci::Point{ x, y }, std::vector<unsigned char>(x * y, static_cast<unsigned char>(value)) }
+inline constexpr wci::MatrixMask::MatrixMask(wci::Short width, wci::Short height, std::uint8_t value) :
+    inner{ wci::Geometry{ width, height }, std::vector<unsigned char>(width * height, static_cast<unsigned char>(value)) }
 {
-    if (x < 0 || y < 0)
+    if (width < 0 || height < 0)
         throw std::invalid_argument("MatrixMask::MatrixMask() got a negative dimension");
 }
-inline constexpr wci::MatrixMask::MatrixMask(const wci::Point& size, std::uint8_t value) :
-    inner{ size, std::vector<unsigned char>(size.x * size.y, static_cast<unsigned char>(value)) }
+inline constexpr wci::MatrixMask::MatrixMask(const wci::Geometry& size, std::uint8_t value) :
+    inner{ size, std::vector<unsigned char>(size.area(), static_cast<unsigned char>(value)) }
 {
-    if (size.x < 0 || size.y < 0)
+    if (size.width < 0 || size.height < 0)
         throw std::invalid_argument("MatrixMask::MatrixMask() got a negative dimension");
 }
 
@@ -95,13 +95,13 @@ inline constexpr std::uint8_t& wci::MatrixMask::at(wci::Short x, wci::Short y)
 {
     if (!within(x, y))
         throw std::out_of_range("MatrixMask::at() position out of bounds");
-    return inner.matrix[y * inner.size.x + x];
+    return inner.matrix[y * size().width + x];
 }
 inline constexpr const std::uint8_t& wci::MatrixMask::at(wci::Short x, wci::Short y) const
 {
     if (!within(x, y))
         throw std::out_of_range("MatrixMask::at() position out of bounds");
-    return inner.matrix[y * inner.size.x + x];
+    return inner.matrix[y * size().width + x];
 }
 inline constexpr std::uint8_t& wci::MatrixMask::at(const wci::Point& position)
 {
@@ -114,11 +114,11 @@ inline constexpr const std::uint8_t& wci::MatrixMask::at(const wci::Point& posit
 
 inline constexpr std::uint8_t& wci::MatrixMask::operator[](const wci::Point& position) noexcept
 {
-    return inner.matrix[position.y * inner.size.x + position.x];
+    return inner.matrix[position.y * size().width + position.x];
 }
 inline constexpr const std::uint8_t& wci::MatrixMask::operator[](const wci::Point& position) const noexcept
 {
-    return inner.matrix[position.y * inner.size.x + position.x];
+    return inner.matrix[position.y * size().width + position.x];
 }
 
 inline constexpr void wci::MatrixMask::set()
@@ -129,7 +129,7 @@ inline constexpr void wci::MatrixMask::set(wci::Short x, wci::Short y)
 {
     if (!within(x, y))
         throw std::out_of_range("MatrixMask::set() position out of bounds");
-    inner.matrix[y * inner.size.x + x] = wci::true8;
+    inner.matrix[y * size().width + x] = wci::true8;
 }
 inline constexpr void wci::MatrixMask::set(const wci::Point& position)
 {
@@ -144,7 +144,7 @@ inline constexpr void wci::MatrixMask::clear(wci::Short x, wci::Short y)
 {
     if (!within(x, y))
         throw std::out_of_range("MatrixMask::clear() position out of bounds");
-    inner.matrix[y * inner.size.x + x] = wci::false8;
+    inner.matrix[y * size().width + x] = wci::false8;
 }
 inline constexpr void wci::MatrixMask::clear(const wci::Point& position)
 {
@@ -154,7 +154,7 @@ inline constexpr void wci::MatrixMask::clear(const wci::Point& position)
 inline constexpr void wci::MatrixMask::flip()
 {
     auto* dest = inner.matrix.data();
-    for (std::size_t i = 0; i < inner.size.x * inner.size.y; ++i)
+    for (std::size_t i = 0; i < size().area(); ++i)
         dest[i] = bool(dest[i]) ? wci::false8 : wci::true8;
 }
 inline constexpr void wci::MatrixMask::flip(wci::Short x, wci::Short y)
@@ -162,7 +162,7 @@ inline constexpr void wci::MatrixMask::flip(wci::Short x, wci::Short y)
     if (!within(x, y))
         throw std::out_of_range("MatrixMask::flip() position out of bounds");
     auto* dest = inner.matrix.data();
-    std::size_t i = y * inner.size.x + x;
+    std::size_t i = y * size().width + x;
     dest[i] = bool(dest[i]) ? wci::false8 : wci::true8;
 }
 inline constexpr void wci::MatrixMask::flip(const wci::Point& position)
@@ -208,7 +208,7 @@ inline constexpr const std::uint8_t* wci::MatrixMask::data() const noexcept
 
 inline constexpr bool wci::MatrixMask::within(wci::Short x, wci::Short y) const noexcept
 {
-    return x >= 0 && x < inner.size.x && y >= 0 && y < inner.size.y;
+    return x >= 0 && x < size().width && y >= 0 && y < size().height;
 }
 inline constexpr bool wci::MatrixMask::within(const wci::Point& position) const noexcept
 {
@@ -217,24 +217,24 @@ inline constexpr bool wci::MatrixMask::within(const wci::Point& position) const 
 
 inline constexpr bool wci::MatrixMask::empty() const noexcept
 {
-    return inner.size.x == 0 || inner.size.y == 0;
+    return size().width == 0 || size().height == 0;
 }
 
-inline constexpr wci::Point wci::MatrixMask::size() const noexcept
+inline constexpr wci::Geometry wci::MatrixMask::size() const noexcept
 {
     return inner.size;
 }
 
-inline constexpr std::optional<wci::Rect> wci::MatrixMask::boundingBox() const
+inline constexpr wci::Rect wci::MatrixMask::boundingBox() const
 {
-    wci::Rect box{ size().x, size().y, -1, -1 };
+    wci::Rect box{ size().width, size().height, -1, -1 };
     const auto* source = data();
     bool found = false;
-    for (wci::Short i = 0; i < size().y; ++i)
+    for (wci::Short i = 0; i < size().height; ++i)
     {
-        for (wci::Short j = 0; j < size().x; ++j)
+        for (wci::Short j = 0; j < size().width; ++j)
         {
-            if (bool(source[i * inner.size.x + j]))
+            if (bool(source[i * size().width + j]))
             {
                 box.left = std::min(box.left, j);
                 box.top = std::min(box.top, i);
@@ -245,7 +245,7 @@ inline constexpr std::optional<wci::Rect> wci::MatrixMask::boundingBox() const
         }
     }
     if (!found)
-        return std::nullopt;
+        return wci::norect;
     ++box.right;
     ++box.bottom;
     return box;

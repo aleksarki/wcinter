@@ -25,7 +25,7 @@ namespace wci
     concept renderable = requires(const T& t)
     {
         { t.toMatrix() } -> std::convertible_to<CharMatrix>;
-        { t.size() } -> std::convertible_to<Point>;
+        { t.size() } -> std::convertible_to<Geometry>;
     };
 
     // NB: if widget constructs from an lvalue-object, the object must outlive the widget!
@@ -43,10 +43,10 @@ namespace wci
             std::size_t id;  // wci::npos if widget is not placed
         } inner;
         std::function<CharMatrix()> renderer;
-        std::function<Point()> sizer;
+        std::function<Geometry()> sizer;
 
         // ctor for delegating and filling inner struct with default values
-        Widget(std::function<CharMatrix()> renderer, std::function<Point()> sizer);
+        Widget(std::function<CharMatrix()> renderer, std::function<Geometry()> sizer);
 
     public:
         template<renderable R>
@@ -66,7 +66,7 @@ namespace wci
         Widget(Widget&&) = default;
         Widget& operator=(Widget&&) = default;
 
-        Point size() const noexcept;
+        Geometry size() const noexcept;
 
         CharMatrix render() const;  // this does not render its children
 
@@ -120,7 +120,7 @@ namespace wci
     };
 }
 
-inline wci::Widget::Widget(std::function<wci::CharMatrix()> renderer, std::function<wci::Point()> sizer) :
+inline wci::Widget::Widget(std::function<wci::CharMatrix()> renderer, std::function<wci::Geometry()> sizer) :
     inner{
         wci::PositionSpec{ wci::LenPercent(wci::Short(0)), wci::LenPercent(wci::Short(0)) },
         wci::Anchor::TopLeft,
@@ -135,51 +135,51 @@ inline wci::Widget::Widget(std::function<wci::CharMatrix()> renderer, std::funct
 template<wci::renderable R>
 inline wci::Widget::Widget(R& object) : wci::Widget(
     [&object]() -> wci::CharMatrix { return object.toMatrix(); },
-    [&object]() -> wci::Point { return object.size(); }
+    [&object]() -> wci::Geometry { return object.size(); }
 )
 {}
 inline wci::Widget::Widget(wci::Wchar character) : wci::Widget(
-    [matrix = wci::CharMatrix(wci::Point{ 1, 1 }, wci::CharCell{ character, wci::normal })]() -> wci::CharMatrix { return matrix; },
-    [size = wci::Point{ 1, 1 }]() -> wci::Point { return size; }
+    [matrix = wci::CharMatrix(wci::Geometry{ 1, 1 }, wci::CharCell{ character, wci::normal })]() -> wci::CharMatrix { return matrix; },
+    [size = wci::Geometry{ 1, 1 }]() -> wci::Geometry { return size; }
 )
 {}
 inline wci::Widget::Widget(const CharCell& cell) : wci::Widget(
-    [&cell]() -> wci::CharMatrix { return wci::CharMatrix(wci::Point{ 1, 1 }, cell); },
-    [size = wci::Point{ 1, 1 }]() -> wci::Point { return size; }
+    [&cell]() -> wci::CharMatrix { return wci::CharMatrix(wci::Geometry{ 1, 1 }, cell); },
+    [size = wci::Geometry{ 1, 1 }]() -> wci::Geometry { return size; }
 )
 {}
 inline wci::Widget::Widget(wci::CharCell&& cell) : wci::Widget(
-    [matrix = wci::CharMatrix(wci::Point{ 1, 1 }, cell)]() -> wci::CharMatrix { return matrix; },
-    [size = wci::Point{ 1, 1 }]() -> wci::Point { return size; }
+    [matrix = wci::CharMatrix(wci::Geometry{ 1, 1 }, cell)]() -> wci::CharMatrix { return matrix; },
+    [size = wci::Geometry{ 1, 1 }]() -> wci::Geometry{ return size; }
 )
 {}
 inline wci::Widget::Widget(const std::wstring& string) : wci::Widget(
     [&string]() -> wci::CharMatrix { return wci::CharString(string).toMatrix(); },
-    [&string]() -> wci::Point { return wci::Point{ wci::CharString(string).size(), 1 }; }
+    [&string]() -> wci::Geometry { return wci::Geometry{ wci::CharString(string).size(), 1 }; }
 )
 {}
 inline wci::Widget::Widget(std::wstring&& string) : wci::Widget(
     [matrix = wci::CharString(string).toMatrix()]() -> wci::CharMatrix { return matrix; },
-    [size = wci::Point{ wci::CharString(string).size(), 1 }]() -> wci::Point { return size; }
+    [size = wci::Geometry{ wci::CharString(string).size(), 1 }]() -> wci::Geometry{ return size; }
 )
 {}
 inline wci::Widget::Widget(const CharString& charString) : wci::Widget (
     [&charString]() -> wci::CharMatrix { return charString.toMatrix(); },
-    [&charString]() -> wci::Point { return wci::Point{ charString.size(), 1 }; }
+    [&charString]() -> wci::Geometry { return wci::Geometry{ charString.size(), 1 }; }
 )
 {}
 inline wci::Widget::Widget(CharString&& charString) : wci::Widget(
     [matrix = charString.toMatrix()]() -> wci::CharMatrix { return matrix; },
-    [size = wci::Point{ charString.size(), 1 }]() -> wci::Point { return size; }
+    [size = wci::Geometry{ charString.size(), 1 }]() -> wci::Geometry { return size; }
 )
 {}
 inline wci::Widget::Widget(CharMatrix&& charMatrix) : wci::Widget(
     [charMatrix]() -> wci::CharMatrix { return charMatrix; },
-    [size = charMatrix.size()]() -> wci::Point { return size; }
+    [size = charMatrix.size()]() -> wci::Geometry { return size; }
 )
 {}
 
-inline wci::Point wci::Widget::size() const noexcept
+inline wci::Geometry wci::Widget::size() const noexcept
 {
     return sizer();
 }

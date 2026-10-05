@@ -2,6 +2,9 @@
 #ifndef WCI_SOURCE_DEFS_RECT_HPP
 #define WCI_SOURCE_DEFS_RECT_HPP
 
+#include <algorithm>
+
+#include "consts.hpp"
 #include "geometry.hpp"
 #include "point.hpp"
 #include "types.hpp"
@@ -30,14 +33,26 @@ namespace wci
 
         constexpr bool intersects(const Rect& other) const noexcept;
 
-        constexpr Rect intersect(const Rect& other) const noexcept;  // todo implement; use CharMatrix::calculateIntersection(int, int, int, int, int, int)
+        constexpr Rect intersect(const Rect& other) const noexcept;  // returns wci::norect when no intersection
 
-        // operator-(Rect) ?
+        constexpr Rect& operator+=(const Point& other) noexcept;
+        constexpr Rect& operator+=(Short other) noexcept;
+
+        constexpr Rect& operator-=(const Point& other) noexcept;
+        constexpr Rect& operator-=(Short other) noexcept;
+
+        constexpr Rect operator+(const Point& other) const noexcept;
+        constexpr Rect operator+(Short other) const noexcept;
+
+        constexpr Rect operator-(const Point& other) const noexcept;
+        constexpr Rect operator-(Short other) const noexcept;
 
         constexpr bool operator==(const Rect& other) const noexcept;
 
         constexpr bool operator!=(const Rect& other) const noexcept;
     };
+
+    inline constexpr Rect norect{ 0, 0, -1, -1 };  // invalid/impossible rect
 }
 
 inline constexpr bool wci::Rect::valid() const noexcept
@@ -69,9 +84,78 @@ inline constexpr bool wci::Rect::within(const wci::Point& point) const noexcept
 inline constexpr bool wci::Rect::intersects(const wci::Rect& other) const noexcept
 {
     return (
-        other.bottomRight().x > topLeft().x && other.topLeft().x < bottomRight().x &&
-        other.bottomRight().y > topLeft().y && other.topLeft().y < bottomRight().y
+        other.right > left && other.left < right &&
+        other.bottom > top && other.top < bottom
     );
+}
+
+inline constexpr wci::Rect wci::Rect::intersect(const wci::Rect& other) const noexcept
+{
+    wci::Rect intersection{
+        std::max(left, other.left),
+        std::max(top, other.top),
+        std::min(right, other.right),
+        std::min(bottom, other.bottom)
+    };
+    if (!intersection.valid())
+        return wci::norect;
+    return intersection;
+}
+
+inline constexpr wci::Rect& wci::Rect::operator+=(const wci::Point& other) noexcept
+{
+    left += other.x;
+    right += other.x;
+    top += other.y;
+    bottom += other.y;
+    return *this;
+}
+inline constexpr wci::Rect& wci::Rect::operator+=(wci::Short other) noexcept
+{
+    left += other;
+    right += other;
+    top += other;
+    bottom += other;
+    return *this;
+}
+
+inline constexpr wci::Rect& wci::Rect::operator-=(const wci::Point& other) noexcept
+{
+    left -= other.x;
+    right -= other.x;
+    top -= other.y;
+    bottom -= other.y;
+    return *this;
+}
+inline constexpr wci::Rect& wci::Rect::operator-=(wci::Short other) noexcept
+{
+    left -= other;
+    right -= other;
+    top -= other;
+    bottom -= other;
+    return *this;
+}
+
+inline constexpr wci::Rect wci::Rect::operator+(const wci::Point& other) const noexcept
+{
+    auto result = *this;
+    return result += other;
+}
+inline constexpr wci::Rect wci::Rect::operator+(wci::Short other) const noexcept
+{
+    auto result = *this;
+    return result += other;
+}
+
+inline constexpr wci::Rect wci::Rect::operator-(const wci::Point& other) const noexcept
+{
+    auto result = *this;
+    return result -= other;
+}
+inline constexpr wci::Rect wci::Rect::operator-(wci::Short other) const noexcept
+{
+    auto result = *this;
+    return result -= other;
 }
 
 inline constexpr bool wci::Rect::operator==(const wci::Rect &other) const noexcept

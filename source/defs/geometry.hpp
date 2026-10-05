@@ -12,12 +12,19 @@ namespace wci
         Short width;
         Short height;
 
+        constexpr Short area() const noexcept;
+
         constexpr bool within(const Point& point) const noexcept;
 
         constexpr bool operator==(const Geometry& other) const noexcept;
 
         constexpr bool operator!=(const Geometry& other) const noexcept;
     };
+}
+
+inline constexpr wci::Short wci::Geometry::area() const noexcept
+{
+    return width * height;
 }
 
 inline constexpr bool wci::Geometry::within(const wci::Point& point) const noexcept

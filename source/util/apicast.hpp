@@ -2,7 +2,9 @@
 #ifndef WCI_SOURCE_UTIL_APICAST_HPP
 #define WCI_SOURCE_UTIL_APICAST_HPP
 
+#include <concepts>
 #include <windows.h>
+
 #include "../defs.hpp"
 
 namespace wci
@@ -135,6 +137,11 @@ namespace wci
     inline constexpr COORD api(const Point& c)
     {
         return COORD{ api(c.x), api(c.y) };
+    }
+
+    inline constexpr COORD api(const Geometry& g)
+    {
+        return COORD{ api(g.width), api(g.height) };
     }
 
     inline constexpr SMALL_RECT api(const Rect& sr)
@@ -292,9 +299,10 @@ namespace wci
 
     #pragma region structs
 
-    inline constexpr Point wci(const COORD& c)
+    template<typename T> requires std::same_as<T, Geometry> || std::same_as<T, Point>
+    inline constexpr T wci(const COORD& c)
     {
-        return Point{ wci(c.X), wci(c.Y) };
+        return T{ wci(c.X), wci(c.Y) };
     }
 
     inline constexpr Rect wci(const SMALL_RECT& sr)
@@ -315,11 +323,11 @@ namespace wci
     inline constexpr ScreenBufferInfo wci(const CONSOLE_SCREEN_BUFFER_INFO& csbi)
     {
         return ScreenBufferInfo{
-            wci(csbi.dwSize),
-            wci(csbi.dwCursorPosition),
+            wci<Geometry>(csbi.dwSize),
+            wci<Point>(csbi.dwCursorPosition),
             Attribute(csbi.wAttributes),
             wci(csbi.srWindow),
-            wci(csbi.dwMaximumWindowSize)
+            wci<Geometry>(csbi.dwMaximumWindowSize)
         };
     }
 
@@ -338,7 +346,7 @@ namespace wci
     inline constexpr MouseEvent wci(const MOUSE_EVENT_RECORD& mer)
     {
         return MouseEvent{
-            wci(mer.dwMousePosition),
+            wci<Point>(mer.dwMousePosition),
             ButtonState(mer.dwButtonState),
             ControlKeyState(mer.dwControlKeyState),
             EventFlag(mer.dwEventFlags)
@@ -347,7 +355,7 @@ namespace wci
 
     inline constexpr WindowBufferResizeEvent wci(const WINDOW_BUFFER_SIZE_RECORD& wbsr)
     {
-        return WindowBufferResizeEvent{ wci(wbsr.dwSize) };
+        return WindowBufferResizeEvent{ wci<Geometry>(wbsr.dwSize) };
     }
 
     inline constexpr MenuEvent wci(const MENU_EVENT_RECORD& mer)
