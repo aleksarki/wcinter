@@ -12,7 +12,23 @@ namespace wci {
     class Console
     {
     public:
+        static void allocate();
+
+        static void attach(Dword processId);
+
+        static void detach();
+
+        static bool attached() noexcept;
+
+        static Handle standardHandle(StdHandle handle);
+
+        static Handle createScreenBuffer(
+            GenericRights generic = GenericRights::Read | GenericRights::Write,
+            FileAccessRights fileAccess = FileAccessRights::ShareRead | FileAccessRights::ShareWrite
+        );
+
         Console();
+
         ~Console();
 
         Console(const Console&) = delete;
@@ -55,11 +71,6 @@ namespace wci {
 
         // Set new console title.
         void title(const std::wstring& newTitle);
-
-        static Handle createScreenBuffer(
-            GenericRights generic = GenericRights::Read | GenericRights::Write,
-            FileAccessRights fileAccess = FileAccessRights::ShareRead | FileAccessRights::ShareWrite
-        );
 
         // Get wci::ScreenBufferInfo object describing console's screen buffer.
         ScreenBufferInfo screenBufferInfo() const;

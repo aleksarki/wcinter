@@ -10,10 +10,12 @@
 #include "console.hpp"
 #include "../util/apicast.hpp"
 
+// todo this needs much polishing...
+
 class wci::Console::Impl
 {
 private:
-    HANDLE stdIn, stdOut, stdErr;
+    wci::Handle stdIn, stdOut, stdErr;
     struct {  // settings to be restored on destruction
         DWORD mode;
         UINT codePage, outputCodePage;
@@ -25,15 +27,24 @@ private:
 public:
     Impl()
     {
-        stdIn = GetStdHandle(STD_INPUT_HANDLE);
-        stdOut = GetStdHandle(STD_OUTPUT_HANDLE);
-        stdErr = GetStdHandle(STD_ERROR_HANDLE);
-        GetConsoleMode(stdIn, &old.mode);
-        SetConsoleMode(stdIn, old.mode | wci::api(wci::InputMode::EnableWindowsInput | wci::InputMode::EnableMouseInput));
+        if (!wci::Console::attached())
+            wci::Console::allocate();
+
+        stdIn = wci::Console::standardHandle(wci::StdHandle::Input);
+        stdOut = wci::Console::standardHandle(wci::StdHandle::Output);
+        stdErr = wci::Console::standardHandle(wci::StdHandle::Error);
+
+        GetConsoleMode(wci::api(stdIn), &old.mode);
+        auto newMode = wci::InputMode(old.mode);
+        newMode |= wci::InputMode::EnableExtendedFlags | wci::InputMode::EnableWindowsInput | wci::InputMode::EnableMouseInput;
+        newMode &= ~wci::InputMode::EnableQuickEditMode;
+        SetConsoleMode(wci::api(stdIn), wci::api(newMode));
+
         old.codePage = GetConsoleCP();
         old.outputCodePage = GetConsoleOutputCP();
         SetConsoleCP(CP_UTF8);
         SetConsoleOutputCP(CP_UTF8);
+
         old.cursor = getCursorInfo();
         old.attributes = getScreenBufferInfo().attributes;
     }
@@ -50,11 +61,11 @@ public:
     {
         wchar_t wide = '\0';
         MultiByteToWideChar(CP_UTF8, 0, &character, 1, &wide, 1);
-        WriteConsoleW(stdOut, &wide, 1, NULL, NULL);
+        WriteConsoleW(wci::api(stdOut), &wide, 1, NULL, NULL);
     }
     void write(wchar_t character)
     {
-        WriteConsoleW(stdOut, &character, 1, NULL, NULL);
+        WriteConsoleW(wci::api(stdOut), &character, 1, NULL, NULL);
     }
     void write(const char* string)
     {
@@ -72,7 +83,7 @@ public:
     {
         DWORD length = 0;
         while (wstring[length]) ++length;
-        WriteConsoleW(stdOut, wstring, length, NULL, NULL);
+        WriteConsoleW(wci::api(stdOut), wstring, length, NULL, NULL);
     }
 
     std::wstring getTitle() const
@@ -92,31 +103,31 @@ public:
     wci::ScreenBufferInfo getScreenBufferInfo() const
     {
         CONSOLE_SCREEN_BUFFER_INFO info;
-        GetConsoleScreenBufferInfo(stdOut, &info);
+        GetConsoleScreenBufferInfo(wci::api(stdOut), &info);
         return wci::wci(info);
     }
 
     wci::CursorInfo getCursorInfo() const
     {
         CONSOLE_CURSOR_INFO info;
-        GetConsoleCursorInfo(stdOut, &info);
+        GetConsoleCursorInfo(wci::api(stdOut), &info);
         return wci::wci(info);
     }
     void setCursorInfo(const wci::CursorInfo& info)
     {
         CONSOLE_CURSOR_INFO winInfo = wci::api(info);
-        SetConsoleCursorInfo(stdOut, &winInfo);
+        SetConsoleCursorInfo(wci::api(stdOut), &winInfo);
     }
 
     void setCursorPosition(const wci::Point& position)
     {
         COORD winCoord = wci::api(position);
-        SetConsoleCursorPosition(stdOut, winCoord);
+        SetConsoleCursorPosition(wci::api(stdOut), winCoord);
     }
 
     wci::Handle getActiveScreenBuffer() const
     {
-        return wci::wci(stdOut);
+        return stdOut;
     }
     void setActiveScreenBuffer(wci::Handle handle)
     {
@@ -127,14 +138,14 @@ public:
 
     void setTextAttribute(wci::Attribute attributes)
     {
-        SetConsoleTextAttribute(stdOut, wci::api(attributes));
+        SetConsoleTextAttribute(wci::api(stdOut), wci::api(attributes));
     }
 
     void readInput(wci::InputEvent inputBuffer[], wci::Dword inputBufferLength, wci::Dword* eventsRead)
     {
         rawInputBuffer.resize(inputBufferLength);
         auto success = ReadConsoleInputW(
-            stdIn,
+            wci::api(stdIn),
             rawInputBuffer.data(),
             wci::api(inputBufferLength),
             wci::api(eventsRead)
@@ -150,19 +161,56 @@ public:
 
     Handle getStdInput() const
     {
-        return wci::wci(stdIn);
+        return stdIn;
     }
     Handle getStdOutput() const
     {
-        return wci::wci(stdOut);
+        return stdOut;
     }
     Handle getStdError() const
     {
-        return wci::wci(stdErr);
+        return stdErr;
     }
 };
 
+void wci::Console::allocate()
+{
+    AllocConsole();
+}
+
+void wci::Console::attach(wci::Dword processId)
+{
+    AttachConsole(wci::api(processId));
+}
+
+void wci::Console::detach()
+{
+    FreeConsole();
+}
+
+bool wci::Console::attached() noexcept
+{
+    return GetConsoleWindow() != NULL;
+}
+
+wci::Handle wci::Console::standardHandle(wci::StdHandle handle)
+{
+    return wci::wci(GetStdHandle(wci::api(handle)));
+}
+
+wci::Handle wci::Console::createScreenBuffer(wci::GenericRights generic, wci::FileAccessRights fileAccess)
+{
+    return wci::wci(CreateConsoleScreenBuffer(
+        wci::api(generic),
+        wci::api(fileAccess),
+        NULL,
+        CONSOLE_TEXTMODE_BUFFER,
+        NULL
+    ));
+}
+
 wci::Console::Console() : impl(std::make_unique<Impl>()) {}
+
 wci::Console::~Console() = default;
 
 void wci::Console::write(char character)
@@ -256,17 +304,6 @@ std::wstring wci::Console::title() const
 void wci::Console::title(const std::wstring& newTitle)
 {
     impl->setTitle(newTitle);
-}
-
-wci::Handle wci::Console::createScreenBuffer(wci::GenericRights generic, wci::FileAccessRights fileAccess)
-{
-    return wci::wci(CreateConsoleScreenBuffer(
-        wci::api(generic),
-        wci::api(fileAccess),
-        NULL,
-        CONSOLE_TEXTMODE_BUFFER,
-        NULL
-    ));
 }
 
 wci::ScreenBufferInfo wci::Console::screenBufferInfo() const
