@@ -2,13 +2,13 @@
 #ifndef WCI_SOURCE_UTIL_PAGE_HPP
 #define WCI_SOURCE_UTIL_PAGE_HPP
 
+#include <concepts>
 #include <cstddef>
 #include <utility>
 #include <vector>
 
 #include "../core.hpp"
 #include "../defs.hpp"
-#include "navigator.hpp"
 
 namespace wci
 {
@@ -16,7 +16,6 @@ namespace wci
     {
     protected:
         Window& window;
-        Navigator& navigator;
         std::vector<std::size_t> ids;
 
         template<typename... Args>
@@ -28,7 +27,7 @@ namespace wci
         }
 
     public:
-        Page(Window& window, Navigator& navigator);
+        Page(Window& window);
         virtual ~Page();
 
         Page(const Page&) = delete;
@@ -50,9 +49,12 @@ namespace wci
 
         virtual bool onResizeEvent(const WindowBufferResizeEvent& event);
     };
+
+    template<typename P>
+    concept page = std::derived_from<P, Page>;
 }
 
-inline wci::Page::Page(wci::Window& window, wci::Navigator& navigator) : window(window), navigator(navigator)
+inline wci::Page::Page(wci::Window& window) : window(window)
 {}
 
 inline wci::Page::~Page() = default;
