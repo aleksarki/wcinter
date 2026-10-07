@@ -1,6 +1,6 @@
 #pragma once
-#ifndef WCI_SOURCE_DEFS_WIDGET_HPP
-#define WCI_SOURCE_DEFS_WIDGET_HPP
+#ifndef WCI_SOURCE_DEFS_DISPLAYADAPTER_HPP
+#define WCI_SOURCE_DEFS_DISPLAYADAPTER_HPP
 
 #include <cassert>
 #include <cstddef>
@@ -21,6 +21,10 @@ namespace wci
 {
     class Window;
 
+    /*
+     * Concept to make sure object can be rendered onto window.
+     * We can render anything that can produce char matrix of itself and tell its size.
+     */
     template<typename T>
     concept renderable = requires(const T& t)
     {
@@ -29,7 +33,10 @@ namespace wci
     };
 
     // NB: if widget constructs from an lvalue-object, the object must outlive the widget!
-    class Widget
+    /*
+     * A display adapter helps place objects on screen, move them and render them.
+     */
+    class DisplayAdapter
     {
         friend class Window;
 
@@ -39,34 +46,34 @@ namespace wci
             Anchor anchor;
             Point absolute;  // calculated position of the top left point
             bool visible;
-            std::variant<std::monostate, Window*, Widget*> parent;
+            std::variant<std::monostate, Window*, DisplayAdapter*> parent;
             std::size_t id;  // wci::npos if widget is not placed
         } inner;
         std::function<CharMatrix()> renderer;
         std::function<Geometry()> sizer;
 
         // ctor for delegating and filling inner struct with default values
-        Widget(std::function<CharMatrix()> renderer, std::function<Geometry()> sizer);
+        DisplayAdapter(std::function<CharMatrix()> renderer, std::function<Geometry()> sizer);
 
     public:
         template<renderable R>
-        Widget(R& object);
+        DisplayAdapter(R& object);
         template<renderable R>
-        Widget(R&& object);
-        Widget(Wchar character);
-        Widget(const CharCell& cell);
-        Widget(CharCell&& cell);
-        Widget(const std::wstring& string);
-        Widget(std::wstring&& string);
-        Widget(const CharString& charString);
-        Widget(CharString&& charString);
-        Widget(CharMatrix&& charMatrix);
+        DisplayAdapter(R&& object);
+        DisplayAdapter(Wchar character);
+        DisplayAdapter(const CharCell& cell);
+        DisplayAdapter(CharCell&& cell);
+        DisplayAdapter(const std::wstring& string);
+        DisplayAdapter(std::wstring&& string);
+        DisplayAdapter(const CharString& charString);
+        DisplayAdapter(CharString&& charString);
+        DisplayAdapter(CharMatrix&& charMatrix);
 
-        Widget(const Widget&) = delete;
-        Widget& operator=(const Widget&) = delete;
+        DisplayAdapter(const DisplayAdapter&) = delete;
+        DisplayAdapter& operator=(const DisplayAdapter&) = delete;
 
-        Widget(Widget&&) = default;
-        Widget& operator=(Widget&&) = default;
+        DisplayAdapter(DisplayAdapter&&) = default;
+        DisplayAdapter& operator=(DisplayAdapter&&) = default;
 
         Geometry size() const noexcept;
 
@@ -99,7 +106,7 @@ namespace wci
 
         bool parentIsWindow() const noexcept;
 
-        bool parentIsWidget() const noexcept;
+        bool parentIsAdapter() const noexcept;
 
         Window& window() const;  // should check prior whether has parent window
 
@@ -108,21 +115,21 @@ namespace wci
         void windowp(Window* newWindowPtr) noexcept;
 
     public:
-        Widget& parent() const;  // should check prior whether has parent widget
+        DisplayAdapter& parent() const;  // should check prior whether has parent widget
 
-        Widget* parentp() const;  // get nullptr if does not have parent widget
+        DisplayAdapter* parentp() const;  // get nullptr if does not have parent widget
     private:
-        void parentp(Widget* newParentPtr) noexcept;
+        void parentp(DisplayAdapter* newParentPtr) noexcept;
 
         void unplace() noexcept;
 
-        // todo in widget.cpp:
+        // todo in displayadapter.cpp:
         // todo make position(), anchor() and unplace() public through Window
-        // todo implement const std::vector<wci::Widget*>& children() const
+        // todo implement const std::vector<wci::DisplayAdapter*>& children() const
     };
 }
 
-inline wci::Widget::Widget(std::function<wci::CharMatrix()> renderer, std::function<wci::Geometry()> sizer) :
+inline wci::DisplayAdapter::DisplayAdapter(std::function<wci::CharMatrix()> renderer, std::function<wci::Geometry()> sizer) :
     inner{
         wci::PositionSpec{ wci::LenPercent(wci::Short(0)), wci::LenPercent(wci::Short(0)) },
         wci::Anchor::TopLeft,
@@ -135,167 +142,167 @@ inline wci::Widget::Widget(std::function<wci::CharMatrix()> renderer, std::funct
     sizer(std::move(sizer))
 {}
 template<wci::renderable R>
-inline wci::Widget::Widget(R& object) : wci::Widget(
+inline wci::DisplayAdapter::DisplayAdapter(R& object) : wci::DisplayAdapter(
     [&object]() -> wci::CharMatrix { return object.toMatrix(); },
     [&object]() -> wci::Geometry { return object.size(); }
 )
 {}
 template<wci::renderable R>
-inline wci::Widget::Widget(R&& object) : wci::Widget(
+inline wci::DisplayAdapter::DisplayAdapter(R&& object) : wci::DisplayAdapter(
     [matrix = object.toMatrix()]() -> wci::CharMatrix { return matrix; },
     [size = object.size()]() -> wci::Geometry { return size; }
 )
 {}
-inline wci::Widget::Widget(wci::Wchar character) : wci::Widget(
+inline wci::DisplayAdapter::DisplayAdapter(wci::Wchar character) : wci::DisplayAdapter(
     [matrix = wci::CharMatrix(wci::Geometry{ 1, 1 }, wci::CharCell{ character, wci::normal })]() -> wci::CharMatrix { return matrix; },
     [size = wci::Geometry{ 1, 1 }]() -> wci::Geometry { return size; }
 )
 {}
-inline wci::Widget::Widget(const CharCell& cell) : wci::Widget(
+inline wci::DisplayAdapter::DisplayAdapter(const CharCell& cell) : wci::DisplayAdapter(
     [&cell]() -> wci::CharMatrix { return wci::CharMatrix(wci::Geometry{ 1, 1 }, cell); },
     [size = wci::Geometry{ 1, 1 }]() -> wci::Geometry { return size; }
 )
 {}
-inline wci::Widget::Widget(wci::CharCell&& cell) : wci::Widget(
+inline wci::DisplayAdapter::DisplayAdapter(wci::CharCell&& cell) : wci::DisplayAdapter(
     [matrix = wci::CharMatrix(wci::Geometry{ 1, 1 }, cell)]() -> wci::CharMatrix { return matrix; },
     [size = wci::Geometry{ 1, 1 }]() -> wci::Geometry{ return size; }
 )
 {}
-inline wci::Widget::Widget(const std::wstring& string) : wci::Widget(
+inline wci::DisplayAdapter::DisplayAdapter(const std::wstring& string) : wci::DisplayAdapter(
     [&string]() -> wci::CharMatrix { return wci::CharString(string).toMatrix(); },
     [&string]() -> wci::Geometry { return wci::Geometry{ static_cast<wci::Short>(string.size()), 1 }; }
 )
 {}
-inline wci::Widget::Widget(std::wstring&& string) : wci::Widget(
+inline wci::DisplayAdapter::DisplayAdapter(std::wstring&& string) : wci::DisplayAdapter(
     [matrix = wci::CharString(string).toMatrix()]() -> wci::CharMatrix { return matrix; },
     [size = wci::Geometry{ wci::CharString(string).size(), 1 }]() -> wci::Geometry{ return size; }
 )
 {}
-inline wci::Widget::Widget(const CharString& charString) : wci::Widget (
+inline wci::DisplayAdapter::DisplayAdapter(const CharString& charString) : wci::DisplayAdapter (
     [&charString]() -> wci::CharMatrix { return charString.toMatrix(); },
     [&charString]() -> wci::Geometry { return wci::Geometry{ charString.size(), 1 }; }
 )
 {}
-inline wci::Widget::Widget(CharString&& charString) : wci::Widget(
+inline wci::DisplayAdapter::DisplayAdapter(CharString&& charString) : wci::DisplayAdapter(
     [matrix = charString.toMatrix()]() -> wci::CharMatrix { return matrix; },
     [size = wci::Geometry{ charString.size(), 1 }]() -> wci::Geometry { return size; }
 )
 {}
-inline wci::Widget::Widget(CharMatrix&& charMatrix) : wci::Widget(
+inline wci::DisplayAdapter::DisplayAdapter(CharMatrix&& charMatrix) : wci::DisplayAdapter(
     [charMatrix]() -> wci::CharMatrix { return charMatrix; },
     [size = charMatrix.size()]() -> wci::Geometry { return size; }
 )
 {}
 
-inline wci::Geometry wci::Widget::size() const noexcept
+inline wci::Geometry wci::DisplayAdapter::size() const noexcept
 {
     return sizer();
 }
 
-inline wci::CharMatrix wci::Widget::render() const
+inline wci::CharMatrix wci::DisplayAdapter::render() const
 {
     return renderer();
 }
 
-inline const wci::PositionSpec& wci::Widget::position() const noexcept
+inline const wci::PositionSpec& wci::DisplayAdapter::position() const noexcept
 {
     return inner.position;
 }
-inline void wci::Widget::position(const wci::PositionSpec& newPosition) noexcept
+inline void wci::DisplayAdapter::position(const wci::PositionSpec& newPosition) noexcept
 {
     inner.position = newPosition;
 }
 
-inline wci::Anchor wci::Widget::anchor() const noexcept
+inline wci::Anchor wci::DisplayAdapter::anchor() const noexcept
 {
     return inner.anchor;
 }
-inline void wci::Widget::anchor(wci::Anchor newAnchor) noexcept
+inline void wci::DisplayAdapter::anchor(wci::Anchor newAnchor) noexcept
 {
     inner.anchor = newAnchor;
 }
 
-inline wci::Point wci::Widget::absolute() const noexcept
+inline wci::Point wci::DisplayAdapter::absolute() const noexcept
 {
     return inner.absolute;
 }
-inline void wci::Widget::absolute(wci::Point newAbsolute) noexcept
+inline void wci::DisplayAdapter::absolute(wci::Point newAbsolute) noexcept
 {
     inner.absolute = newAbsolute;
 }
 
-inline std::size_t wci::Widget::id() const noexcept
+inline std::size_t wci::DisplayAdapter::id() const noexcept
 {
     return inner.id;
 }
 
-inline void wci::Widget::id(std::size_t newId) noexcept
+inline void wci::DisplayAdapter::id(std::size_t newId) noexcept
 {
     inner.id = newId;
 }
 
-inline bool wci::Widget::visible() const noexcept
+inline bool wci::DisplayAdapter::visible() const noexcept
 {
     return inner.visible;
 }
-inline void wci::Widget::visible(bool newVisibility) noexcept
+inline void wci::DisplayAdapter::visible(bool newVisibility) noexcept
 {
     inner.visible = newVisibility;
 }
 
-inline bool wci::Widget::placed() const noexcept
+inline bool wci::DisplayAdapter::placed() const noexcept
 {
     return !std::holds_alternative<std::monostate>(inner.parent);
 }
 
-inline bool wci::Widget::parentIsWindow() const noexcept
+inline bool wci::DisplayAdapter::parentIsWindow() const noexcept
 {
     return std::holds_alternative<wci::Window*>(inner.parent);
 }
 
-inline bool wci::Widget::parentIsWidget() const noexcept
+inline bool wci::DisplayAdapter::parentIsAdapter() const noexcept
 {
-    return std::holds_alternative<wci::Widget*>(inner.parent);
+    return std::holds_alternative<wci::DisplayAdapter*>(inner.parent);
 }
 
-inline wci::Window& wci::Widget::window() const
+inline wci::Window& wci::DisplayAdapter::window() const
 {
     return *std::get<wci::Window*>(inner.parent);  // wonderful that this works
 }
 
-inline wci::Window* wci::Widget::windowp() const
+inline wci::Window* wci::DisplayAdapter::windowp() const
 {
     if (parentIsWindow())
         return std::get<wci::Window*>(inner.parent);
     return nullptr;
 }
-inline void wci::Widget::windowp(wci::Window* newWindow) noexcept
+inline void wci::DisplayAdapter::windowp(wci::Window* newWindow) noexcept
 {
     assert(newWindow != nullptr);
     inner.parent = newWindow;
 }
 
-inline wci::Widget& wci::Widget::parent() const
+inline wci::DisplayAdapter& wci::DisplayAdapter::parent() const
 {
-    return *std::get<wci::Widget*>(inner.parent);
+    return *std::get<wci::DisplayAdapter*>(inner.parent);
 }
 
-inline wci::Widget* wci::Widget::parentp() const
+inline wci::DisplayAdapter* wci::DisplayAdapter::parentp() const
 {
-    if (parentIsWidget())
-        return std::get<wci::Widget*>(inner.parent);
+    if (parentIsAdapter())
+        return std::get<wci::DisplayAdapter*>(inner.parent);
     return nullptr;
 }
-inline void wci::Widget::parentp(wci::Widget* newParent) noexcept
+inline void wci::DisplayAdapter::parentp(wci::DisplayAdapter* newParent) noexcept
 {
     assert(newParent != nullptr);
     inner.parent = newParent;
 }
 
-inline void wci::Widget::unplace() noexcept
+inline void wci::DisplayAdapter::unplace() noexcept
 {
     inner.parent = std::monostate{};
     inner.id = wci::npos;
 }
 
-#endif  // WCI_SOURCE_DEFS_WIDGET_HPP
+#endif  // WCI_SOURCE_DEFS_DISPLAYADAPTER_HPP

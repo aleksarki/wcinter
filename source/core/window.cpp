@@ -18,10 +18,10 @@
 class wci::Window::Impl
 {
 private:
-    struct WidgetPlacement
+    struct AdapterPlacement
     {
-        wci::Widget* widget;
-        std::vector<wci::Widget*> children;
+        wci::DisplayAdapter* adapter;
+        std::vector<wci::DisplayAdapter*> children;
     };
 
     struct {
@@ -29,11 +29,11 @@ private:
         wci::CharMatrix matrix;
     } inner;
     wci::Handle oldScreenBuffer;
-    wci::CharMatrix framebuf;                                     // framebuf is used to forgo allocating matrices anew each rendering
-    wci::CharMatrix lastbuf;                                      // contains last rendered frame
-    std::unordered_map<std::size_t, WidgetPlacement> placements;  // id -> widget placement info
-    std::vector<wci::Widget*> roots;                              // widgets placed directly on the window
-    std::list<wci::Widget> orphans;                               // list because it does not invalidate pointers on relocation and deletion
+    wci::CharMatrix framebuf;                                      // framebuf is used to forgo allocating matrices anew each rendering
+    wci::CharMatrix lastbuf;                                       // contains last rendered frame
+    std::unordered_map<std::size_t, AdapterPlacement> placements;  // id -> adapter placement info
+    std::vector<wci::DisplayAdapter*> roots;                       // adapters placed directly on the window
+    std::list<wci::DisplayAdapter> orphans;                        // list because it does not invalidate pointers on relocation and deletion
     std::size_t counter = 0;
     bool forceRedraw;
 
@@ -84,19 +84,19 @@ public:
     }
 
 private:
-    wci::CharMatrix renderPlacedWidget(const WidgetPlacement& placed) const
+    wci::CharMatrix renderPlacedAdapter(const AdapterPlacement& placed) const
     {
-        auto matrix = placed.widget->render();
+        auto matrix = placed.adapter->render();
         for (auto* child : placed.children)
         {
             if (!child->visible())
                 continue;
             auto& childPlaced = placements.at(child->id());
             wci::Point startPoint = calculateStackeeStart(
-                child->position(), placed.widget->size(), child->size(), child->anchor()
+                child->position(), placed.adapter->size(), child->size(), child->anchor()
             );
             child->absolute(startPoint);
-            matrix.inlay(startPoint, renderPlacedWidget(childPlaced));
+            matrix.inlay(startPoint, renderPlacedAdapter(childPlaced));
         }
         return matrix;
     }
@@ -119,14 +119,14 @@ public:
         for (auto* root : roots)
         {
             auto& placed = placements.at(root->id());
-            auto* widget = placed.widget;
-            if (!widget->visible())
+            auto* adapter = placed.adapter;
+            if (!adapter->visible())
                 continue;
             wci::Point startPoint = calculateStackeeStart(
-                widget->position(), size(), widget->size(), widget->anchor()
+                adapter->position(), size(), adapter->size(), adapter->anchor()
             );
-            widget->absolute(startPoint);
-            framebuf.inlay(startPoint, renderPlacedWidget(placed));
+            adapter->absolute(startPoint);
+            framebuf.inlay(startPoint, renderPlacedAdapter(placed));
         }
 
         wci::Rect bbox;
@@ -183,164 +183,164 @@ public:
         this->matrix().inlay(x, y, matrix);
     }
 
-    bool widgetPlaced(std::size_t id) const noexcept
+    bool adapterPlaced(std::size_t id) const noexcept
     {
         return placements.contains(id);
     }
-    bool widgetPlaced(const wci::Widget& widget) const noexcept
+    bool adapterPlaced(const wci::DisplayAdapter& adapter) const noexcept
     {
-        return widget.placed() && placements.contains(widget.id());
+        return adapter.placed() && placements.contains(adapter.id());
     }
 
-    wci::Widget& getWidget(std::size_t id)
+    wci::DisplayAdapter& getAdapter(std::size_t id)
     {
-        return *placements.at(id).widget;
+        return *placements.at(id).adapter;
     }
-    const wci::Widget& getWidget(std::size_t id) const
+    const wci::DisplayAdapter& getAdapter(std::size_t id) const
     {
-        return *placements.at(id).widget;
+        return *placements.at(id).adapter;
     }
 
 private:
-    std::size_t newPlacement(wci::Widget& widget)
+    std::size_t newPlacement(wci::DisplayAdapter& adapter)
     {
         auto id = counter++;
-        placements[id] = WidgetPlacement{ &widget, std::vector<wci::Widget*>() };
+        placements[id] = AdapterPlacement{ &adapter, std::vector<wci::DisplayAdapter*>() };
         return id;
     }
 
-    wci::Widget& newOrphan(wci::Widget&& widget)
+    wci::DisplayAdapter& newOrphan(wci::DisplayAdapter&& adapter)
     {
-        orphans.push_back(std::move(widget));
+        orphans.push_back(std::move(adapter));
         return orphans.back();
     }
 
-    void addRoot(wci::Widget& widget)
+    void addRoot(wci::DisplayAdapter& adapter)
     {
-        roots.push_back(&widget);
+        roots.push_back(&adapter);
     }
 
-    void removeRoot(const wci::Widget& widget)
+    void removeRoot(const wci::DisplayAdapter& adapter)
     {
-        std::erase(roots, &widget);
+        std::erase(roots, &adapter);
     }
 
-    void addChild(wci::Widget& child, wci::Widget& parent)
+    void addChild(wci::DisplayAdapter& child, wci::DisplayAdapter& parent)
     {
         placements.at(parent.id()).children.push_back(&child);
     }
 
-    void removeChild(const wci::Widget& child, const wci::Widget& parent)
+    void removeChild(const wci::DisplayAdapter& child, const wci::DisplayAdapter& parent)
     {
         std::erase(placements.at(parent.id()).children, &child);
     }
 
 public:
     // for maybe new widgets; placement on window directly
-    std::size_t placeWidget(const wci::PositionSpec& position, wci::Widget& widget, wci::Anchor anchor, wci::Window* window)
+    std::size_t placeAdapter(const wci::PositionSpec& position, wci::DisplayAdapter& adapter, wci::Anchor anchor, wci::Window* window)
     {
-        widget.position(position);
-        widget.anchor(anchor);
-        widget.absolute(calculateStackeeStart(position, size(), widget.size(), anchor));
+        adapter.position(position);
+        adapter.anchor(anchor);
+        adapter.absolute(calculateStackeeStart(position, size(), adapter.size(), anchor));
 
-        if (widget.parentIsWindow())  // already placed on the window
-            return widget.id();
-        else if (widget.parentIsWidget())  // widget has been previously placed on another widget
-            removeChild(widget, widget.parent());
-        else  // new widget
-            widget.id(newPlacement(widget));
-        addRoot(widget);
-        widget.windowp(window);
+        if (adapter.parentIsWindow())  // already placed on the window
+            return adapter.id();
+        else if (adapter.parentIsAdapter())  // adapter has been previously placed on another adapter
+            removeChild(adapter, adapter.parent());
+        else  // new adapter
+            adapter.id(newPlacement(adapter));
+        addRoot(adapter);
+        adapter.windowp(window);
 
-        return widget.id();
+        return adapter.id();
     }
     // for new widgets; placement on window directly
-    std::size_t placeWidget(const wci::PositionSpec& position, wci::Widget&& widget, wci::Anchor anchor, wci::Window* window)
+    std::size_t placeAdapter(const wci::PositionSpec& position, wci::DisplayAdapter&& adapter, wci::Anchor anchor, wci::Window* window)
     {
-        return placeWidget(position, newOrphan(std::move(widget)), anchor, window);
+        return placeAdapter(position, newOrphan(std::move(adapter)), anchor, window);
     }
     // for already placed widgets; placement on window directly
-    std::size_t placeWidget(const wci::PositionSpec& position, std::size_t id, wci::Anchor anchor, wci::Window* window)
+    std::size_t placeAdapter(const wci::PositionSpec& position, std::size_t id, wci::Anchor anchor, wci::Window* window)
     {
-        if (!widgetPlaced(id))
-            throw std::invalid_argument("Such widget does not exist");
+        if (!adapterPlaced(id))
+            throw std::invalid_argument("Such adapter does not exist");
     
-        auto& widget = getWidget(id);
-        widget.position(position);
-        widget.anchor(anchor);
-        widget.absolute(calculateStackeeStart(position, size(), widget.size(), anchor));
+        auto& adapter = getAdapter(id);
+        adapter.position(position);
+        adapter.anchor(anchor);
+        adapter.absolute(calculateStackeeStart(position, size(), adapter.size(), anchor));
     
-        if (widget.parentIsWidget())  // widget has been previously placed on another widget
+        if (adapter.parentIsAdapter())  // adapter has been previously placed on another adapter
         {
-            removeChild(widget, widget.parent());
-            addRoot(widget);
-            widget.windowp(window);
+            removeChild(adapter, adapter.parent());
+            addRoot(adapter);
+            adapter.windowp(window);
         }
 
         return id;
     }
-    // for maybe new widgets; placement on another widget
-    std::size_t placeWidget(const wci::PositionSpec& position, std::size_t parentId, wci::Widget& child, wci::Anchor anchor)
+    // for maybe new widgets; placement on another adapter
+    std::size_t placeAdapter(const wci::PositionSpec& position, std::size_t parentId, wci::DisplayAdapter& child, wci::Anchor anchor)
     {
-        if (!widgetPlaced(parentId))
-            throw std::invalid_argument("Such parent widget does not exist");
+        if (!adapterPlaced(parentId))
+            throw std::invalid_argument("Such parent adapter does not exist");
 
-        auto& parent = getWidget(parentId);
+        auto& parent = getAdapter(parentId);
         if (child.placed())
             for (auto* parentp = &parent; parentp; parentp = parentp->parentp())  // do the check all the way up
                 if (parentp->id() == child.id())
-                    throw std::invalid_argument("Widget cannot be its own parent");
+                    throw std::invalid_argument("DisplayAdapter cannot be its own parent");
 
         child.position(position);
         child.anchor(anchor);
         child.absolute(calculateStackeeStart(position, parent.size(), child.size(), anchor));
 
-        if (child.parentIsWindow())  // widget has been previously placed on window directly
+        if (child.parentIsWindow())  // adapter has been previously placed on window directly
             removeRoot(child);
-        else if (child.parentIsWidget())
+        else if (child.parentIsAdapter())
         {
-            if (child.parent().id() == parentId)  // widget's already on the right parent
+            if (child.parent().id() == parentId)  // adapter's already on the right parent
                 return child.id();
-            removeChild(child, child.parent());  // widget has been placed on a different parent
+            removeChild(child, child.parent());  // adapter has been placed on a different parent
         }
-        else  // new widget
+        else  // new adapter
             child.id(newPlacement(child));
         addChild(child, parent);
         child.parentp(&parent);
 
         return child.id();
     }
-    // for new widgets; placement on another widget
-    std::size_t placeWidget(const wci::PositionSpec& position, std::size_t parentId, wci::Widget&& widget, wci::Anchor anchor)
+    // for new widgets; placement on another adapter
+    std::size_t placeAdapter(const wci::PositionSpec& position, std::size_t parentId, wci::DisplayAdapter&& adapter, wci::Anchor anchor)
     {
-        return placeWidget(position, parentId, newOrphan(std::move(widget)), anchor);
+        return placeAdapter(position, parentId, newOrphan(std::move(adapter)), anchor);
     }
-    // for already placed widgets; placement on another widget
-    std::size_t placeWidget(const wci::PositionSpec& position, std::size_t parentId, std::size_t childId, wci::Anchor anchor)  // review what happens when circular dependecy?
+    // for already placed widgets; placement on another adapter
+    std::size_t placeAdapter(const wci::PositionSpec& position, std::size_t parentId, std::size_t childId, wci::Anchor anchor)  // review what happens when circular dependecy?
     {
-        if (!widgetPlaced(childId))
-            throw std::invalid_argument("Such child widget does not exist");
-        if (!widgetPlaced(parentId))
-            throw std::invalid_argument("Such parent widget does not exist");
+        if (!adapterPlaced(childId))
+            throw std::invalid_argument("Such child adapter does not exist");
+        if (!adapterPlaced(parentId))
+            throw std::invalid_argument("Such parent adapter does not exist");
 
-        auto& child = getWidget(childId);
-        auto& parent = getWidget(parentId);
+        auto& child = getAdapter(childId);
+        auto& parent = getAdapter(parentId);
         if (child.placed())
             for (auto* parentp = &parent; parentp; parentp = parentp->parentp())  // do the check all the way up
                 if (parentp->id() == childId)
-                    throw std::invalid_argument("Widget cannot be its own parent");
+                    throw std::invalid_argument("DisplayAdapter cannot be its own parent");
 
         child.position(position);
         child.anchor(anchor);
         child.absolute(calculateStackeeStart(position, parent.size(), child.size(), anchor));
 
-        if (child.parentIsWindow())  // widget has been previously placed on window directly
+        if (child.parentIsWindow())  // adapter has been previously placed on window directly
             removeRoot(child);
-        else if (child.parentIsWidget())
+        else if (child.parentIsAdapter())
         {
-            if (child.parent().id() == parentId)  // widget's already on the right parent
+            if (child.parent().id() == parentId)  // adapter's already on the right parent
                 return childId;
-            removeChild(child, child.parent());  // widget has been placed on a different parent
+            removeChild(child, child.parent());  // adapter has been placed on a different parent
         }
         addChild(child, parent);
         child.parentp(&parent);
@@ -348,59 +348,59 @@ public:
         return childId;
     }
 
-    void moveWidget(const wci::PositionSpec& position, wci::Widget& widget, wci::Anchor anchor)
+    void moveWidget(const wci::PositionSpec& position, wci::DisplayAdapter& adapter, wci::Anchor anchor)
     {
-        if (!widget.placed())
-            throw std::logic_error("Widget has not been yet placed");
-        widget.position(position);
-        widget.anchor(anchor);
-        auto baseSize = widget.parentIsWindow() ? size() : widget.parent().size();
-        widget.absolute(calculateStackeeStart(position, baseSize, widget.size(), anchor));
+        if (!adapter.placed())
+            throw std::logic_error("DisplayAdapter has not been yet placed");
+        adapter.position(position);
+        adapter.anchor(anchor);
+        auto baseSize = adapter.parentIsWindow() ? size() : adapter.parent().size();
+        adapter.absolute(calculateStackeeStart(position, baseSize, adapter.size(), anchor));
     }
 
-    void removeIfOrphan(wci::Widget* orphan)
+    void removeIfOrphan(wci::DisplayAdapter* orphan)
     {
-        std::erase_if(orphans, [orphan](const wci::Widget& widget) -> bool { return &widget == orphan; });
+        std::erase_if(orphans, [orphan](const wci::DisplayAdapter& adapter) -> bool { return &adapter == orphan; });
     }
 
     void unplaceWidget(std::size_t id)
     {
-        if (!widgetPlaced(id))
-            throw std::invalid_argument("Such widget does not exist");
+        if (!adapterPlaced(id))
+            throw std::invalid_argument("Such adapter does not exist");
 
         auto& placed = placements.at(id);
-        auto* widget = placed.widget;
+        auto* adapter = placed.adapter;
         auto children = std::move(placed.children);
         placed.children.clear();  // restore assurance in the vector after the move
 
-        if (widget->parentIsWindow())
-            std::erase(roots, widget);
+        if (adapter->parentIsWindow())
+            std::erase(roots, adapter);
         else
         {
-            auto& parentPlaced = placements.at(widget->parent().id());  // parentPlaced == placed inside unplaceWidget(*child)
-            std::erase(parentPlaced.children, widget);
+            auto& parentPlaced = placements.at(adapter->parent().id());  // parentPlaced == placed inside unplaceWidget(*child)
+            std::erase(parentPlaced.children, adapter);
         }
 
         for (auto* child : children)
             unplaceWidget(*child);
 
         placements.erase(id);
-        widget->unplace();
-        removeIfOrphan(widget);
+        adapter->unplace();
+        removeIfOrphan(adapter);
     }
-    void unplaceWidget(wci::Widget& widget)
+    void unplaceWidget(wci::DisplayAdapter& adapter)
     {
-        if (!widget.placed())
-            throw std::invalid_argument("Such widget does not exist");
-        unplaceWidget(widget.id());
+        if (!adapter.placed())
+            throw std::invalid_argument("Such adapter does not exist");
+        unplaceWidget(adapter.id());
     }
 
-    const std::vector<wci::Widget*>& getRoots() const
+    const std::vector<wci::DisplayAdapter*>& getRoots() const
     {
         return roots;
     }
 
-    const std::vector<wci::Widget*>& getChildren(std::size_t id) const
+    const std::vector<wci::DisplayAdapter*>& getChildren(std::size_t id) const
     {
         return placements.at(id).children;
     }
@@ -505,139 +505,139 @@ void wci::Window::put(const wci::Point& position, const wci::CharMatrix& matrix)
     impl->putMatrix(position.x, position.y, matrix);
 }
 
-std::size_t wci::Window::place(const wci::LenPercent& x, const wci::LenPercent& y, wci::Widget& widget, wci::Anchor anchor)
+std::size_t wci::Window::place(const wci::LenPercent& x, const wci::LenPercent& y, wci::DisplayAdapter& adapter, wci::Anchor anchor)
 {
-    return impl->placeWidget(wci::position(x, y), widget, anchor, this);
+    return impl->placeAdapter(wci::position(x, y), adapter, anchor, this);
 }
-std::size_t wci::Window::place(const wci::LenPercent& x, const wci::LenPercent& y, wci::Widget&& widget, wci::Anchor anchor)
+std::size_t wci::Window::place(const wci::LenPercent& x, const wci::LenPercent& y, wci::DisplayAdapter&& adapter, wci::Anchor anchor)
 {
-    return impl->placeWidget(wci::position(x, y), std::move(widget), anchor, this);
+    return impl->placeAdapter(wci::position(x, y), std::move(adapter), anchor, this);
 }
 std::size_t wci::Window::place(const wci::LenPercent& x, const wci::LenPercent& y, std::size_t id, wci::Anchor anchor)
 {
-    return impl->placeWidget(wci::position(x, y), id, anchor, this);
+    return impl->placeAdapter(wci::position(x, y), id, anchor, this);
 }
-std::size_t wci::Window::place(const wci::PositionSpec& position, wci::Widget& widget, wci::Anchor anchor)
+std::size_t wci::Window::place(const wci::PositionSpec& position, wci::DisplayAdapter& adapter, wci::Anchor anchor)
 {
-    return impl->placeWidget(position, widget, anchor, this);
+    return impl->placeAdapter(position, adapter, anchor, this);
 }
-std::size_t wci::Window::place(const wci::PositionSpec& position, wci::Widget&& widget, wci::Anchor anchor)
+std::size_t wci::Window::place(const wci::PositionSpec& position, wci::DisplayAdapter&& adapter, wci::Anchor anchor)
 {
-    return impl->placeWidget(position, std::move(widget), anchor, this);
+    return impl->placeAdapter(position, std::move(adapter), anchor, this);
 }
 std::size_t wci::Window::place(const wci::PositionSpec& position, std::size_t id, wci::Anchor anchor)
 {
-    return impl->placeWidget(position, id, anchor, this);
+    return impl->placeAdapter(position, id, anchor, this);
 }
 
-std::size_t wci::Window::place(const wci::LenPercent& x, const wci::LenPercent& y, std::size_t parentId, wci::Widget& child, wci::Anchor anchor)
+std::size_t wci::Window::place(const wci::LenPercent& x, const wci::LenPercent& y, std::size_t parentId, wci::DisplayAdapter& child, wci::Anchor anchor)
 {
-    return impl->placeWidget(wci::position(x, y), parentId, child, anchor);
+    return impl->placeAdapter(wci::position(x, y), parentId, child, anchor);
 }
-std::size_t wci::Window::place(const wci::LenPercent& x, const wci::LenPercent& y, std::size_t parentId, wci::Widget&& child, wci::Anchor anchor)
+std::size_t wci::Window::place(const wci::LenPercent& x, const wci::LenPercent& y, std::size_t parentId, wci::DisplayAdapter&& child, wci::Anchor anchor)
 {
-    return impl->placeWidget(wci::position(x, y), parentId, std::move(child), anchor);
+    return impl->placeAdapter(wci::position(x, y), parentId, std::move(child), anchor);
 }
 std::size_t wci::Window::place(const wci::LenPercent& x, const wci::LenPercent& y, std::size_t parentId, std::size_t childId, wci::Anchor anchor)
 {
-    return impl->placeWidget(wci::position(x, y), parentId, childId, anchor);
+    return impl->placeAdapter(wci::position(x, y), parentId, childId, anchor);
 }
-std::size_t wci::Window::place(const wci::PositionSpec& position, std::size_t parentId, wci::Widget& child, wci::Anchor anchor)
+std::size_t wci::Window::place(const wci::PositionSpec& position, std::size_t parentId, wci::DisplayAdapter& child, wci::Anchor anchor)
 {
-    return impl->placeWidget(position, parentId, child, anchor);
+    return impl->placeAdapter(position, parentId, child, anchor);
 }
-std::size_t wci::Window::place(const wci::PositionSpec& position, std::size_t parentId, wci::Widget&& child, wci::Anchor anchor)
+std::size_t wci::Window::place(const wci::PositionSpec& position, std::size_t parentId, wci::DisplayAdapter&& child, wci::Anchor anchor)
 {
-    return impl->placeWidget(position, parentId, std::move(child), anchor);
+    return impl->placeAdapter(position, parentId, std::move(child), anchor);
 }
 std::size_t wci::Window::place(const wci::PositionSpec& position, std::size_t parentId, std::size_t childId, wci::Anchor anchor)
 {
-    return impl->placeWidget(position, parentId, childId, anchor);
+    return impl->placeAdapter(position, parentId, childId, anchor);
 }
 
-std::size_t wci::Window::place(const wci::LenPercent& x, const wci::LenPercent& y, wci::Widget& parent, wci::Widget& child, wci::Anchor anchor)
+std::size_t wci::Window::place(const wci::LenPercent& x, const wci::LenPercent& y, wci::DisplayAdapter& parent, wci::DisplayAdapter& child, wci::Anchor anchor)
 {
-    return impl->placeWidget(wci::position(x, y), parent.id(), child, anchor);
+    return impl->placeAdapter(wci::position(x, y), parent.id(), child, anchor);
 }
-std::size_t wci::Window::place(const wci::LenPercent& x, const wci::LenPercent& y, wci::Widget& parent, wci::Widget&& child, wci::Anchor anchor)
+std::size_t wci::Window::place(const wci::LenPercent& x, const wci::LenPercent& y, wci::DisplayAdapter& parent, wci::DisplayAdapter&& child, wci::Anchor anchor)
 {
-    return impl->placeWidget(wci::position(x, y), parent.id(), std::move(child), anchor);
+    return impl->placeAdapter(wci::position(x, y), parent.id(), std::move(child), anchor);
 }
-std::size_t wci::Window::place(const wci::LenPercent& x, const wci::LenPercent& y, wci::Widget& parent, std::size_t childId, wci::Anchor anchor)
+std::size_t wci::Window::place(const wci::LenPercent& x, const wci::LenPercent& y, wci::DisplayAdapter& parent, std::size_t childId, wci::Anchor anchor)
 {
-    return impl->placeWidget(wci::position(x, y), parent.id(), childId, anchor);
+    return impl->placeAdapter(wci::position(x, y), parent.id(), childId, anchor);
 }
-std::size_t wci::Window::place(const wci::PositionSpec& position, wci::Widget& parent, wci::Widget& child, wci::Anchor anchor)
+std::size_t wci::Window::place(const wci::PositionSpec& position, wci::DisplayAdapter& parent, wci::DisplayAdapter& child, wci::Anchor anchor)
 {
-    return impl->placeWidget(position, parent.id(), child, anchor);
+    return impl->placeAdapter(position, parent.id(), child, anchor);
 }
-std::size_t wci::Window::place(const wci::PositionSpec& position, wci::Widget& parent, wci::Widget&& child, wci::Anchor anchor)
+std::size_t wci::Window::place(const wci::PositionSpec& position, wci::DisplayAdapter& parent, wci::DisplayAdapter&& child, wci::Anchor anchor)
 {
-    return impl->placeWidget(position, parent.id(), std::move(child), anchor);
+    return impl->placeAdapter(position, parent.id(), std::move(child), anchor);
 }
-std::size_t wci::Window::place(const wci::PositionSpec& position, wci::Widget& parent, std::size_t childId, wci::Anchor anchor)
+std::size_t wci::Window::place(const wci::PositionSpec& position, wci::DisplayAdapter& parent, std::size_t childId, wci::Anchor anchor)
 {
-    return impl->placeWidget(position, parent.id(), childId, anchor);
+    return impl->placeAdapter(position, parent.id(), childId, anchor);
 }
 
-void wci::Window::move(const wci::LenPercent& x, const wci::LenPercent& y, wci::Widget& widget, wci::Anchor anchor)
+void wci::Window::move(const wci::LenPercent& x, const wci::LenPercent& y, wci::DisplayAdapter& adapter, wci::Anchor anchor)
 {
-    impl->moveWidget(wci::position(x, y), widget, anchor);
+    impl->moveWidget(wci::position(x, y), adapter, anchor);
 }
 void wci::Window::move(const wci::LenPercent& x, const wci::LenPercent& y, std::size_t id, wci::Anchor anchor)
 {
-    impl->moveWidget(wci::position(x, y), impl->getWidget(id), anchor);
+    impl->moveWidget(wci::position(x, y), impl->getAdapter(id), anchor);
 }
-void wci::Window::move(const wci::PositionSpec& position, wci::Widget& widget, wci::Anchor anchor)
+void wci::Window::move(const wci::PositionSpec& position, wci::DisplayAdapter& adapter, wci::Anchor anchor)
 {
-    impl->moveWidget(position, widget, anchor);
+    impl->moveWidget(position, adapter, anchor);
 }
 void wci::Window::move(const wci::PositionSpec& position, std::size_t id, wci::Anchor anchor)
 {
-    impl->moveWidget(position, impl->getWidget(id), anchor);
+    impl->moveWidget(position, impl->getAdapter(id), anchor);
 }
 
 void wci::Window::unplace(std::size_t id)
 {
     impl->unplaceWidget(id);
 }
-void wci::Window::unplace(wci::Widget& widget)
+void wci::Window::unplace(wci::DisplayAdapter& adapter)
 {
-    impl->unplaceWidget(widget);
+    impl->unplaceWidget(adapter);
 }
 
 bool wci::Window::placed(std::size_t id) const noexcept
 {
-    return impl->widgetPlaced(id);
+    return impl->adapterPlaced(id);
 }
-bool wci::Window::placed(const Widget& widget) const noexcept
+bool wci::Window::placed(const DisplayAdapter& adapter) const noexcept
 {
-    return impl->widgetPlaced(widget);
+    return impl->adapterPlaced(adapter);
 }
 
-wci::Widget& wci::Window::widget(std::size_t id)
+wci::DisplayAdapter& wci::Window::adapter(std::size_t id)
 {
-    return impl->getWidget(id);
+    return impl->getAdapter(id);
 }
-const wci::Widget& wci::Window::widget(std::size_t id) const
+const wci::DisplayAdapter& wci::Window::adapter(std::size_t id) const
 {
-    return impl->getWidget(id);
-}
-
-std::size_t wci::Window::id(const wci::Widget& widget) const
-{
-    return widget.id();
+    return impl->getAdapter(id);
 }
 
-const std::vector<wci::Widget*>& wci::Window::children() const
+std::size_t wci::Window::id(const wci::DisplayAdapter& adapter) const
+{
+    return adapter.id();
+}
+
+const std::vector<wci::DisplayAdapter*>& wci::Window::children() const
 {
     return impl->getRoots();
 }
-const std::vector<wci::Widget*>& wci::Window::children(const wci::Widget& widget) const
+const std::vector<wci::DisplayAdapter*>& wci::Window::children(const wci::DisplayAdapter& adapter) const
 {
-    return impl->getChildren(widget.id());
+    return impl->getChildren(adapter.id());
 }
-const std::vector<wci::Widget*>& wci::Window::children(std::size_t id) const
+const std::vector<wci::DisplayAdapter*>& wci::Window::children(std::size_t id) const
 {
     return impl->getChildren(id);
 }

@@ -72,13 +72,13 @@ inline void wci::Page::destroy()
 inline void wci::Page::show()
 {
     for (auto id : ids)
-        window.widget(id).visible(true);
+        window.adapter(id).visible(true);
 }
 
 inline void wci::Page::hide()
 {
     for (auto id : ids)
-        window.widget(id).visible(false);
+        window.adapter(id).visible(false);
 }
 
 inline bool wci::Page::onTick()  // assume by default that tick is handled
