@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "../defs.hpp"
+#include "../util.hpp"
 
 namespace wci
 {
@@ -24,14 +25,8 @@ namespace wci
             bool showTipPrev, showTipNext;
             std::optional<CharCell> tipCharPrev, tipCharNext;               // these are visual tips for switching options
         } inner;
-        mutable struct {
-            CharMatrix buffer;
-            bool dirty;
-        } bufferCache;
-        mutable struct {
-            Geometry size;
-            bool dirty;
-        } sizeCache;
+        mutable Cache<CharMatrix> matrixCache;
+        mutable Cache<Geometry> sizeCache;
 
     public:
         MenuList(
