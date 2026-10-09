@@ -23,9 +23,7 @@ namespace wci
     inline constexpr CharCell normalch{ zero, normal };
     inline constexpr CharCell nullch{ zero, Attribute::No };
 
-    inline constexpr std::size_t npos(-1);
-
-    inline constexpr Short noindex = -1;
+    inline constexpr Id npos(-1);
 
     inline constexpr std::uint8_t true8 = true;
     inline constexpr std::uint8_t false8 = false;

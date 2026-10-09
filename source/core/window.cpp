@@ -18,32 +18,28 @@
 class wci::Window::Impl
 {
 private:
-    struct AdapterPlacement
-    {
-        wci::DisplayAdapter* adapter;
-        std::vector<wci::DisplayAdapter*> children;
-    };
-
     struct {
         wci::Console console;
         wci::CharMatrix matrix;
     } inner;
     wci::Handle oldScreenBuffer;
-    wci::CharMatrix framebuf;                                      // framebuf is used to forgo allocating matrices anew each rendering
-    wci::CharMatrix lastbuf;                                       // contains last rendered frame
-    std::unordered_map<std::size_t, AdapterPlacement> placements;  // id -> adapter placement info
-    std::vector<wci::DisplayAdapter*> roots;                       // adapters placed directly on the window
-    std::list<wci::DisplayAdapter> orphans;                        // list because it does not invalidate pointers on relocation and deletion
-    std::size_t counter = 0;
+    wci::CharMatrix framebuf;                                        // framebuf is used to forgo allocating matrices anew each rendering
+    wci::CharMatrix lastbuf;                                         // contains last rendered frame
+    std::list<wci::DisplayAdapter> orphans;                          // storage for rlavue-adapters
+    wci::Hierarchy<wci::DisplayAdapter> hierarchy;                   // root node symbolises the window itself
+    Id rootId;                                                       // id of the root (the window itself)
     bool forceRedraw;
 
+    using Node = wci::Hierarchy<wci::DisplayAdapter>::Node<wci::DisplayAdapter>;
+
 public:
-    Impl() : inner{ wci::Console(), wci::CharMatrix(0, 0) }, framebuf(), lastbuf(), forceRedraw(true)
+    Impl() : inner{ wci::Console(), wci::CharMatrix(0, 0) }, framebuf(), lastbuf(), hierarchy(nullptr), forceRedraw(true)
     {
         inner.matrix.resize(inner.console.screenBufferInfo().size);
         oldScreenBuffer = inner.console.activeScreenBuffer();
         inner.console.activeScreenBuffer(wci::Console::createScreenBuffer());
         inner.console.cursorInfo(wci::CursorInfo{ 1, false });  // hide the cursor
+        rootId = hierarchy.id(hierarchy.root());
     }
     ~Impl()
     {
@@ -84,19 +80,17 @@ public:
     }
 
 private:
-    wci::CharMatrix renderPlacedAdapter(const AdapterPlacement& placed) const
+    wci::CharMatrix renderNode(Node* node) /* const */
     {
-        auto matrix = placed.adapter->render();
-        for (auto* child : placed.children)
+        auto matrix = node->object->render();
+        for (auto* child : node->children)
         {
-            if (!child->visible())
+            if (!child->object->visible())
                 continue;
-            auto& childPlaced = placements.at(child->id());
-            wci::Point startPoint = calculateStackeeStart(
-                child->position(), placed.adapter->size(), child->size(), child->anchor()
-            );
-            child->absolute(startPoint);
-            matrix.inlay(startPoint, renderPlacedAdapter(childPlaced));
+            auto* adapter = child->object;
+            auto start = wci::calculateStackeeStart(adapter->position(), node->object->size(), adapter->size(), adapter->anchor());
+            adapter->absolute(start);
+            matrix.inlay(start, renderNode(child));
         }
         return matrix;
     }
@@ -116,17 +110,14 @@ public:
         }
         std::copy(matrix().data(), matrix().data() + size().area(), framebuf.data());
 
-        for (auto* root : roots)
+        for (auto* node : hierarchy.root()->children)
         {
-            auto& placed = placements.at(root->id());
-            auto* adapter = placed.adapter;
+            auto* adapter = node->object;
             if (!adapter->visible())
                 continue;
-            wci::Point startPoint = calculateStackeeStart(
-                adapter->position(), size(), adapter->size(), adapter->anchor()
-            );
-            adapter->absolute(startPoint);
-            framebuf.inlay(startPoint, renderPlacedAdapter(placed));
+            wci::Point start = calculateStackeeStart(adapter->position(), size(), adapter->size(), adapter->anchor());
+            adapter->absolute(start);
+            framebuf.inlay(start, renderNode(node));
         }
 
         wci::Rect bbox;
@@ -183,172 +174,113 @@ public:
         this->matrix().inlay(x, y, matrix);
     }
 
-    bool adapterPlaced(std::size_t id) const noexcept
-    {
-        return placements.contains(id);
-    }
-    bool adapterPlaced(const wci::DisplayAdapter& adapter) const noexcept
-    {
-        return adapter.placed() && placements.contains(adapter.id());
-    }
-
-    wci::DisplayAdapter& getAdapter(std::size_t id)
-    {
-        return *placements.at(id).adapter;
-    }
-    const wci::DisplayAdapter& getAdapter(std::size_t id) const
-    {
-        return *placements.at(id).adapter;
-    }
-
 private:
-    std::size_t newPlacement(wci::DisplayAdapter& adapter)
-    {
-        auto id = counter++;
-        placements[id] = AdapterPlacement{ &adapter, std::vector<wci::DisplayAdapter*>() };
-        return id;
-    }
-
-    wci::DisplayAdapter& newOrphan(wci::DisplayAdapter&& adapter)
+    wci::DisplayAdapter& orphanize(wci::DisplayAdapter&& adapter)
     {
         orphans.push_back(std::move(adapter));
         return orphans.back();
     }
 
-    void addRoot(wci::DisplayAdapter& adapter)
-    {
-        roots.push_back(&adapter);
-    }
-
-    void removeRoot(const wci::DisplayAdapter& adapter)
-    {
-        std::erase(roots, &adapter);
-    }
-
-    void addChild(wci::DisplayAdapter& child, wci::DisplayAdapter& parent)
-    {
-        placements.at(parent.id()).children.push_back(&child);
-    }
-
-    void removeChild(const wci::DisplayAdapter& child, const wci::DisplayAdapter& parent)
-    {
-        std::erase(placements.at(parent.id()).children, &child);
-    }
-
 public:
+    wci::DisplayAdapter& getAdapter(wci::Id id)
+    {
+        if (!hierarchy.has(id))
+            throw std::invalid_argument("Such adapter does not exist");
+        return *hierarchy.node(id)->object;
+    }
+
+    bool adapterPlaced(wci::Id id) const noexcept
+    {
+        return hierarchy.has(id);
+    }
+    bool adapterPlaced(const wci::DisplayAdapter& adapter) const noexcept
+    {
+        return hierarchy.has(&adapter);
+    }
+
     // for maybe new widgets; placement on window directly
-    std::size_t placeAdapter(const wci::PositionSpec& position, wci::DisplayAdapter& adapter, wci::Anchor anchor, wci::Window* window)
+    wci::Id placeAdapter(const wci::PositionSpec& position, wci::DisplayAdapter& adapter, wci::Anchor anchor, wci::Window* window)
     {
         adapter.position(position);
         adapter.anchor(anchor);
         adapter.absolute(calculateStackeeStart(position, size(), adapter.size(), anchor));
-
-        if (adapter.parentIsWindow())  // already placed on the window
-            return adapter.id();
-        else if (adapter.parentIsAdapter())  // adapter has been previously placed on another adapter
-            removeChild(adapter, adapter.parent());
-        else  // new adapter
-            adapter.id(newPlacement(adapter));
-        addRoot(adapter);
+        auto id = hierarchy.id(&adapter);
+        if (id == wci::npos)  // brand new adapter, yet to be placed
+            id = hierarchy.add(&adapter, rootId);
+        else
+            hierarchy.move(id, rootId);
         adapter.windowp(window);
-
-        return adapter.id();
+        adapter.id(id);
+        return id;
     }
     // for new widgets; placement on window directly
     std::size_t placeAdapter(const wci::PositionSpec& position, wci::DisplayAdapter&& adapter, wci::Anchor anchor, wci::Window* window)
     {
-        return placeAdapter(position, newOrphan(std::move(adapter)), anchor, window);
+        return placeAdapter(position, orphanize(std::move(adapter)), anchor, window);
     }
     // for already placed widgets; placement on window directly
-    std::size_t placeAdapter(const wci::PositionSpec& position, std::size_t id, wci::Anchor anchor, wci::Window* window)
+    std::size_t placeAdapter(const wci::PositionSpec& position, wci::Id id, wci::Anchor anchor, wci::Window* window)
     {
-        if (!adapterPlaced(id))
+        if (!hierarchy.has(id))
             throw std::invalid_argument("Such adapter does not exist");
-    
-        auto& adapter = getAdapter(id);
-        adapter.position(position);
-        adapter.anchor(anchor);
-        adapter.absolute(calculateStackeeStart(position, size(), adapter.size(), anchor));
-    
-        if (adapter.parentIsAdapter())  // adapter has been previously placed on another adapter
-        {
-            removeChild(adapter, adapter.parent());
-            addRoot(adapter);
-            adapter.windowp(window);
-        }
-
+        auto* adapter = hierarchy.node(id)->object;
+        adapter->position(position);
+        adapter->anchor(anchor);
+        adapter->absolute(calculateStackeeStart(position, size(), adapter->size(), anchor));
+        hierarchy.move(id, rootId);
+        adapter->windowp(window);
         return id;
     }
     // for maybe new widgets; placement on another adapter
-    std::size_t placeAdapter(const wci::PositionSpec& position, std::size_t parentId, wci::DisplayAdapter& child, wci::Anchor anchor)
+    std::size_t placeAdapter(const wci::PositionSpec& position, wci::Id parentId, wci::DisplayAdapter& child, wci::Anchor anchor)
     {
-        if (!adapterPlaced(parentId))
+        if (!hierarchy.has(parentId))
             throw std::invalid_argument("Such parent adapter does not exist");
-
-        auto& parent = getAdapter(parentId);
+        auto* parent = hierarchy.node(parentId)->object;
         if (child.placed())
-            for (auto* parentp = &parent; parentp; parentp = parentp->parentp())  // do the check all the way up
+            for (auto* parentp = parent; parentp; parentp = parentp->parentp())  // do the check all the way up
                 if (parentp->id() == child.id())
                     throw std::invalid_argument("DisplayAdapter cannot be its own parent");
-
         child.position(position);
         child.anchor(anchor);
-        child.absolute(calculateStackeeStart(position, parent.size(), child.size(), anchor));
-
-        if (child.parentIsWindow())  // adapter has been previously placed on window directly
-            removeRoot(child);
-        else if (child.parentIsAdapter())
-        {
-            if (child.parent().id() == parentId)  // adapter's already on the right parent
-                return child.id();
-            removeChild(child, child.parent());  // adapter has been placed on a different parent
-        }
-        else  // new adapter
-            child.id(newPlacement(child));
-        addChild(child, parent);
-        child.parentp(&parent);
-
-        return child.id();
+        child.absolute(calculateStackeeStart(position, parent->size(), child.size(), anchor));
+        auto id = hierarchy.id(&child);
+        if (id == wci::npos)  // brand new adapter, yet to be placed
+            id = hierarchy.add(&child, parentId);
+        else
+            hierarchy.move(id, parentId);
+        child.parentp(parent);
+        child.id(id);
+        return id;
     }
     // for new widgets; placement on another adapter
     std::size_t placeAdapter(const wci::PositionSpec& position, std::size_t parentId, wci::DisplayAdapter&& adapter, wci::Anchor anchor)
     {
-        return placeAdapter(position, parentId, newOrphan(std::move(adapter)), anchor);
+        return placeAdapter(position, parentId, orphanize(std::move(adapter)), anchor);
     }
     // for already placed widgets; placement on another adapter
-    std::size_t placeAdapter(const wci::PositionSpec& position, std::size_t parentId, std::size_t childId, wci::Anchor anchor)  // review what happens when circular dependecy?
+    std::size_t placeAdapter(const wci::PositionSpec& position, std::size_t parentId, std::size_t childId, wci::Anchor anchor)
     {
-        if (!adapterPlaced(childId))
+        if (!hierarchy.has(childId))
             throw std::invalid_argument("Such child adapter does not exist");
-        if (!adapterPlaced(parentId))
+        if (!hierarchy.has(parentId))
             throw std::invalid_argument("Such parent adapter does not exist");
-
-        auto& child = getAdapter(childId);
-        auto& parent = getAdapter(parentId);
-        if (child.placed())
-            for (auto* parentp = &parent; parentp; parentp = parentp->parentp())  // do the check all the way up
+        auto* child = hierarchy.node(childId)->object;
+        auto* parent = hierarchy.node(parentId)->object;
+        if (child->placed())
+            for (auto* parentp = parent; parentp; parentp = parentp->parentp())  // do the check all the way up
                 if (parentp->id() == childId)
                     throw std::invalid_argument("DisplayAdapter cannot be its own parent");
-
-        child.position(position);
-        child.anchor(anchor);
-        child.absolute(calculateStackeeStart(position, parent.size(), child.size(), anchor));
-
-        if (child.parentIsWindow())  // adapter has been previously placed on window directly
-            removeRoot(child);
-        else if (child.parentIsAdapter())
-        {
-            if (child.parent().id() == parentId)  // adapter's already on the right parent
-                return childId;
-            removeChild(child, child.parent());  // adapter has been placed on a different parent
-        }
-        addChild(child, parent);
-        child.parentp(&parent);
-
+        child->position(position);
+        child->anchor(anchor);
+        child->absolute(calculateStackeeStart(position, parent->size(), child->size(), anchor));
+        hierarchy.move(childId, parentId);
+        child->parentp(parent);
         return childId;
     }
 
-    void moveWidget(const wci::PositionSpec& position, wci::DisplayAdapter& adapter, wci::Anchor anchor)
+    // update placed adapter's positions
+    void moveAdapter(const wci::PositionSpec& position, wci::DisplayAdapter& adapter, wci::Anchor anchor)
     {
         if (!adapter.placed())
             throw std::logic_error("DisplayAdapter has not been yet placed");
@@ -363,46 +295,29 @@ public:
         std::erase_if(orphans, [orphan](const wci::DisplayAdapter& adapter) -> bool { return &adapter == orphan; });
     }
 
-    void unplaceWidget(std::size_t id)
+private:
+    void markUnplaced(Node* node)
     {
-        if (!adapterPlaced(id))
-            throw std::invalid_argument("Such adapter does not exist");
-
-        auto& placed = placements.at(id);
-        auto* adapter = placed.adapter;
-        auto children = std::move(placed.children);
-        placed.children.clear();  // restore assurance in the vector after the move
-
-        if (adapter->parentIsWindow())
-            std::erase(roots, adapter);
-        else
-        {
-            auto& parentPlaced = placements.at(adapter->parent().id());  // parentPlaced == placed inside unplaceWidget(*child)
-            std::erase(parentPlaced.children, adapter);
-        }
-
-        for (auto* child : children)
-            unplaceWidget(*child);
-
-        placements.erase(id);
-        adapter->unplace();
-        removeIfOrphan(adapter);
+        node->object->unplace();
+        for (auto* child : node->children)
+            markUnplaced(child);
+        removeIfOrphan(node->object);
     }
-    void unplaceWidget(wci::DisplayAdapter& adapter)
+
+public:
+    void unplaceAdapter(wci::Id id)
+    {
+        if (!hierarchy.has(id))
+            throw std::invalid_argument("Such adapter does not exist");
+        auto* node = hierarchy.node(id);
+        markUnplaced(node);
+        hierarchy.remove(id);
+    }
+    void unplaceAdapter(wci::DisplayAdapter& adapter)
     {
         if (!adapter.placed())
             throw std::invalid_argument("Such adapter does not exist");
-        unplaceWidget(adapter.id());
-    }
-
-    const std::vector<wci::DisplayAdapter*>& getRoots() const
-    {
-        return roots;
-    }
-
-    const std::vector<wci::DisplayAdapter*>& getChildren(std::size_t id) const
-    {
-        return placements.at(id).children;
+        unplaceAdapter(adapter.id());
     }
 };
 
@@ -582,28 +497,28 @@ std::size_t wci::Window::place(const wci::PositionSpec& position, wci::DisplayAd
 
 void wci::Window::move(const wci::LenPercent& x, const wci::LenPercent& y, wci::DisplayAdapter& adapter, wci::Anchor anchor)
 {
-    impl->moveWidget(wci::position(x, y), adapter, anchor);
+    impl->moveAdapter(wci::position(x, y), adapter, anchor);
 }
 void wci::Window::move(const wci::LenPercent& x, const wci::LenPercent& y, std::size_t id, wci::Anchor anchor)
 {
-    impl->moveWidget(wci::position(x, y), impl->getAdapter(id), anchor);
+    impl->moveAdapter(wci::position(x, y), impl->getAdapter(id), anchor);
 }
 void wci::Window::move(const wci::PositionSpec& position, wci::DisplayAdapter& adapter, wci::Anchor anchor)
 {
-    impl->moveWidget(position, adapter, anchor);
+    impl->moveAdapter(position, adapter, anchor);
 }
 void wci::Window::move(const wci::PositionSpec& position, std::size_t id, wci::Anchor anchor)
 {
-    impl->moveWidget(position, impl->getAdapter(id), anchor);
+    impl->moveAdapter(position, impl->getAdapter(id), anchor);
 }
 
 void wci::Window::unplace(std::size_t id)
 {
-    impl->unplaceWidget(id);
+    impl->unplaceAdapter(id);
 }
 void wci::Window::unplace(wci::DisplayAdapter& adapter)
 {
-    impl->unplaceWidget(adapter);
+    impl->unplaceAdapter(adapter);
 }
 
 bool wci::Window::placed(std::size_t id) const noexcept
@@ -629,15 +544,15 @@ std::size_t wci::Window::id(const wci::DisplayAdapter& adapter) const
     return adapter.id();
 }
 
-const std::vector<wci::DisplayAdapter*>& wci::Window::children() const
-{
-    return impl->getRoots();
-}
-const std::vector<wci::DisplayAdapter*>& wci::Window::children(const wci::DisplayAdapter& adapter) const
-{
-    return impl->getChildren(adapter.id());
-}
-const std::vector<wci::DisplayAdapter*>& wci::Window::children(std::size_t id) const
-{
-    return impl->getChildren(id);
-}
+// const std::vector<wci::DisplayAdapter*>& wci::Window::children() const
+// {
+//     return impl->getRoots();
+// }
+// const std::vector<wci::DisplayAdapter*>& wci::Window::children(const wci::DisplayAdapter& adapter) const
+// {
+//     return impl->getChildren(adapter.id());
+// }
+// const std::vector<wci::DisplayAdapter*>& wci::Window::children(std::size_t id) const
+// {
+//     return impl->getChildren(id);
+// }

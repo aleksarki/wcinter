@@ -2,6 +2,8 @@
 #ifndef CINTER_INCLUDE_DEFINITIONS_TYPES_HPP
 #define CINTER_INCLUDE_DEFINITIONS_TYPES_HPP
 
+#include <cstddef>
+
 namespace wci
 {
     using Wchar = wchar_t;
@@ -9,6 +11,7 @@ namespace wci
     using Word = unsigned short;
     using Dword = unsigned long;
     using Handle = void*;
+    using Id = std::size_t;
 }
 
 #endif  // CINTER_INCLUDE_DEFINITIONS_TYPES_HPP

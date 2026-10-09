@@ -95,9 +95,9 @@ namespace wci {
 
         std::size_t id(const DisplayAdapter& adapter) const;
 
-        const std::vector<DisplayAdapter*>& children() const;
-        const std::vector<DisplayAdapter*>& children(const DisplayAdapter& adapter) const;
-        const std::vector<DisplayAdapter*>& children(std::size_t id) const;
+        // const std::vector<DisplayAdapter*>& children() const;
+        // const std::vector<DisplayAdapter*>& children(const DisplayAdapter& adapter) const;
+        // const std::vector<DisplayAdapter*>& children(std::size_t id) const;
 
     private:
         class Impl;
