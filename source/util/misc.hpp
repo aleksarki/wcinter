@@ -68,13 +68,6 @@ namespace wci
      * Swap foreground and background of an attribute.
      */
     constexpr Attribute inversed(Attribute attribute) noexcept;
-
-    /*
-     * Calculate absolute position of the top left corner of a rectangle stacked upon another one.
-     */
-    constexpr Point calculateStackeeStart(
-        const PositionSpec& stackeePosition, const Geometry& baseSize, const Geometry& stackeeSize, Anchor stackeeAnchor
-    );
 }
 
 inline constexpr wci::Point wci::at(wci::Short x, wci::Short y) noexcept
@@ -137,40 +130,6 @@ inline constexpr wci::Attribute wci::inversed(wci::Attribute attribute) noexcept
     auto newFg = static_cast<wci::Attribute>(static_cast<U>(wci::bg(attribute)) >> 4);
     auto newBg = static_cast<wci::Attribute>(static_cast<U>(wci::fg(attribute)) << 4);
     return attribute & ~wci::Attribute::FgColorWhiteBright & ~wci::Attribute::BgColorWhiteBright | newFg | newBg;
-}
-
-inline constexpr wci::Point wci::calculateStackeeStart(
-    const wci::PositionSpec &stackeePosition, const wci::Geometry& baseSize, const wci::Geometry& stackeeSize, wci::Anchor stackeeAnchor
-)
-{
-    wci::Point anchor{ 0, 0 };  // init just in case?
-    wci::Point half = stackeeSize.toPoint() / 2.;
-    wci::Point size = stackeeSize.toPoint();
-
-    if (stackeePosition.x.isAbsolute())
-        anchor.x = stackeePosition.x.absolute();
-    else if (stackeePosition.x.isRelative())
-        anchor.x = static_cast<wci::Short>(std::lround(stackeePosition.x.relative() * baseSize.width));
-
-    if (stackeePosition.y.isAbsolute())
-        anchor.y = stackeePosition.y.absolute();
-    else if (stackeePosition.y.isRelative())
-        anchor.y = static_cast<wci::Short>(std::lround(stackeePosition.y.relative() * baseSize.height));
-
-    switch (stackeeAnchor)
-    {
-    case wci::Anchor::TopLeft:     return anchor;
-    case wci::Anchor::Top:         return anchor - wci::at(half.x, 0);
-    case wci::Anchor::TopRight:    return anchor - wci::at(size.x, 0);
-    case wci::Anchor::Right:       return anchor - wci::at(size.x, half.y);
-    case wci::Anchor::BottomRight: return anchor - size;
-    case wci::Anchor::Bottom:      return anchor - wci::at(half.x, size.y);
-    case wci::Anchor::BottomLeft:  return anchor - wci::at(0, size.y);
-    case wci::Anchor::Left:        return anchor - wci::at(0, half.y);
-    case wci::Anchor::Center:      return anchor - half;
-    }
-
-    throw std::invalid_argument("wci::calculateStackeeStart() got invalid Anchor value");
 }
 
 #endif  // WCI_SOURCE_UTIL_MISC_HPP

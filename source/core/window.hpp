@@ -2,7 +2,6 @@
 #ifndef WCI_SOURCE_CORE_WINDOW_HPP
 #define WCI_SOURCE_CORE_WINDOW_HPP
 
-#include <cstddef>
 #include <memory>
 #include <string>
 #include <vector>
@@ -55,49 +54,59 @@ namespace wci {
         void put(Short x, Short y, const CharMatrix& matrix);
         void put(const Point& position, const CharMatrix& matrix);
 
+        // todo change signatures
+
         // place on window
-        std::size_t place(const LenPercent& x, const LenPercent& y, DisplayAdapter& adapter, Anchor anchor = Anchor::TopLeft);
-        std::size_t place(const LenPercent& x, const LenPercent& y, DisplayAdapter&& adapter, Anchor anchor = Anchor::TopLeft);
-        std::size_t place(const LenPercent& x, const LenPercent& y, std::size_t id, Anchor anchor = Anchor::TopLeft);
-        std::size_t place(const PositionSpec& position, DisplayAdapter& adapter, Anchor anchor = Anchor::TopLeft);
-        std::size_t place(const PositionSpec& position, DisplayAdapter&& adapter, Anchor anchor = Anchor::TopLeft);
-        std::size_t place(const PositionSpec& position, std::size_t id, Anchor anchor = Anchor::TopLeft);
+        Id place(const LenPercent& x, const LenPercent& y, DisplayAdapter& adapter, Anchor anchor = Anchor::TopLeft);
+        Id place(const LenPercent& x, const LenPercent& y, DisplayAdapter&& adapter, Anchor anchor = Anchor::TopLeft);
+        Id place(const LenPercent& x, const LenPercent& y, Id id, Anchor anchor = Anchor::TopLeft);
+        Id place(const PositionSpec& position, DisplayAdapter& adapter, Anchor anchor = Anchor::TopLeft);
+        Id place(const PositionSpec& position, DisplayAdapter&& adapter, Anchor anchor = Anchor::TopLeft);
+        Id place(const PositionSpec& position, Id id, Anchor anchor = Anchor::TopLeft);
 
         // place on parent (by id)
-        std::size_t place(const LenPercent& x, const LenPercent& y, std::size_t parentId, DisplayAdapter& child, Anchor anchor = Anchor::TopLeft);
-        std::size_t place(const LenPercent& x, const LenPercent& y, std::size_t parentId, DisplayAdapter&& child, Anchor anchor = Anchor::TopLeft);
-        std::size_t place(const LenPercent& x, const LenPercent& y, std::size_t parentId, std::size_t childId, Anchor anchor = Anchor::TopLeft);
-        std::size_t place(const PositionSpec& position, std::size_t parentId, DisplayAdapter& child, Anchor anchor = Anchor::TopLeft);
-        std::size_t place(const PositionSpec& position, std::size_t parentId, DisplayAdapter&& child, Anchor anchor = Anchor::TopLeft);
-        std::size_t place(const PositionSpec& position, std::size_t parentId, std::size_t childId, Anchor anchor = Anchor::TopLeft);
+        Id place(const LenPercent& x, const LenPercent& y, Id parentId, DisplayAdapter& child, Anchor anchor = Anchor::TopLeft);
+        Id place(const LenPercent& x, const LenPercent& y, Id parentId, DisplayAdapter&& child, Anchor anchor = Anchor::TopLeft);
+        Id place(const LenPercent& x, const LenPercent& y, Id parentId, Id childId, Anchor anchor = Anchor::TopLeft);
+        Id place(const PositionSpec& position, Id parentId, DisplayAdapter& child, Anchor anchor = Anchor::TopLeft);
+        Id place(const PositionSpec& position, Id parentId, DisplayAdapter&& child, Anchor anchor = Anchor::TopLeft);
+        Id place(const PositionSpec& position, Id parentId, Id childId, Anchor anchor = Anchor::TopLeft);
 
         // place on parent (by reference)
-        std::size_t place(const LenPercent& x, const LenPercent& y, DisplayAdapter& parent, DisplayAdapter& child, Anchor anchor = Anchor::TopLeft);
-        std::size_t place(const LenPercent& x, const LenPercent& y, DisplayAdapter& parent, DisplayAdapter&& child, Anchor anchor = Anchor::TopLeft);
-        std::size_t place(const LenPercent& x, const LenPercent& y, DisplayAdapter& parent, std::size_t childId, Anchor anchor = Anchor::TopLeft);
-        std::size_t place(const PositionSpec& position, DisplayAdapter& parent, DisplayAdapter& child, Anchor anchor = Anchor::TopLeft);
-        std::size_t place(const PositionSpec& position, DisplayAdapter& parent, DisplayAdapter&& child, Anchor anchor = Anchor::TopLeft);
-        std::size_t place(const PositionSpec& position, DisplayAdapter& parent, std::size_t childId, Anchor anchor = Anchor::TopLeft);
+        Id place(const LenPercent& x, const LenPercent& y, DisplayAdapter& parent, DisplayAdapter& child, Anchor anchor = Anchor::TopLeft);
+        Id place(const LenPercent& x, const LenPercent& y, DisplayAdapter& parent, DisplayAdapter&& child, Anchor anchor = Anchor::TopLeft);
+        Id place(const LenPercent& x, const LenPercent& y, DisplayAdapter& parent, Id childId, Anchor anchor = Anchor::TopLeft);
+        Id place(const PositionSpec& position, DisplayAdapter& parent, DisplayAdapter& child, Anchor anchor = Anchor::TopLeft);
+        Id place(const PositionSpec& position, DisplayAdapter& parent, DisplayAdapter&& child, Anchor anchor = Anchor::TopLeft);
+        Id place(const PositionSpec& position, DisplayAdapter& parent, Id childId, Anchor anchor = Anchor::TopLeft);
+
+        void unplace(Id id);
+        void unplace(const DisplayAdapter& adapter);
+
+        bool contains(Id id) const noexcept;
+        bool contains(const DisplayAdapter& adapter) const noexcept;
 
         void move(const LenPercent& x, const LenPercent& y, DisplayAdapter& adapter, Anchor anchor = Anchor::TopLeft);
-        void move(const LenPercent& x, const LenPercent& y, std::size_t id, Anchor anchor = Anchor::TopLeft);
+        void move(const LenPercent& x, const LenPercent& y, Id id, Anchor anchor = Anchor::TopLeft);
         void move(const PositionSpec& position, DisplayAdapter& adapter, Anchor anchor = Anchor::TopLeft);
-        void move(const PositionSpec& position, std::size_t id, Anchor anchor = Anchor::TopLeft);
+        void move(const PositionSpec& position, Id id, Anchor anchor = Anchor::TopLeft);
 
-        void unplace(std::size_t id);
-        void unplace(DisplayAdapter& adapter);
+        void reposition(Id id, const PositionSpec& position);
 
-        bool placed(std::size_t id) const noexcept;
-        bool placed(const DisplayAdapter& adapter) const noexcept;
+        void reanchor(Id id, Anchor anchor);
 
-        DisplayAdapter& adapter(std::size_t id);
-        const DisplayAdapter& adapter(std::size_t id) const;
+        void reorder(Id id, int z);
 
-        std::size_t id(const DisplayAdapter& adapter) const;
+        DisplayAdapter& adapter(Id id);
+        const DisplayAdapter& adapter(Id id) const;
+
+        Id id(const DisplayAdapter& adapter) const;
+
+        Point absolute(Id id) const;
 
         // const std::vector<DisplayAdapter*>& children() const;
         // const std::vector<DisplayAdapter*>& children(const DisplayAdapter& adapter) const;
-        // const std::vector<DisplayAdapter*>& children(std::size_t id) const;
+        // const std::vector<DisplayAdapter*>& children(Id id) const;
 
     private:
         class Impl;

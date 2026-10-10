@@ -7,5 +7,6 @@
 #include "util/misc.hpp"
 #include "util/navigator.hpp"
 #include "util/page.hpp"
+#include "util/placement.hpp"
 
 #endif  // WCI_SOURCE_UTIL_HPP
