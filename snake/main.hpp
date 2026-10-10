@@ -29,7 +29,7 @@ public:
 
     void build() override
     {
-        place(50_rel, 50_rel, menu, wci::Anchor::Center);
+        place(menu, 50_rel, 50_rel, wci::Anchor::Center);
     }
 
     bool onKeyEvent(const wci::KeyEvent& event) override
